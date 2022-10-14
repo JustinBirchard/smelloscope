@@ -11,7 +11,8 @@ class Company:
     def __init__(self, fullname, ticker, cap, price,
                        tca, tld, ptb, bvps, pe, pfcf, pts,
                        roe, roa, gpr, pm, cr, dte,
-                       io, it, inst_o, inst_t):
+                       io, it, inst_o, inst_t,
+                       div, div_y, div_h):
 
         """
            Initializes each attribute of a Comapny.
@@ -45,7 +46,10 @@ class Company:
         self._inst_o = inst_o
         self._inst_t = inst_t
 
-
+        # dividend metrics
+        self._div = div
+        self._div_y = div_y
+        self._div_h = div_h
 
 #        self._psatype_g3_d = psatype_g3_d if psatype_g3_d != 'radio' else 'radio'
 #        self._custommonthly = custommonthly if custommonthly is not None else None
@@ -161,6 +165,21 @@ class Company:
         """return self._inst_t value"""
         return self._inst_t
 
+#************** dividend properties
+    @property
+    def div(self):
+        """return self._div value"""
+        return self._div
+
+    @property
+    def div_y(self):
+        """return self._div_y value"""
+        return self._div_y
+
+    @property
+    def div_h(self):
+        """return self._div_h value"""
+        return self._div_h
 
 #* Start of Sigma & Monthly report order getters, setters, and methods
 
