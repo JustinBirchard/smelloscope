@@ -1,7 +1,7 @@
 # company.py
 """Company class definitions and methods.
     Version 0.1
-    Last updated 10/12/22
+    Last updated 10/14/22
 """
 
 
@@ -9,7 +9,9 @@ class Company:
     """Class Company for creating Company objects."""
 
     def __init__(self, fullname, ticker, cap, price,
-                       tca, tld):
+                       tca, tld, ptb, bvps, pe, pfcf, pts,
+                       roe, roa, gpr, pm, cr, dte,
+                       io, it, inst_o, inst_t):
 
         """
            Initializes each attribute of a Comapny.
@@ -23,12 +25,34 @@ class Company:
         # value metrics
         self._tca = tca # numpy.float64 - Total current assets of the company -- pulled from df_balance
         self._tld = tld # numpy.float64 - Total long-term debt of the company -- pulled from df_balance
+        self._ptb = ptb 
+        self._bvps = bvps
+        self._pe = pe
+        self._pfcf = pfcf
+        self._pts = pts
+
+        # management metrics
+        self._roe = roe
+        self._roa = roa
+        self._gpr = gpr
+        self._pm = pm
+        self._cr = cr
+        self._dte = dte
+
+        # insider metrics
+        self._io = io
+        self._it = it
+        self._inst_o = inst_o
+        self._inst_t = inst_t
+
+
 
 #        self._psatype_g3_d = psatype_g3_d if psatype_g3_d != 'radio' else 'radio'
 #        self._custommonthly = custommonthly if custommonthly is not None else None
 #        self._reportOrderSigma_d = reportOrderSigma_d if reportOrderSigma_d != [] else []
 #        self._reportOrderMonthly_d = reportOrderMonthly_d if reportOrderMonthly_d != [] else []   
 
+#************** profile properties
     @property
     def fullname(self):
         """return self._fullname value"""
@@ -49,6 +73,7 @@ class Company:
         """return self._price value"""
         return self._price
 
+#************** value properties
     @property
     def tca(self):
         """return self._tca value"""
@@ -58,7 +83,84 @@ class Company:
     def tld(self):
         """return self._tld value"""
         return self._tld
-  
+
+    @property
+    def ptb(self):
+        """return self._ptb value"""
+        return self._ptb
+
+    @property
+    def bvps(self):
+        """return self._bvps value"""
+        return self._bvps
+
+    @property
+    def pe(self):
+        """return self._pe value"""
+        return self._pe
+
+    @property
+    def pfcf(self):
+        """return self._pfcf value"""
+        return self._pfcf
+
+    @property
+    def pts(self):
+        """return self._pts value"""
+        return self._pts
+
+#************** management properties
+    @property
+    def roe(self):
+        """return self._roe value"""
+        return self._roe
+
+    @property
+    def roa(self):
+        """return self._roa value"""
+        return self._roa
+
+    @property
+    def gpr(self):
+        """return self._gpr value"""
+        return self._gpr
+
+    @property
+    def pm(self):
+        """return self._pm value"""
+        return self._pm
+
+    @property
+    def cr(self):
+        """return self._cr value"""
+        return self._cr
+
+    @property
+    def dte(self):
+        """return self._dte value"""
+        return self._dte
+
+#************** insider properties
+    @property
+    def io(self):
+        """return self._io value"""
+        return self._io
+
+    @property
+    def it(self):
+        """return self._it value"""
+        return self._it
+
+    @property
+    def inst_o(self):
+        """return self._inst_o value"""
+        return self._inst_o
+
+    @property
+    def inst_t(self):
+        """return self._inst_t value"""
+        return self._inst_t
+
 
 #* Start of Sigma & Monthly report order getters, setters, and methods
 
