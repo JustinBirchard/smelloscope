@@ -8,11 +8,13 @@
 class Company:
     """Class Company for creating Company objects."""
 
-    def __init__(self, fullname, ticker, cap, price,
+    def __init__(self, fullname, ticker, sector, industry, cap, price,
                        tca, tld, ptb, bvps, pe, pfcf, pts,
                        roe, roa, gpr, pm, cr, dte,
                        io, it, inst_o, inst_t,
-                       div, div_y, div_h):
+                       div, div_y, div_h,
+                       twits_perc,
+                       company_news, sector_news, industry_news, news_sent):
 
         """
            Initializes each attribute of a Comapny.
@@ -20,6 +22,8 @@ class Company:
         # profile
         self._fullname = fullname # string - Full name of company pulled from df_profile
         self._ticker = ticker # string - Ticker symbol of company pulled from df_quote
+        self._sector = sector
+        self._industry = industry
         self._cap = cap # string - Market Cap of the company pulled from df_quote
         self._price = price # float - Current price of the stock pulled from df_quote 
 
@@ -51,6 +55,16 @@ class Company:
         self._div_y = div_y
         self._div_h = div_h
 
+        # sentiment metrics
+        self._twits_perc = twits_perc
+
+        # news data
+        self._company_news = company_news
+        self._sector_news = sector_news
+        self._industry_news = industry_news
+        self._news_sent = news_sent
+
+
 #        self._psatype_g3_d = psatype_g3_d if psatype_g3_d != 'radio' else 'radio'
 #        self._custommonthly = custommonthly if custommonthly is not None else None
 #        self._reportOrderSigma_d = reportOrderSigma_d if reportOrderSigma_d != [] else []
@@ -71,6 +85,16 @@ class Company:
     def cap(self):
         """return self._cap value"""
         return self._cap
+
+    @property
+    def sector(self):
+        """return self._sector value"""
+        return self._sector
+
+    @property
+    def industry(self):
+        """return self._industry value"""
+        return self._industry
 
     @property
     def price(self):
@@ -180,6 +204,34 @@ class Company:
     def div_h(self):
         """return self._div_h value"""
         return self._div_h
+
+#************** sentiment properties
+    @property
+    def twits_perc(self):
+        """return self._twits_perc"""
+        return self._twits_perc
+
+#************** news properties
+    @property
+    def company_news(self):
+        """return self._company_news"""
+        return self._company_news
+
+    @property
+    def sector_news(self):
+        """return self._sector_news"""
+        return self._sector_news
+
+    @property
+    def industry_news(self):
+        """return self._industry_news"""
+        return self._industry_news
+
+    @property
+    def news_sent(self):
+        """return self._news_sent"""
+        return self._news_sent
+
 
 #* Start of Sigma & Monthly report order getters, setters, and methods
 
