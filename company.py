@@ -13,8 +13,9 @@ class Company:
                        roe, roa, gpr, pm, cr, dte,
                        io, it, inst_o, inst_t,
                        div, div_y, div_h,
-                       twits_perc,
-                       company_news, sector_news, industry_news, news_sent):
+                       twits_perc, shrt_int,
+                       company_news, sector_news, industry_news, news_sent,
+                       ratings_list, rot_dict, wb_score):
 
         """
            Initializes each attribute of a Comapny.
@@ -57,6 +58,7 @@ class Company:
 
         # sentiment metrics
         self._twits_perc = twits_perc
+        self._shrt_int = shrt_int
 
         # news data
         self._company_news = company_news
@@ -64,6 +66,10 @@ class Company:
         self._industry_news = industry_news
         self._news_sent = news_sent
 
+        # analyst ratings & opinions
+        self._ratings_list = ratings_list
+        self._rot_dict = rot_dict
+        self._wb_score = wb_score
 
 #        self._psatype_g3_d = psatype_g3_d if psatype_g3_d != 'radio' else 'radio'
 #        self._custommonthly = custommonthly if custommonthly is not None else None
@@ -211,6 +217,11 @@ class Company:
         """return self._twits_perc"""
         return self._twits_perc
 
+    @property
+    def shrt_int(self):
+        """return self._shrt_int"""
+        return self._shrt_int
+
 #************** news properties
     @property
     def company_news(self):
@@ -231,6 +242,37 @@ class Company:
     def news_sent(self):
         """return self._news_sent"""
         return self._news_sent
+
+#************** analyst opinions & ratings properties
+    @property
+    def ratings_list(self):
+        """return self._ratings_list"""
+        return self._ratings_list
+
+    @property
+    def rot_dict(self):
+        """return self._rot_dict"""
+        return self._rot_dict
+
+    @property
+    def wb_score(self):
+        """return self._wb_score"""
+        return self._wb_score
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #* Start of Sigma & Monthly report order getters, setters, and methods
@@ -255,23 +297,23 @@ class Company:
     #     """Set self._reportOrderMonthly value"""
     #     self._reportOrderMonthly = new_order
 
-    def set_sigma_order(self):
-        """Sets order for online Radio Sigma Reports. 
-           Special handling for multiple reports is provided within the method.
-        """
-        # Determining the current number of reports the client has online
-        cursor.execute(f"""
-                        SELECT MAX("reportOrder") FROM client_sigma_index 
-                        WHERE "clientID" = '{self.clientcompany}' AND "reportType" = 'radio'
-                        """)
-        query_result = cursor.fetchall() # returns list with one tuple, tuple contains results
+    # def set_sigma_order(self):
+    #     """Sets order for online Radio Sigma Reports. 
+    #        Special handling for multiple reports is provided within the method.
+    #     """
+    #     # Determining the current number of reports the client has online
+    #     cursor.execute(f"""
+    #                     SELECT MAX("reportOrder") FROM client_sigma_index 
+    #                     WHERE "clientID" = '{self.clientcompany}' AND "reportType" = 'radio'
+    #                     """)
+    #     query_result = cursor.fetchall() # returns list with one tuple, tuple contains results
        
-        if query_result[0][0] == None: # case for new client with first reports
-            for order in range(len(self.sigmatable)):
-                self.reportordersigma.append(order + 1)
+    #     if query_result[0][0] == None: # case for new client with first reports
+    #         for order in range(len(self.sigmatable)):
+    #             self.reportordersigma.append(order + 1)
 
-        else: # case for existing client with existing reports
-            starting_position = query_result[0][0] # accessing contents of tuple to determine starting position
-            for order in range(len(self.sigmatable)):
-                self.reportordersigma.append(order + 1 + starting_position)
+    #     else: # case for existing client with existing reports
+    #         starting_position = query_result[0][0] # accessing contents of tuple to determine starting position
+    #         for order in range(len(self.sigmatable)):
+    #             self.reportordersigma.append(order + 1 + starting_position)
 
