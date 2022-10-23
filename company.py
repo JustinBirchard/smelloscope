@@ -1,76 +1,27 @@
 # company.py
-"""Company class definitions and methods.
-    Version 0.3
-    Last updated 10/18/22
+"""Company class and PeerGroup subclass definitions and methods.
+    Version 0.4
+    Last updated 10/22/22
 """
+
 import pandas as pd
+from dataclasses import dataclass, field
 from IPython.display import display
 
+@dataclass
 class Company:
     """Class Company for creating Company objects."""
 
-    def __init__(self, df_basic, df_value, df_mgmt, df_ins,
-                       div_dfs, df_pub_sent, news_dfs, 
-                       analyst_data, df_esg):
-
-        """
-           Initializes each attribute of a Comapny.
-        """
-
-        self._df_basic = df_basic # DataFrame, shape=(6,1), holds basic company details
-        self._df_value = df_value # DataFrame, shape=(18,1), holds value metrics
-        self._df_mgmt = df_mgmt # DataFrame, shape=(14,1), holds management metrics
-        self._df_ins = df_ins # DataFrame, shape=(4,1), holds insider & instituion data
-        self._div_dfs = div_dfs # List that holds 2 DataFrames containing dividend data
-        self._df_pub_sent = df_pub_sent # DataFrame, shape=(3,1), holds public sentiment data
-        self._news_dfs = news_dfs # List that holds 3 DataFrames containing Company, Sector, & Industry news
-        self._analyst_data = analyst_data # List that holds 2 DataFrames containing Analyst ratings
-        self._df_esg = df_esg # DataFrame, shape=(27,1), holds ESG data a& metrics
-
-    @property
-    def df_basic(self):
-        """return self._df_basic value"""
-        return self._df_basic
-
-    @property
-    def df_value(self):
-        """return self._df_value value"""
-        return self._df_value
-
-    @property
-    def df_mgmt(self):
-        """return self._df_mgmt value"""
-        return self._df_mgmt
-
-    @property
-    def df_ins(self):
-        """return self._df_ins value"""
-        return self._df_ins
-
-    @property
-    def div_dfs(self):
-        """return self._div_dfs value"""
-        return self._div_dfs
-
-    @property
-    def df_pub_sent(self):
-        """return self._df_pub_sent value"""
-        return self._df_pub_sent
-
-    @property
-    def news_dfs(self):
-        """return self._news_dfs value"""
-        return self._news_dfs
-
-    @property
-    def analyst_data(self):
-        """return self._analyst_data value"""
-        return self._analyst_data
-
-    @property
-    def df_esg(self):
-        """return self._df_esg value"""
-        return self._df_esg
+# Note that default_factory can take any function name as an argument so we could define a function above and then initialize object with it
+    df_basic: pd.DataFrame = field(default_factory=pd.DataFrame) # DataFrame, shape=(6,1), holds basic company details
+    df_value: pd.DataFrame = field(default_factory=pd.DataFrame) # DataFrame, shape=(18,1), holds value metrics
+    df_mgmt: pd.DataFrame = field(default_factory=pd.DataFrame)# DataFrame, shape=(14,1), holds management metrics
+    df_ins: pd.DataFrame = field(default_factory=pd.DataFrame)# DataFrame, shape=(4,1), holds insider & instituion data
+    div_dfs: list = field(default_factory=list, repr=False) # List that holds 2 DataFrames containing dividend data
+    df_pub_sent: pd.DataFrame = field(default_factory=pd.DataFrame) # DataFrame, shape=(3,1), holds public sentiment data
+    news_dfs: list = field(default_factory=list, repr=False) # List that holds 3 DataFrames containing Company, Sector, & Industry news
+    analyst_data: list = field(default_factory=list, repr=False) # List that holds 2 DataFrames containing Analyst ratings
+    df_esg: pd.DataFrame = field(default_factory=pd.DataFrame) # DataFrame, shape=(27,1), holds ESG data a& metrics
 
     def data_to_excel(self):
         """Combine selected data into a new dataframe and output to excel file.
@@ -97,3 +48,39 @@ class Company:
 
         for df in group:
             display(df)
+
+@dataclass
+class PeerGroup(Company):
+    """Subclass PeerGroup for creating PeerGroup objects
+
+    Args:
+        Company (Object): Class Company Object
+    """
+    
+    company_list: list = field(default_factory=list) # List of 1 or more Company objects
+
+
+    def set_df_basic(self):
+        """Set self.df_basic values"""
+
+        self.df_basic['name'] = self.company_list[0].df_basic.loc['ticker'] + ' Peer Group Avg'
+        self.df_basic['ticker'] = 'n/a'
+        self.df_basic['sector'] = self.company_list[0].df_basic.loc['sector']
+        self.df_basic['industry'] = self.company_list[0].df_basic.loc['industry']
+        self.df_basic['cap'] = 'temp n/a'
+        self.df_basic['price'] = 'temp n/a'
+
+    def set_df_value(self):
+        """Set self.df_value values"""
+
+        result_list = []
+
+        for metric in self.company_list[0].df_value.index:
+            for company in self.company_list:
+                result_list.append(company.df_value.loc[metric])
+            
+            sum = 0
+            for value in result_list:
+                sum += value
+
+            self.df_value[metric] = sum / len(result_list)
