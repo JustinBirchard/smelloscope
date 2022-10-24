@@ -20,7 +20,7 @@ import pandas as pd
 from openbb_terminal.api import openbb as obb
 from company import Company, PeerGroup
 
-peers = [('MSFT', 1), ('AAPL', 2)] #, ('SPCE', 3), ('ETSY', 4)]
+peers = [('MSFT', 1), ('AAPL', 2), ('ORCL', 3), ('PRGS', 4)]
 
 # used to convert strings representing percentage to a float, eg '10%' becomes 0.1
 def p2f(str_perc):
@@ -136,7 +136,7 @@ for company in peers:
     else:
         tca_div_tld = tca / tld
  
-    ptb_mrq = float(obb.stocks.fa.data(stock).loc['P/B'][0])
+    ptb_mrq = try_it('P/B', 'data')
     ptb_ttm = df_metrics.loc['Ptb ratio'][0]
     ptb_5yr_avg = df_metrics.loc['Ptb ratio']['5yr Avg']
 
@@ -183,7 +183,7 @@ for company in peers:
     cr_ttm = df_metrics.loc['Current ratio'][0]
     cr_5yr_avg = df_metrics.loc['Current ratio']['5yr Avg']
     
-    dte_mrq = float(obb.stocks.fa.data(stock).loc['LT Debt/Eq'][0])
+    dte_mrq = try_it('LT Debt/Eq', 'data')
     dte_ttm = df_metrics.loc['Debt to equity'][0]
     dte_5yr_avg = df_metrics.loc['Debt to equity']['5yr Avg']
     
@@ -253,8 +253,8 @@ for company in peers:
 ############## *** COMPANY, SECTOR, & INDUSTRY NEWS *** ##############
 
     df_com_news = obb.common.news(name, sort='published').head(20)
-    df_sec_news = obb.common.news(sector + 'Sector News Stock Market', sort='published').head(50)
-    df_ind_news = obb.common.news(industry + 'Industry News Stock Market', sort='published').head(50)
+    df_sec_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Company News'])
+    df_ind_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Company News'])
 
     # List will be added to company object
     news_dfs = [df_com_news, df_sec_news, df_ind_news]
@@ -300,9 +300,3 @@ for company in peers:
     elif slot == 4:
         c4 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
         company_list.append(c4)
-
-# Creating PeerGroup object
-peer_group = PeerGroup(company_list=company_list)
-
-# Pulling in the data for PeerGroup object
-peer_group.set_all_data()
