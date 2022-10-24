@@ -1,4 +1,7 @@
 # smellogather.py
+#* Version 0.9
+#* Last update 10/23/22
+
 """smellogather takes a user supplied list of stocks and pulls in a wide
    variety of metrics and data via OpenBB. 
 
@@ -8,18 +11,14 @@
    The main point of this script is to the create company_list variable
    which holds one or more instaniated Company objects
 
-
-Raises:
-    TypeError: _description_
-
 Returns:
-    list: _description_
+    list: company_list containing Company class objects
 """
 
 import math
 import pandas as pd
 from openbb_terminal.api import openbb as obb
-from company import Company
+from company import Company, PeerGroup
 
 peers = [('MSFT', 1), ('AAPL', 2)] #, ('SPCE', 3), ('ETSY', 4)]
 
@@ -253,10 +252,10 @@ for company in peers:
         
 ############## *** COMPANY, SECTOR, & INDUSTRY NEWS *** ##############
 
-    df_com_news = obb.common.news(name, sort='published').head(20)       
+    df_com_news = obb.common.news(name, sort='published').head(20)
     df_sec_news = obb.common.news(sector + 'Sector News Stock Market', sort='published').head(50)
-    df_ind_news = obb.common.news(industry + 'Industry News Stock Market', sort='published').head(50) 
-    
+    df_ind_news = obb.common.news(industry + 'Industry News Stock Market', sort='published').head(50)
+
     # List will be added to company object
     news_dfs = [df_com_news, df_sec_news, df_ind_news]
     
@@ -300,4 +299,10 @@ for company in peers:
         
     elif slot == 4:
         c4 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
-        company_list.append(c4)       
+        company_list.append(c4)
+
+# Creating PeerGroup object
+peer_group = PeerGroup(company_list=company_list)
+
+# Pulling in the data for PeerGroup object
+peer_group.set_all_data()

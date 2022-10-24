@@ -1,7 +1,7 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
-    Version 0.4
-    Last updated 10/22/22
+    Version 0.5
+    Last updated 10/23/22
 """
 
 import pandas as pd
@@ -70,6 +70,8 @@ class PeerGroup(Company):
         self.df_basic['cap'] = 'temp n/a'
         self.df_basic['price'] = 'temp n/a'
 
+        self.df_basic = self.df_basic.T
+
     def set_df_value(self):
         """Set self.df_value values"""
 
@@ -84,3 +86,110 @@ class PeerGroup(Company):
                 sum += value
 
             self.df_value[metric] = sum / len(result_list)
+            result_list.clear()
+
+        self.df_value = self.df_value.T
+
+    def set_df_mgmt(self):
+        """Set self.df_mgmt values"""
+
+        result_list = []
+
+        for metric in self.company_list[0].df_mgmt.index:
+            for company in self.company_list:
+                result_list.append(company.df_mgmt.loc[metric])
+            
+            sum = 0
+            for value in result_list:
+                sum += value
+
+            self.df_mgmt[metric] = sum / len(result_list)
+            result_list.clear()
+
+        self.df_mgmt = self.df_mgmt.T
+
+    def set_df_ins(self):
+        """Set self.df_ins values"""
+
+        result_list = []
+
+        for metric in self.company_list[0].df_ins.index:
+            for company in self.company_list:
+                result_list.append(company.df_ins.loc[metric])
+            
+            sum = 0
+            for value in result_list:
+                sum += value
+
+            self.df_ins[metric] = sum / len(result_list)
+            result_list.clear()
+
+        self.df_ins = self.df_ins.T
+
+    def set_div_dfs(self):
+        """Set self.div_dfs values"""
+        self.df_div = pd.DataFrame()
+        self.df_div_his = pd.DataFrame({'Data N/A': 'n/a'}, index=[0]).T
+        self.div_dfs.append(self.df_div)
+        self.div_dfs.append(self.df_div_his)
+
+        result_list = []
+
+        for metric in self.company_list[0].div_dfs[0].index:
+            for company in self.company_list:
+                result_list.append(company.div_dfs[0].loc[metric])
+            
+            sum = 0
+            for value in result_list:
+                sum += value
+
+            self.div_dfs[0][metric] = sum / len(result_list)
+            result_list.clear()
+
+        self.div_dfs[0] = self.div_dfs[0].T
+
+    def set_df_pub_sent(self):
+        """Set self.df_pub_sent values"""
+
+        result_list = []
+
+        for metric in self.company_list[0].df_pub_sent.index:
+            for company in self.company_list:
+                result_list.append(company.df_pub_sent.loc[metric])
+            
+            sum = 0
+            for value in result_list:
+                sum += value
+
+            self.df_pub_sent[metric] = sum / len(result_list)
+            result_list.clear()
+
+        self.df_pub_sent = self.df_pub_sent.T
+
+    def set_news_dfs(self):
+        """Set self.div_dfs values"""
+        df_com_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Company News'])
+        df_sec_news = self.company_list[0].news_dfs[1]
+        df_ind_news = self.company_list[0].news_dfs[2]
+
+        self.news_dfs = [df_com_news, df_sec_news, df_ind_news]
+
+    def set_na_dfs(self):
+        df_rating_30d = pd.DataFrame({'Data N/A': 'n/a'}, index=['df_rating_30d']).T
+        df_rot_3mo = pd.DataFrame({'Data N/A': 'n/a'}, index=['df_rot_3mo']).T
+        wb_score = 'n/a'
+        empty_data = [df_rating_30d, df_rot_3mo, wb_score]
+        for na_value in empty_data:
+            self.analyst_data.append(na_value)
+
+        self.df_esg = pd.DataFrame({'Data N/A': 'n/a'}, index=['ESG Data']).T
+
+    def set_all_data(self):
+        self.set_df_basic()
+        self.set_df_value()
+        self.set_df_mgmt()
+        self.set_df_ins()
+        self.set_div_dfs()
+        self.set_df_pub_sent()
+        self.set_news_dfs()
+        self.set_na_dfs()
