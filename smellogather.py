@@ -1,26 +1,35 @@
 # smellogather.py
 #* Version 0.9
-#* Last update 10/23/22
+#* Last update 10/24/22
 
-"""smellogather takes a user supplied list of stocks and pulls in a wide
+"""smellogather takes a user supplied list of stocks and pulls in a 
    variety of metrics and data via OpenBB. 
 
-   Each stock will become a Company object and can be examined easily via
-   calls and methods. 
+   Each stock will become a Company object and can be examined via 
+   methods in company.py. 
 
-   The main point of this script is to the create company_list variable
-   which holds one or more instaniated Company objects
+   Additionally, a PeerGroup object will be created which contains average
+   values drawn from user submitted stock list.
+
+   The main point of this script is:
+   1) Create company_list variable which holds one or more instaniated Company objects
+   2) Create peer_group object which 
 
 Returns:
     list: company_list containing Company class objects
+    object: PeerGroup subclass object
 """
 
 import math
 import pandas as pd
 from openbb_terminal.api import openbb as obb
 from company import Company, PeerGroup
+from stocklist import stocks
 
-peers = [('MSFT', 1), ('AAPL', 2), ('ORCL', 3), ('PRGS', 4)]
+# crating peers list based on user selected stocks from stocklist.py
+peers = []
+for index, stock in enumerate(stocks):
+    peers.append((stock, index + 1))
 
 # used to convert strings representing percentage to a float, eg '10%' becomes 0.1
 def p2f(str_perc):
@@ -121,24 +130,29 @@ for company in peers:
 
     tca = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Total current assets'][0]
 
-    # Case for if the company has no debt
-    if math.isnan(obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]) is True:
-        tld = 0 
-    
-    elif obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0] is None:
-        tld = 0         
-    
-    else:  
-        tld = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]
+    # Cases for if the company has no debt
+    try:
+        if math.isnan(obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]) is True:
+            tld = 0 
+        
+        elif obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0] is None:
+            tld = 0         
+        
+        else:  
+            tld = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]
 
-    if tld == 0:
+        if tld == 0:
+            tca_div_tld = 'n/a'
+        else:
+            tca_div_tld = tca / tld
+
+    except KeyError:
+        tld = 0
         tca_div_tld = 'n/a'
-    else:
-        tca_div_tld = tca / tld
  
     ptb_mrq = try_it('P/B', 'data')
-    ptb_ttm = df_metrics.loc['Ptb ratio'][0]
-    ptb_5yr_avg = df_metrics.loc['Ptb ratio']['5yr Avg']
+    ptb_ttm = try_it('Ptb ratio', 'metrics')
+    ptb_5yr_avg = try_it('Ptb ratio', 'metrics', avg=True)
 
     bvps_mrq = float(obb.stocks.fa.data(stock).loc['Book/sh'][0])
     bvps_ttm = df_metrics.loc['Book value per share'][0]
@@ -300,3 +314,33 @@ for company in peers:
     elif slot == 4:
         c4 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
         company_list.append(c4)
+
+    elif slot == 5:
+        c5 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
+        company_list.append(c5)
+
+    elif slot == 6:
+        c6 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
+        company_list.append(c6)
+
+    elif slot == 7:
+        c7 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
+        company_list.append(c7)
+
+    elif slot == 8:
+        c8 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
+        company_list.append(c8)
+
+    elif slot == 9:
+        c9 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
+        company_list.append(c9)
+
+    elif slot == 10:
+        c10 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
+        company_list.append(c10)
+
+# Creating PeerGroup object
+peer_group = PeerGroup(company_list=company_list)
+
+# Pulling in the data for PeerGroup object
+peer_group.set_all_data()

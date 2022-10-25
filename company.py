@@ -1,21 +1,13 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
     Version 0.5
-    Last updated 10/23/22
+    Last updated 10/24/22
 """
 
 from openbb_terminal.api import openbb as obb
 import pandas as pd
 from dataclasses import dataclass, field
 from IPython.display import display
-
-# def no_zeros(self, result_list, metric):
-#     if len(result_list) != 0:
-#         self.df_value[metric] = sum / len(result_list)
-
-#     else:
-#         self.df_value[metric] = 'n/a'
-
 
 @dataclass
 class Company:
@@ -47,7 +39,6 @@ class Company:
         # Creating df out of dict, transposing, exporting to excel. Filename will output to root folder with filename: [TICKER].xlsx
         pd.DataFrame(combined_dict, index=['Values']).T.to_excel(self.df_basic.loc['ticker'][0] + '.xlsx')
 
-
     def display_dfs(self):
         """View selected dataframes in Jupyter Lab or IPython
         """
@@ -67,14 +58,6 @@ class PeerGroup(Company):
     """
     
     company_list: list = field(default_factory=list) # List of 1 or more Company objects
-
-
-    # def no_zeros(result_list, df, metric):
-    #     if len(result_list) != 0:
-    #         df[metric] = sum / len(result_list)
-
-    #     else:
-    #         df[metric] = 'n/a'
 
     def set_df_basic(self):
         """Set self.df_basic values"""
