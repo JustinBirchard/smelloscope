@@ -1,28 +1,188 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
-    Version 0.5
-    Last updated 10/24/22
+    Version 0.6
+    Last updated 10/25/22
 """
 
+from copy import deepcopy
 from openbb_terminal.api import openbb as obb
 import pandas as pd
 from dataclasses import dataclass, field
 from IPython.display import display
 
+scores_value = pd.DataFrame({'Value': {'v1': None, 'v2': None, 'v3': None, 'v4': None, 'v5': None, 'v6': None, 'v7': None, 'v8': None, 'v9': None}})
+scores_mgmt = pd.DataFrame({'MGMT': {'m1': None, 'm2': None, 'm3': None, 'm4': None}})
+
 @dataclass
 class Company:
     """Class Company for creating Company objects."""
 
-# Note that default_factory can take any function name as an argument so we could define a function above and then initialize object with it
-    df_basic: pd.DataFrame = field(default_factory=pd.DataFrame) # DataFrame, shape=(6,1), holds basic company details
-    df_value: pd.DataFrame = field(default_factory=pd.DataFrame) # DataFrame, shape=(18,1), holds value metrics
-    df_mgmt: pd.DataFrame = field(default_factory=pd.DataFrame)# DataFrame, shape=(14,1), holds management metrics
-    df_ins: pd.DataFrame = field(default_factory=pd.DataFrame)# DataFrame, shape=(4,1), holds insider & instituion data
-    div_dfs: list = field(default_factory=list, repr=False) # List that holds 2 DataFrames containing dividend data
-    df_pub_sent: pd.DataFrame = field(default_factory=pd.DataFrame) # DataFrame, shape=(3,1), holds public sentiment data
-    news_dfs: list = field(default_factory=list, repr=False) # List that holds 3 DataFrames containing Company, Sector, & Industry news
-    analyst_data: list = field(default_factory=list, repr=False) # List that holds 2 DataFrames containing Analyst ratings
-    df_esg: pd.DataFrame = field(default_factory=pd.DataFrame) # DataFrame, shape=(27,1), holds ESG data a& metrics
+    df_basic: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(6,1), holds basic company details
+    df_value: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(18,1), holds value metrics
+    df_mgmt: pd.DataFrame = field(default_factory=pd.DataFrame)# shape=(14,1), holds management metrics
+    df_ins: pd.DataFrame = field(default_factory=pd.DataFrame)# shape=(4,1), holds insider & instituion data
+    div_dfs: list = field(default_factory=list, repr=False) # holds 2 DataFrames containing dividend data
+    df_pub_sent: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(3,1), holds public sentiment data
+    news_dfs: list = field(default_factory=list, repr=False) # holds 3 DataFrames containing Company, Sector, & Industry news
+    analyst_data: list = field(default_factory=list, repr=False) # olds 2 DataFrames containing Analyst ratingsmetrics
+    df_esg: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(27,1), holds ESG data & metrics
+    score_dict: dict = field(default_factory=lambda: {'value': deepcopy(scores_value), 'mgmt': deepcopy(scores_mgmt)}) # a dictionary of dataframes
+
+    def set_scores_value(self, peer_group):
+
+        # variables for ease of reading
+        pe_mrq = self.df_value.loc['pe_mrq'][0]
+        peer_pe_mrq = peer_group.df_value.loc['pe_mrq'][0]
+        pe_5yr_avg = self.df_value.loc['pe_5yr_avg'][0]
+        ptb_mrq = self.df_value.loc['ptb_mrq'][0]
+        peer_ptb_mrq = peer_group.df_value.loc['ptb_mrq'][0]
+        roe_mrq = self.df_mgmt.loc['roe_mrq'][0]
+        peer_roe_mrq = peer_group.df_mgmt.loc['roe_mrq'][0]
+        bvps_mrq = self.df_value.loc['bvps_mrq'][0]
+        bvps_5yr_avg = self.df_value.loc['bvps_5yr_avg'][0]
+        pfcf_mrq = self.df_value.loc['pfcf_mrq'][0]
+        pfcf_5yr_avg = self.df_value.loc['pfcf_5yr_avg'][0]
+        peer_pfcf_mrq = peer_group.df_value.loc['pfcf_mrq'][0]
+        tca_div_tld = self.df_value.loc['tca_div_tld'][0]
+        peer_tca_div_tld = peer_group.df_value.loc['tca_div_tld'][0]
+        pts_mrq = self.df_value.loc['pts_mrq'][0]
+        pts_5yr_avg = self.df_value.loc['pts_5yr_avg'][0]
+        peer_pts_mrq = peer_group.df_value.loc['pts_mrq'][0]
+
+        #**************************************************************** v1
+        if pe_mrq <= (peer_pe_mrq * 0.9):
+            self.score_dict['value'].loc['v1'][0] = 3
+
+        elif pe_mrq <= (peer_pe_mrq * 1.05):
+            self.score_dict['value'].loc['v1'][0] = 1
+
+        elif pe_mrq > (peer_pe_mrq * 1.05):
+            self.score_dict['value'].loc['v1'][0] = 0
+
+        else:
+            print('v1 case slipped through')
+
+        #**************************************************************** v2
+        if pe_mrq <= (pe_5yr_avg * 0.75):
+            self.score_dict['value'].loc['v2'][0] = 3
+
+        elif pe_mrq < (pe_5yr_avg * 0.9):
+            self.score_dict['value'].loc['v2'][0] = 2
+
+        elif pe_mrq <= pe_5yr_avg:
+            self.score_dict['value'].loc['v2'][0] = 1
+
+        elif pe_mrq > pe_5yr_avg:
+            self.score_dict['value'].loc['v2'][0] = 0
+
+        else:
+            print('v2 case slipped through')
+
+        #**************************************************************** v3
+        if ptb_mrq <= (peer_ptb_mrq * 0.9) and roe_mrq >= (peer_roe_mrq * 1.1):
+            self.score_dict['value'].loc['v3'][0] = 3
+
+        elif ptb_mrq <= (peer_ptb_mrq * 1.05) and roe_mrq >= (peer_roe_mrq * .95):
+            self.score_dict['value'].loc['v3'][0] = 2
+
+        elif ptb_mrq >= (peer_ptb_mrq * 1.05) and roe_mrq <= (peer_roe_mrq * .95):
+            self.score_dict['value'].loc['v3'][0] = 1
+
+        elif ptb_mrq > (peer_ptb_mrq * 1.05) or roe_mrq < (peer_roe_mrq * .95):
+            self.score_dict['value'].loc['v3'][0] = 0
+
+        else:
+            print('v3 case slipped through')
+
+        #**************************************************************** v4
+        if ptb_mrq < 2:
+            self.score_dict['value'].loc['v4'][0] = 2
+
+        elif ptb_mrq >= 2 and ptb_mrq <= 4:
+            self.score_dict['value'].loc['v4'][0] = 1
+
+        elif ptb_mrq > 4:
+            self.score_dict['value'].loc['v4'][0] = 0
+
+        else:
+            print('v4 case slipped through')
+
+        #**************************************************************** v5
+        if ptb_mrq <= (peer_ptb_mrq * 0.9) and bvps_mrq > (bvps_5yr_avg * 1.05):
+            self.score_dict['value'].loc['v5'][0] = 3
+
+        elif ptb_mrq <= (peer_ptb_mrq * 0.9) and bvps_mrq >= (bvps_5yr_avg * 0.95):
+            self.score_dict['value'].loc['v5'][0] = 2
+
+        elif ptb_mrq <= (peer_ptb_mrq * 1.05) and bvps_mrq >= (bvps_5yr_avg * 0.95):
+            self.score_dict['value'].loc['v5'][0] = 1
+
+        elif ptb_mrq > (peer_ptb_mrq * 1.05) or bvps_mrq < (bvps_5yr_avg * 0.95):
+            self.score_dict['value'].loc['v5'][0] = 0
+
+        else:
+            print('v5 case slipped through')
+
+        #**************************************************************** v6
+        if pfcf_mrq <= (peer_pfcf_mrq * .9):
+            self.score_dict['value'].loc['v6'][0] = 3
+
+        elif pfcf_mrq > (peer_pfcf_mrq * .9) and pfcf_mrq <= peer_pfcf_mrq:
+            self.score_dict['value'].loc['v6'][0] = 2
+
+        elif pfcf_mrq >= peer_pfcf_mrq and pfcf_mrq < (peer_pfcf_mrq * 1.05):
+            self.score_dict['value'].loc['v6'][0] = 1
+
+        elif pfcf_mrq > (peer_pfcf_mrq * 1.05):
+            self.score_dict['value'].loc['v6'][0] = 0
+
+        else:
+            print('v6 case slipped through')
+
+        #**************************************************************** v7
+        if tca_div_tld >= 1.1:
+            self.score_dict['value'].loc['v7'][0] = 2
+
+        elif tca_div_tld < 1.1 and tca_div_tld >= 0.9:
+            self.score_dict['value'].loc['v7'][0] = 1
+
+        elif tca_div_tld > 0.9:
+            self.score_dict['value'].loc['v7'][0] = 0
+
+        else:
+            print('v7 case slipped through')
+
+        #**************************************************************** v8
+        if tca_div_tld >= (peer_tca_div_tld * 1.2):
+            self.score_dict['value'].loc['v8'][0] = 4
+
+        elif tca_div_tld < (peer_tca_div_tld * 1.2) and tca_div_tld > peer_tca_div_tld:
+            self.score_dict['value'].loc['v8'][0] = 2
+
+        elif tca_div_tld <= peer_tca_div_tld:
+            self.score_dict['value'].loc['v8'][0] = 0
+
+        else:
+            print('v8 case slipped through')
+
+        #**************************************************************** v9
+        if pts_mrq < (peer_pts_mrq * 0.9) and tca_div_tld >= 1.1:
+            self.score_dict['value'].loc['v9'][0] = 4
+
+        elif pts_mrq >= (peer_pts_mrq * 0.9) and pts_mrq <= peer_pts_mrq and tca_div_tld < 1.1 and tca_div_tld >= 0.95:
+            self.score_dict['value'].loc['v9'][0] = 3
+
+        elif pts_mrq >= (peer_pts_mrq * 0.9) and pts_mrq <= peer_pts_mrq and tca_div_tld < 0.95 and tca_div_tld >= 0.8:
+            self.score_dict['value'].loc['v9'][0] = 2
+
+        elif pts_mrq > peer_pts_mrq and pts_mrq <= (peer_pts_mrq * 1.1) and tca_div_tld >= 0.8:
+            self.score_dict['value'].loc['v9'][0] = 1
+
+        elif pts_mrq >= (peer_pts_mrq * 1.1) or tca_div_tld < 0.8:
+            self.score_dict['value'].loc['v9'][0] = 0
+
+        else:
+            print('v9 case slipped through')
 
     def data_to_excel(self):
         """Combine selected data into a new dataframe and output to excel file.
