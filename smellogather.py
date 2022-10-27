@@ -127,8 +127,18 @@ for company in peers:
                               index=['Basic Details']).T
     
 ############## *** VALUE METRICS DATAFRAME *** ##############
+ 
+    yahoo_success = 'no'
+ 
+    while yahoo_success == 'no':
+        try:
+            tca = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Total current assets'][0]
+            yahoo_success = 'yes'
 
-    tca = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Total current assets'][0]
+
+        except AttributeError:
+            print('Yahoo error. Trying again.')
+
 
     # Cases for if the company has no debt
     try:
@@ -344,3 +354,6 @@ peer_group = PeerGroup(company_list=company_list)
 
 # Pulling in the data for PeerGroup object
 peer_group.set_all_data()
+
+# Fixes improper calculation set by set_all_data() for peer_group tca_div_tld
+peer_group.df_value.loc['tca_div_tld'][0] = peer_group.df_value.loc['tca'][0] / peer_group.df_value.loc['tld'][0]
