@@ -1,7 +1,7 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
-    Version 0.7
-    Last updated 10/26/22
+    Version 0.7.1
+    Last updated 10/27/22
 """
 
 from copy import deepcopy
@@ -476,98 +476,95 @@ class Company:
         else:
             print('i4 case slipped through')
 
-    # def set_scores_div(self, peer_group):
+    def set_scores_div(self, peer_group):
 
-    #     div = self.div_dfs[0].loc['div'][0]
-    #     peer_div = peer_group.div_dfs[0].loc['div'][0]
-    #     div_y = self.div_dfs[0].loc['div_y'][0]
-    #     peer_div_y = peer_group.div_dfs[0].loc['div_y'][0]
-        
-    #     for x in [div, peer_div, div_y, peer_div_y]:
-    #         print(self.df_basic.loc['name'] + ' ' + str(x))
+        div = self.div_dfs[0].loc['div'][0]
+        peer_div = peer_group.div_dfs[0].loc['div'][0]
+        div_y = self.div_dfs[0].loc['div_y'][0]
+        peer_div_y = peer_group.div_dfs[0].loc['div_y'][0]
 
-    #     try: # The amount of the most recent dividend
-    #         last_div = self.div_dfs[1].tail(1)['Dividends'][0]
+        try: # The amount of the most recent dividend
+            last_div = self.div_dfs[1].tail(1)['Dividends'][0]
 
-    #     except ValueError:
-    #         last_div = 0
+        except ValueError:
+            last_div = 0
 
-    #     try: # The average of the last 12 dividends
-    #         last12_avg = self.div_dfs[1].tail(12).mean(axis=0)[0]
+        try: # The average of the last 12 dividends
+            last12_avg = self.div_dfs[1].tail(12).mean(axis=0)[0]
 
-    #     except ValueError:
-    #         last12_avg = 0
+        except ValueError:
+            last12_avg = 0
 
-    #     #**************************************************************** d1
+        #**************************************************************** d1
 
-    #     if div or peer_div == 'n/a':
-    #         self.score_dict['div'].loc['d1'][0] = 0
+        if div == 'n/a' or peer_div == 'n/a':
+            self.score_dict['div'].loc['d1'][0] = 0
 
-    #     elif div >= (peer_div * 1.2):
-    #         self.score_dict['div'].loc['d1'][0] = 2
+        elif div >= (peer_div * 1.2):
+            self.score_dict['div'].loc['d1'][0] = 2
 
-    #     elif div < (peer_div * 1.2) and div >= peer_div:
-    #         self.score_dict['div'].loc['d1'][0] = 1
+        elif div < (peer_div * 1.2) and div >= peer_div:
+            self.score_dict['div'].loc['d1'][0] = 1
 
-    #     elif div < peer_div:
-    #         self.score_dict['div'].loc['d1'][0] = 0
+        elif div < peer_div:
+            self.score_dict['div'].loc['d1'][0] = 0
 
-    #     else:
-    #         print('d1 case slipped through')
+        else:
+            print('d1 case slipped through')
 
-    #     #**************************************************************** d2
+        #**************************************************************** d2
 
-    #     if div_y or peer_div_y == 'n/a':
-    #         self.score_dict['div'].loc['d2'][0] = 0
+        if div_y == 'n/a' or peer_div_y == 'n/a':
+            self.score_dict['div'].loc['d2'][0] = 0
 
-    #     elif div_y >= (peer_div_y * 1.2):
-    #         self.score_dict['div'].loc['d2'][0] = 2
+        elif div_y >= (peer_div_y * 1.2):
+            self.score_dict['div'].loc['d2'][0] = 2
 
-    #     elif div_y < (peer_div_y * 1.2) and div >= peer_div:
-    #         self.score_dict['div'].loc['d2'][0] = 1
+        elif div_y < (peer_div_y * 1.2) and div >= peer_div:
+            self.score_dict['div'].loc['d2'][0] = 1
 
-    #     elif div_y < peer_div_y:
-    #         self.score_dict['div'].loc['d2'][0] = 0
+        elif div_y < peer_div_y:
+            self.score_dict['div'].loc['d2'][0] = 0
 
-    #     else:
-    #         print('d2 case slipped through')
+        else:
+            print('d2 case slipped through')
 
-    #     #**************************************************************** d3
+        #**************************************************************** d3
 
-    #     if last_div or last12_avg == 0:
-    #         self.score_dict['div'].loc['d3'][0] = 0
+        if last_div == 0 or last12_avg == 0:
+            self.score_dict['div'].loc['d3'][0] = 0
 
-    #     elif last_div >= (last12_avg * 1.2):
-    #         self.score_dict['div'].loc['d3'][0] = 2
+        elif last_div >= (last12_avg * 1.2):
+            self.score_dict['div'].loc['d3'][0] = 2
 
-    #     elif last_div < (last12_avg * 1.2) and last_div >= last12_avg:
-    #         self.score_dict['div'].loc['d3'][0] = 1
+        elif last_div < (last12_avg * 1.2) and last_div >= last12_avg:
+            self.score_dict['div'].loc['d3'][0] = 1
 
-    #     elif last_div < last12_avg:
-    #         self.score_dict['div'].loc['d3'][0] = 0
+        elif last_div < last12_avg:
+            self.score_dict['div'].loc['d3'][0] = 0
 
-    #     else:
-    #         print('d3 case slipped through')
+        else:
+            print('d3 case slipped through')
 
-    #     #**************************************************************** d4
+        #**************************************************************** d4
 
-    #     if div_y == 'n/a':
-    #         self.score_dict['div'].loc['d4'][0] = 0
+        if div_y == 'n/a':
+            self.score_dict['div'].loc['d4'][0] = 0
 
-    #     elif div_y >= .02:
-    #         self.score_dict['div'].loc['d4'][0] = 4
+        elif div_y >= .02:
+            self.score_dict['div'].loc['d4'][0] = 4
 
-    #     elif div_y < .02 and div_y >= .01:
-    #         self.score_dict['div'].loc['d4'][0] = 2
+        elif div_y < .02 and div_y >= .01:
+            self.score_dict['div'].loc['d4'][0] = 2
 
-    #     elif div_y < .01 and div_y >= .005:
-    #         self.score_dict['div'].loc['d4'][0] = 1
+        elif div_y < .01 and div_y >= .005:
+            self.score_dict['div'].loc['d4'][0] = 1
 
-    #     elif div_y < .005:
-    #         self.score_dict['div'].loc['d4'][0] = 0
+        elif div_y < .005:
+            self.score_dict['div'].loc['d4'][0] = 0
 
-    #     else:
-    #         print('d4 case slipped through')
+        else:
+            print('d4 case slipped through')
 
     def data_to_excel(self):
         """Combine selected data into a new dataframe and output to excel file.
