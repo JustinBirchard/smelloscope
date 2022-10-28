@@ -14,6 +14,8 @@ scores_value = pd.DataFrame({'value': {'v1': None, 'v2': None, 'v3': None, 'v4':
 scores_mgmt = pd.DataFrame({'mgmt': {'m1': None, 'm2': None, 'm3': None, 'm4': None, 'm5': None, 'm6': None, 'm7': None, 'm8': None, 'm9': None}})
 scores_ins = pd.DataFrame({'ins': {'i1': None, 'i2': None, 'i3': None, 'i4': None}})
 scores_div = pd.DataFrame({'div': {'d1': None, 'd2': None, 'd3': None, 'd4': None}})
+scores_pub_sent = pd.DataFrame({'pub_sent': {'p1': None, 'p2': None, 'p3': None, 'p4': None, 'p5': None, 'p6': None}})
+scores_analyst_data = pd.DataFrame({'analyst_data': {'a1': None, 'a2': None, 'a3': None, 'a4': None, 'a5': None}})
 
 @dataclass
 class Company:
@@ -26,12 +28,14 @@ class Company:
     div_dfs: list = field(default_factory=list, repr=False) # holds 2 DataFrames containing dividend data
     df_pub_sent: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(3,1), holds public sentiment data
     news_dfs: list = field(default_factory=list, repr=False) # holds 3 DataFrames containing Company, Sector, & Industry news
-    analyst_data: list = field(default_factory=list, repr=False) # olds 2 DataFrames containing Analyst ratingsmetrics
+    analyst_data: list = field(default_factory=list, repr=False) # holds 2 DataFrames containing Analyst ratingsmetrics
     df_esg: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(27,1), holds ESG data & metrics
     score_dict: dict = field(default_factory=lambda: {'value': deepcopy(scores_value), 
                                                       'mgmt': deepcopy(scores_mgmt),
                                                       'ins': deepcopy(scores_ins), 
-                                                      'div': deepcopy(scores_div)}) # a dictionary of dataframes
+                                                      'div': deepcopy(scores_div),
+                                                      'pub_sent': deepcopy(scores_pub_sent),
+                                                      'analyst_data': deepcopy(scores_analyst_data)}) # a dictionary of dataframes
 
     def set_scores_value(self, peer_group):
 
@@ -172,7 +176,7 @@ class Company:
         elif tca_div_tld < 1.1 and tca_div_tld >= 0.9:
             self.score_dict['value'].loc['v7'][0] = 1
 
-        elif tca_div_tld > 0.9:
+        elif tca_div_tld < 0.9:
             self.score_dict['value'].loc['v7'][0] = 0
 
         else:
@@ -489,10 +493,16 @@ class Company:
         except ValueError:
             last_div = 0
 
+        except AttributeError:
+            last_div = 0
+
         try: # The average of the last 12 dividends
             last12_avg = self.div_dfs[1].tail(12).mean(axis=0)[0]
 
         except ValueError:
+            last12_avg = 0
+
+        except AttributeError:
             last12_avg = 0
 
         #**************************************************************** d1
@@ -512,18 +522,20 @@ class Company:
         else:
             print('d1 case slipped through')
 
+
+
         #**************************************************************** d2
 
-        if div_y == 'n/a' or peer_div_y == 'n/a':
+        if last_div == 0 or last12_avg == 0:
             self.score_dict['div'].loc['d2'][0] = 0
 
-        elif div_y >= (peer_div_y * 1.2):
+        elif last_div >= (last12_avg * 1.2):
             self.score_dict['div'].loc['d2'][0] = 2
 
-        elif div_y < (peer_div_y * 1.2) and div >= peer_div:
+        elif last_div < (last12_avg * 1.2) and last_div >= last12_avg:
             self.score_dict['div'].loc['d2'][0] = 1
 
-        elif div_y < peer_div_y:
+        elif last_div < last12_avg:
             self.score_dict['div'].loc['d2'][0] = 0
 
         else:
@@ -531,16 +543,16 @@ class Company:
 
         #**************************************************************** d3
 
-        if last_div == 0 or last12_avg == 0:
+        if div_y == 'n/a' or peer_div_y == 'n/a':
             self.score_dict['div'].loc['d3'][0] = 0
 
-        elif last_div >= (last12_avg * 1.2):
+        elif div_y >= (peer_div_y * 1.2):
             self.score_dict['div'].loc['d3'][0] = 2
 
-        elif last_div < (last12_avg * 1.2) and last_div >= last12_avg:
+        elif div_y < (peer_div_y * 1.2) and div >= peer_div:
             self.score_dict['div'].loc['d3'][0] = 1
 
-        elif last_div < last12_avg:
+        elif div_y < peer_div_y:
             self.score_dict['div'].loc['d3'][0] = 0
 
         else:
@@ -565,6 +577,234 @@ class Company:
 
         else:
             print('d4 case slipped through')
+
+
+    def set_scores_pub_sent(self, peer_group):
+
+        twits_perc = self.df_pub_sent.loc['twits_perc'][0]
+        peer_twits_perc = peer_group.df_pub_sent.loc['twits_perc'][0]
+        shrt_int = self.df_pub_sent.loc['shrt_int'][0]
+        peer_shrt_int = peer_group.df_pub_sent.loc['shrt_int'][0]
+        news_sent = self.df_pub_sent.loc['news_sent'][0]
+        peer_news_sent = peer_group.df_pub_sent.loc['news_sent'][0]
+
+        #**************************************************************** p1
+
+        if twits_perc == 'n/a':
+            self.score_dict['pub_sent'].loc['p1'][0] = 0
+
+        elif twits_perc >= .8:
+            self.score_dict['pub_sent'].loc['p1'][0] = 1
+
+        elif twits_perc < .8:
+            self.score_dict['pub_sent'].loc['p1'][0] = 0
+
+        else:
+            print('p1 case slipped through')
+
+        #**************************************************************** p2
+
+        if twits_perc == 'n/a':
+            self.score_dict['pub_sent'].loc['p2'][0] = 0
+
+        elif twits_perc >= (peer_twits_perc * 1.1):
+            self.score_dict['pub_sent'].loc['p2'][0] = 1
+
+        elif twits_perc < (peer_twits_perc * 1.1):
+            self.score_dict['pub_sent'].loc['p2'][0] = 0
+
+        else:
+            print('p2 case slipped through')
+
+        #**************************************************************** p3
+
+        if shrt_int == 'n/a':
+            self.score_dict['pub_sent'].loc['p3'][0] = 0
+
+        elif shrt_int <= 0.01:
+            self.score_dict['pub_sent'].loc['p3'][0] = 2
+
+        elif shrt_int > 0.01 and shrt_int <= 0.02:
+            self.score_dict['pub_sent'].loc['p3'][0] = 1
+
+        elif shrt_int > 0.02:
+            self.score_dict['pub_sent'].loc['p3'][0] = 0
+
+        else:
+            print('p3 case slipped through')
+
+        #**************************************************************** p4
+
+        if shrt_int == 'n/a':
+            self.score_dict['pub_sent'].loc['p4'][0] = 0
+
+        elif shrt_int <= (peer_shrt_int * 0.9):
+            self.score_dict['pub_sent'].loc['p4'][0] = 2
+
+        elif shrt_int > (peer_shrt_int * 0.9) and shrt_int <= (peer_shrt_int * 1.05):
+            self.score_dict['pub_sent'].loc['p4'][0] = 1
+
+        elif shrt_int > (peer_shrt_int * 1.05):
+            self.score_dict['pub_sent'].loc['p4'][0] = 0
+
+        else:
+            print('p4 case slipped through')
+
+        #**************************************************************** p5
+
+        if news_sent == 'n/a':
+            self.score_dict['pub_sent'].loc['p5'][0] = 0
+
+        elif news_sent >= 0.25:
+            self.score_dict['pub_sent'].loc['p5'][0] = 2
+
+        elif news_sent < 0.25 and news_sent >= 0.1:
+            self.score_dict['pub_sent'].loc['p5'][0] = 1
+
+        elif news_sent < 0.1:
+            self.score_dict['pub_sent'].loc['p5'][0] = 0
+
+        else:
+            print('p5 case slipped through')
+
+        #**************************************************************** p6
+
+        if news_sent == 'n/a':
+            self.score_dict['pub_sent'].loc['p6'][0] = 0
+
+        elif news_sent >= (peer_news_sent * 1.2):
+            self.score_dict['pub_sent'].loc['p6'][0] = 2
+
+        elif news_sent < (peer_news_sent * 1.2) and news_sent >= peer_news_sent:
+            self.score_dict['pub_sent'].loc['p6'][0] = 1
+
+        elif news_sent < peer_news_sent:
+            self.score_dict['pub_sent'].loc['p6'][0] = 0
+
+        else:
+            print('p6 case slipped through')
+
+
+
+    def set_scores_analyst_data(self, peer_group):
+
+        wghtd_buys_sum = self.analyst_data[1].loc['Buy'][0] + (self.analyst_data[1].loc['Strong Buy'][0] * 1.25)
+        wghtd_peer_buys_sum = peer_group.analyst_data[1].loc['Buy'][0] + (peer_group.analyst_data[1].loc['Strong Buy'][0] * 1.25)
+        holds = self.analyst_data[1].loc['Hold'][0]
+        peer_holds = peer_group.analyst_data[1].loc['Hold'][0]
+        wghtd_sells_sum = self.analyst_data[1].loc['Sell'][0] + (self.analyst_data[1].loc['Strong Sell'][0] * 1.25)
+        wghtd_peer_sells_sum = peer_group.analyst_data[1].loc['Sell'][0] + (peer_group.analyst_data[1].loc['Strong Sell'][0] * 1.25)
+
+        buys_perc = wghtd_buys_sum / (wghtd_buys_sum + holds + wghtd_sells_sum)
+        peer_buys_perc = wghtd_peer_buys_sum / (wghtd_peer_buys_sum + peer_holds + wghtd_peer_sells_sum)
+        sells_perc = wghtd_sells_sum / (wghtd_buys_sum + holds + wghtd_sells_sum)
+        peer_sells_perc = wghtd_peer_sells_sum / (wghtd_peer_buys_sum + peer_holds + wghtd_peer_sells_sum)
+
+        series_last_14 = self.analyst_data[0]['Rating'].head(14)
+        
+        #counting how many Strong Buy ratings have been issued in last 14 days
+        strong_buys = 0
+        for rating in series_last_14:
+            if rating == 'Strong Buy':
+                strong_buys += 1
+
+        wb_score = self.analyst_data[2]
+
+        #**************************************************************** a1
+
+        if buys_perc == 'n/a':
+            self.score_dict['analyst_data'].loc['a1'][0] = 0
+
+        elif buys_perc >= (peer_buys_perc * 1.2):
+            self.score_dict['analyst_data'].loc['a1'][0] = 2
+
+        elif buys_perc < (peer_buys_perc * 1.2) and buys_perc > peer_buys_perc:
+            self.score_dict['analyst_data'].loc['a1'][0] = 1
+
+        elif buys_perc <= peer_buys_perc:
+            self.score_dict['analyst_data'].loc['a1'][0] = 0
+
+        else:
+            print('a1 case slipped through')
+
+        #**************************************************************** a2
+
+        if sells_perc == 'n/a':
+            self.score_dict['analyst_data'].loc['a2'][0] = 0
+
+        elif sells_perc <= (peer_sells_perc * .8):
+            self.score_dict['analyst_data'].loc['a2'][0] = 2
+
+        elif sells_perc > (peer_sells_perc * .8) and sells_perc <= peer_sells_perc:
+            self.score_dict['analyst_data'].loc['a2'][0] = 1
+
+        elif sells_perc > peer_sells_perc:
+            self.score_dict['analyst_data'].loc['a2'][0] = 0
+
+        else:
+            print('a2 case slipped through')
+
+        #**************************************************************** a3
+
+        if wghtd_buys_sum == 'n/a':
+            self.score_dict['analyst_data'].loc['a3'][0] = 0
+
+        elif wghtd_buys_sum >= (wghtd_peer_buys_sum * 1.5):
+            self.score_dict['analyst_data'].loc['a3'][0] = 3
+
+        elif wghtd_buys_sum < (wghtd_peer_buys_sum * 1.5) and wghtd_buys_sum >= (wghtd_peer_buys_sum * 1.1):
+            self.score_dict['analyst_data'].loc['a3'][0] = 2
+
+        elif wghtd_buys_sum < (wghtd_peer_buys_sum * 1.1) and wghtd_buys_sum >= (wghtd_peer_buys_sum * 0.7):
+            self.score_dict['analyst_data'].loc['a3'][0] = 1
+
+        elif wghtd_buys_sum < (wghtd_peer_buys_sum * 0.7):
+            self.score_dict['analyst_data'].loc['a3'][0] = 0
+
+        else:
+            print('a3 case slipped through')
+
+        #**************************************************************** a4
+
+        if strong_buys == 'n/a':
+            self.score_dict['analyst_data'].loc['a4'][0] = 0
+
+        elif strong_buys >= 12:
+            self.score_dict['analyst_data'].loc['a4'][0] = 3
+
+        elif strong_buys < 12 and strong_buys >= 10:
+            self.score_dict['analyst_data'].loc['a4'][0] = 2
+
+        elif strong_buys < 10 and strong_buys >= 8:
+            self.score_dict['analyst_data'].loc['a4'][0] = 1
+
+        elif strong_buys < 8:
+            self.score_dict['analyst_data'].loc['a4'][0] = 0
+
+        else:
+            print('a4 case slipped through')
+
+        #**************************************************************** a5
+
+        # Scoring 'n/a' as worth 1pt so as not to punish those not on S&P or NASDAQ 100
+        if wb_score == 'n/a':
+            self.score_dict['analyst_data'].loc['a5'][0] = 1
+
+        elif wb_score >= 80:
+            self.score_dict['analyst_data'].loc['a5'][0] = 3
+
+        elif wb_score < 80 and wb_score >= 75:
+            self.score_dict['analyst_data'].loc['a5'][0] = 2
+
+        elif wb_score < 75 and wb_score >= 70:
+            self.score_dict['analyst_data'].loc['a5'][0] = 1
+
+        elif wb_score < 70:
+            self.score_dict['analyst_data'].loc['a5'][0] = 0
+
+        else:
+            print('a5 case slipped through')
+
 
     def data_to_excel(self):
         """Combine selected data into a new dataframe and output to excel file.
@@ -750,14 +990,18 @@ class PeerGroup(Company):
 
         self.news_dfs = [df_com_news, df_sec_news, df_ind_news]
 
-    def set_na_dfs(self):
+    def set_analyst_data(self):
         df_rating_30d = pd.DataFrame({'Data N/A': 'n/a'}, index=['df_rating_30d']).T
-        df_rot_3mo = pd.DataFrame({'Data N/A': 'n/a'}, index=['df_rot_3mo']).T
-        wb_score = 'n/a'
-        empty_data = [df_rating_30d, df_rot_3mo, wb_score]
-        for na_value in empty_data:
-            self.analyst_data.append(na_value)
+        peer_df_rot_3mo = pd.DataFrame({'Strong Buy': 0, 'Buy': 0, 'Hold': 0, 'Sell': 0, 'Strong Sell': 0}, index=['Last 3mo']).T
 
+        for company in self.company_list:
+            peer_df_rot_3mo += company.analyst_data[1]
+
+        peer_df_rot_3mo = peer_df_rot_3mo / len(self.company_list)
+
+        self.analyst_data = [df_rating_30d, peer_df_rot_3mo]
+
+    def set_na_dfs(self):
         self.df_esg = pd.DataFrame({'Data N/A': 'n/a'}, index=['ESG Data']).T
 
     def set_all_data(self):
@@ -768,4 +1012,5 @@ class PeerGroup(Company):
         self.set_div_dfs()
         self.set_df_pub_sent()
         self.set_news_dfs()
+        self.set_analyst_data()
         self.set_na_dfs()

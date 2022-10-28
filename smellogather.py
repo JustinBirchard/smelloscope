@@ -253,7 +253,7 @@ for company in peers:
         twits_perc = tuple_twits[2] / tuple_twits[1]
         
     elif tuple_twits[1] == 0: # Case for if there are no ratings
-        twits_perc = 'Not Rated'
+        twits_perc = 'n/a'
         
     elif tuple_twits[2] == 0: # Case for if all ratings are bearish
         twits_perc = 0
@@ -303,6 +303,8 @@ for company in peers:
 ############## *** ESG RATINGS *** ##############
 
     df_esg = obb.stocks.fa.sust(stock)
+    if df_esg.empty:
+        df_esg = 'n/a'
     
 ##################################################################################    
 ############## *** Creating Company objects: *** #################################  
