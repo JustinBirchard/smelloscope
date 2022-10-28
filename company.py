@@ -10,12 +10,17 @@ import pandas as pd
 from dataclasses import dataclass, field
 from IPython.display import display
 
-scores_value = pd.DataFrame({'value': {'v1': None, 'v2': None, 'v3': None, 'v4': None, 'v5': None, 'v6': None, 'v7': None, 'v8': None, 'v9': None}})
-scores_mgmt = pd.DataFrame({'mgmt': {'m1': None, 'm2': None, 'm3': None, 'm4': None, 'm5': None, 'm6': None, 'm7': None, 'm8': None, 'm9': None}})
+scores_value = pd.DataFrame({'value': {'v1': None, 'v2': None, 'v3': None, 'v4': None, 'v5': None, 
+                                       'v6': None, 'v7': None, 'v8': None, 'v9': None, 'v10': None, 'v11': None}})
+
+scores_mgmt = pd.DataFrame({'mgmt': {'m1': None, 'm2': None, 'm3': None, 'm4': None, 
+                                     'm5': None, 'm6': None, 'm7': None, 'm8': None, 'm9': None, 'm10': None}})
+
 scores_ins = pd.DataFrame({'ins': {'i1': None, 'i2': None, 'i3': None, 'i4': None}})
 scores_div = pd.DataFrame({'div': {'d1': None, 'd2': None, 'd3': None, 'd4': None}})
 scores_pub_sent = pd.DataFrame({'pub_sent': {'p1': None, 'p2': None, 'p3': None, 'p4': None, 'p5': None, 'p6': None}})
 scores_analyst_data = pd.DataFrame({'analyst_data': {'a1': None, 'a2': None, 'a3': None, 'a4': None, 'a5': None}})
+scores_esg = pd.DataFrame({'esg': {'e1': None, 'e2': None, 'e3': None, 'e4': None, 'e5': None}})
 
 @dataclass
 class Company:
@@ -29,17 +34,18 @@ class Company:
     df_pub_sent: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(3,1), holds public sentiment data
     news_dfs: list = field(default_factory=list, repr=False) # holds 3 DataFrames containing Company, Sector, & Industry news
     analyst_data: list = field(default_factory=list, repr=False) # holds 2 DataFrames containing Analyst ratingsmetrics
-    df_esg: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(27,1), holds ESG data & metrics
+    df_esg: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(5,1), holds ESG data & metrics
     score_dict: dict = field(default_factory=lambda: {'value': deepcopy(scores_value), 
                                                       'mgmt': deepcopy(scores_mgmt),
                                                       'ins': deepcopy(scores_ins), 
                                                       'div': deepcopy(scores_div),
                                                       'pub_sent': deepcopy(scores_pub_sent),
-                                                      'analyst_data': deepcopy(scores_analyst_data)}) # a dictionary of dataframes
+                                                      'analyst_data': deepcopy(scores_analyst_data),
+                                                      'esg': deepcopy(scores_esg)}) # a dictionary of dataframes
 
     def set_scores_value(self, peer_group):
 
-        # variables for ease of reading
+        # setting VALUE variables for ease of reading
         pe_mrq = self.df_value.loc['pe_mrq'][0]
         peer_pe_mrq = peer_group.df_value.loc['pe_mrq'][0]
         pe_5yr_avg = self.df_value.loc['pe_5yr_avg'][0]
@@ -152,12 +158,9 @@ class Company:
             self.score_dict['value'].loc['v6'][0] = 0
 
         elif pfcf_mrq <= (peer_pfcf_mrq * .9):
-            self.score_dict['value'].loc['v6'][0] = 3
-
-        elif pfcf_mrq > (peer_pfcf_mrq * .9) and pfcf_mrq <= peer_pfcf_mrq:
             self.score_dict['value'].loc['v6'][0] = 2
 
-        elif pfcf_mrq >= peer_pfcf_mrq and pfcf_mrq < (peer_pfcf_mrq * 1.05):
+        elif pfcf_mrq > (peer_pfcf_mrq * .9) and pfcf_mrq <= (peer_pfcf_mrq * 1.05):
             self.score_dict['value'].loc['v6'][0] = 1
 
         elif pfcf_mrq > (peer_pfcf_mrq * 1.05):
@@ -167,16 +170,16 @@ class Company:
             print('v6 case slipped through')
 
         #**************************************************************** v7
-        if tca_div_tld == 'n/a':
+        if pfcf_mrq == 'n/a' or pfcf_5yr_avg == 'n/a':
             self.score_dict['value'].loc['v7'][0] = 0
 
-        elif tca_div_tld >= 1.1:
+        elif pfcf_mrq <= (pfcf_5yr_avg * 0.9):
             self.score_dict['value'].loc['v7'][0] = 2
 
-        elif tca_div_tld < 1.1 and tca_div_tld >= 0.9:
+        elif pfcf_mrq > (pfcf_5yr_avg * 0.9) and pfcf_mrq < (pfcf_5yr_avg * 1.05):
             self.score_dict['value'].loc['v7'][0] = 1
 
-        elif tca_div_tld < 0.9:
+        elif pfcf_mrq > (pfcf_5yr_avg * 1.05):
             self.score_dict['value'].loc['v7'][0] = 0
 
         else:
@@ -186,43 +189,77 @@ class Company:
         if tca_div_tld == 'n/a':
             self.score_dict['value'].loc['v8'][0] = 0
 
-        elif tca_div_tld >= (peer_tca_div_tld * 1.2):
-            self.score_dict['value'].loc['v8'][0] = 4
-
-        elif tca_div_tld < (peer_tca_div_tld * 1.2) and tca_div_tld > peer_tca_div_tld:
+        elif tca_div_tld >= 1.1:
             self.score_dict['value'].loc['v8'][0] = 2
 
-        elif tca_div_tld <= peer_tca_div_tld:
+        elif tca_div_tld < 1.1 and tca_div_tld >= 0.9:
+            self.score_dict['value'].loc['v8'][0] = 1
+
+        elif tca_div_tld < 0.9:
             self.score_dict['value'].loc['v8'][0] = 0
 
         else:
             print('v8 case slipped through')
 
         #**************************************************************** v9
-
-        if pts_mrq == 'n/a' or tca_div_tld == 'n/a':
+        if tca_div_tld == 'n/a':
             self.score_dict['value'].loc['v9'][0] = 0
 
-        elif pts_mrq < (peer_pts_mrq * 0.9) and tca_div_tld >= 1.1:
-            self.score_dict['value'].loc['v9'][0] = 4
-
-        elif pts_mrq <= (peer_pts_mrq * 0.9) and tca_div_tld < 1.1 and tca_div_tld >= 0.95:
-            self.score_dict['value'].loc['v9'][0] = 3
-
-        elif pts_mrq <= (peer_pts_mrq * 0.9) and tca_div_tld < 0.95 and tca_div_tld >= 0.8:
+        elif tca_div_tld >= (peer_tca_div_tld * 1.2):
             self.score_dict['value'].loc['v9'][0] = 2
 
-        elif pts_mrq > (peer_pts_mrq * 0.9) and pts_mrq <= (peer_pts_mrq * 1.1) and tca_div_tld >= 0.8:
+        elif tca_div_tld < (peer_tca_div_tld * 1.2) and tca_div_tld > peer_tca_div_tld:
             self.score_dict['value'].loc['v9'][0] = 1
 
-        elif pts_mrq > (peer_pts_mrq * 0.9) or tca_div_tld < 0.8:
+        elif tca_div_tld <= peer_tca_div_tld:
             self.score_dict['value'].loc['v9'][0] = 0
 
         else:
             print('v9 case slipped through')
 
+        #**************************************************************** v10
+
+        if pts_mrq == 'n/a' or tca_div_tld == 'n/a':
+            self.score_dict['value'].loc['v10'][0] = 0
+
+        elif pts_mrq < (peer_pts_mrq * 0.9) and tca_div_tld >= 1.1:
+            self.score_dict['value'].loc['v10'][0] = 4
+
+        elif pts_mrq <= (peer_pts_mrq * 0.9) and tca_div_tld < 1.1 and tca_div_tld >= 0.95:
+            self.score_dict['value'].loc['v10'][0] = 3
+
+        elif pts_mrq <= (peer_pts_mrq * 0.9) and tca_div_tld < 0.95 and tca_div_tld >= 0.8:
+            self.score_dict['value'].loc['v10'][0] = 2
+
+        elif pts_mrq > (peer_pts_mrq * 0.9) and pts_mrq <= (peer_pts_mrq * 1.1) and tca_div_tld >= 0.8:
+            self.score_dict['value'].loc['v10'][0] = 1
+
+        elif pts_mrq > (peer_pts_mrq * 0.9) or tca_div_tld < 0.8:
+            self.score_dict['value'].loc['v10'][0] = 0
+
+        else:
+            print('v10 case slipped through')
+
+        #**************************************************************** v11
+        if pts_mrq == 'n/a' or pts_5yr_avg == 'n/a':
+            self.score_dict['value'].loc['v11'][0] = 0
+
+        elif pts_mrq <= (pts_5yr_avg * 0.9):
+            self.score_dict['value'].loc['v11'][0] = 2
+
+        elif pts_mrq > (pts_5yr_avg * 0.9) and pts_mrq < (pts_5yr_avg * 1.05):
+            self.score_dict['value'].loc['v11'][0] = 1
+
+        elif pts_mrq > (pts_5yr_avg * 1.05):
+            self.score_dict['value'].loc['v11'][0] = 0
+
+        else:
+            print('v11 case slipped through')
+
+
     def set_scores_mgmt(self, peer_group):
 
+        # setting MANAGEMENT variables for ease of reading
         roa_mrq = self.df_mgmt.loc['roa_mrq'][0]
         peer_roa_mrq = peer_group.df_mgmt.loc['roa_mrq'][0]
         roa_5yr_avg = self.df_mgmt.loc['roa_5yr_avg'][0]
@@ -281,7 +318,7 @@ class Company:
         elif roe_mrq >= (peer_roe_mrq * 1.1):
             self.score_dict['mgmt'].loc['m3'][0] = 3
 
-        elif roe_mrq < (peer_roe_mrq * 1.1) and roa_mrq >= peer_roa_mrq:
+        elif roe_mrq < (peer_roe_mrq * 1.1) and roe_mrq >= peer_roe_mrq:
             self.score_dict['mgmt'].loc['m3'][0] = 1
 
         elif roe_mrq < peer_roe_mrq:
@@ -329,13 +366,13 @@ class Company:
         if gpr == 'n/a':
             self.score_dict['mgmt'].loc['m6'][0] = 0
 
-        elif gpr > (peer_gpr * 1.05):
-            self.score_dict['mgmt'].loc['m6'][0] = 3
+        elif gpr > (peer_gpr * 1.1):
+            self.score_dict['mgmt'].loc['m6'][0] = 4
 
-        elif gpr <= (peer_gpr * 1.05) and gpr >= (peer_gpr * 0.95):
-            self.score_dict['mgmt'].loc['m6'][0] = 1
+        elif gpr <= (peer_gpr * 1.1) and gpr >= peer_gpr:
+            self.score_dict['mgmt'].loc['m6'][0] = 2
 
-        elif gpr < (peer_gpr * 0.95):
+        elif gpr < peer_gpr:
             self.score_dict['mgmt'].loc['m6'][0] = 0
 
         else:
@@ -346,13 +383,13 @@ class Company:
         if pm == 'n/a':
             self.score_dict['mgmt'].loc['m7'][0] = 0
 
-        elif pm > (peer_pm * 1.05):
-            self.score_dict['mgmt'].loc['m7'][0] = 3
+        elif pm > (peer_pm * 1.1):
+            self.score_dict['mgmt'].loc['m7'][0] = 4
 
-        elif pm <= (peer_pm * 1.05) and pm >= (peer_pm * 0.95):
-            self.score_dict['mgmt'].loc['m7'][0] = 1
+        elif pm <= (peer_pm * 1.1) and pm >= peer_pm:
+            self.score_dict['mgmt'].loc['m7'][0] = 2
 
-        elif pm < (peer_pm * 0.95):
+        elif pm < peer_pm:
             self.score_dict['mgmt'].loc['m7'][0] = 0
 
         else:
@@ -363,16 +400,13 @@ class Company:
         if cr_mrq == 'n/a':
             self.score_dict['mgmt'].loc['m8'][0] = 0
 
-        elif cr_mrq >= 3:
-            self.score_dict['mgmt'].loc['m8'][0] = 3
-
-        elif cr_mrq < 3 and cr_mrq >= 1.5:
+        elif cr_mrq >= 1.1 and cr_mrq <= 2:
             self.score_dict['mgmt'].loc['m8'][0] = 2
 
-        elif cr_mrq < 1.5 and cr_mrq >= 1:
+        elif cr_mrq < 1.1 and cr_mrq >= 0.95 or cr_mrq > 2 and cr_mrq <= 3:
             self.score_dict['mgmt'].loc['m8'][0] = 1
 
-        elif cr_mrq < 1:
+        elif cr_mrq < 0.95 or cr_mrq > 3:
             self.score_dict['mgmt'].loc['m8'][0] = 0
 
         else:
@@ -383,20 +417,28 @@ class Company:
         if cr_mrq == 'n/a':
             self.score_dict['mgmt'].loc['m9'][0] = 0
 
-        elif cr_mrq >= (peer_cr_mrq * 1.3):
-            self.score_dict['mgmt'].loc['m9'][0] = 4
-
-        elif cr_mrq < (peer_cr_mrq * 1.3) and cr_mrq >= (peer_cr_mrq * 1.15):
-            self.score_dict['mgmt'].loc['m9'][0] = 2
-
-        elif cr_mrq < (peer_cr_mrq * 1.15) and cr_mrq >= (peer_cr_mrq * 0.95):
+        elif cr_mrq <= (peer_cr_mrq * 1.2) and cr_mrq >= (peer_cr_mrq * 0.9):
             self.score_dict['mgmt'].loc['m9'][0] = 1
 
-        elif cr_mrq < (peer_cr_mrq * 0.95):
+        elif cr_mrq > (peer_cr_mrq * 1.2) or cr_mrq < (peer_cr_mrq * 0.9):
             self.score_dict['mgmt'].loc['m9'][0] = 0
 
         else:
             print('m9 case slipped through')
+
+        #**************************************************************** m10
+
+        if cr_mrq == 'n/a':
+            self.score_dict['mgmt'].loc['m10'][0] = 0
+
+        elif cr_mrq <= (cr_5yr_avg * 1.2) and cr_mrq >= (cr_5yr_avg * 0.9):
+            self.score_dict['mgmt'].loc['m10'][0] = 1
+
+        elif cr_mrq > (cr_5yr_avg * 1.2) or cr_mrq < (cr_5yr_avg * 0.9):
+            self.score_dict['mgmt'].loc['m10'][0] = 0
+
+        else:
+            print('m10 case slipped through')
 
     def set_scores_ins(self, peer_group):
 
@@ -449,13 +491,13 @@ class Company:
             self.score_dict['ins'].loc['i3'][0] = 0
 
         elif it >= 0.03:
-            self.score_dict['ins'].loc['i3'][0] = 6
-
-        elif it < 0.03 and io >= .015:
             self.score_dict['ins'].loc['i3'][0] = 4
 
+        elif it < 0.03 and io >= .015:
+            self.score_dict['ins'].loc['i3'][0] = 3
+
         elif it < 0.015 and io >= 0:
-            self.score_dict['ins'].loc['i3'][0] = 2
+            self.score_dict['ins'].loc['i3'][0] = 1
 
         elif it < 0:
             self.score_dict['ins'].loc['i3'][0] = 0
@@ -468,13 +510,10 @@ class Company:
         if inst_t == 'n/a':
             self.score_dict['ins'].loc['i4'][0] = 0
 
-        elif inst_t >= 0.03:
-            self.score_dict['ins'].loc['i4'][0] = 3
-
-        elif inst_t < 0.03 and inst_t >= 0:
+        elif inst_t >= 0.02:
             self.score_dict['ins'].loc['i4'][0] = 1
 
-        elif inst_t < 0:
+        elif inst_t < 0.02:
             self.score_dict['ins'].loc['i4'][0] = 0
 
         else:
@@ -491,24 +530,25 @@ class Company:
             last_div = self.div_dfs[1].tail(1)['Dividends'][0]
 
         except ValueError:
-            last_div = 0
+            last_div = 'n/a'
 
         except AttributeError:
-            last_div = 0
+            last_div = 'n/a'
 
         try: # The average of the last 12 dividends
             last12_avg = self.div_dfs[1].tail(12).mean(axis=0)[0]
 
         except ValueError:
-            last12_avg = 0
+            last12_avg = 'n/a'
 
         except AttributeError:
-            last12_avg = 0
+            last12_avg = 'n/a'
 
         #**************************************************************** d1
 
+        # setting 'n/a' to 1 so as not to penalize companies who have no div
         if div == 'n/a' or peer_div == 'n/a':
-            self.score_dict['div'].loc['d1'][0] = 0
+            self.score_dict['div'].loc['d1'][0] = 1
 
         elif div >= (peer_div * 1.2):
             self.score_dict['div'].loc['d1'][0] = 2
@@ -526,8 +566,9 @@ class Company:
 
         #**************************************************************** d2
 
-        if last_div == 0 or last12_avg == 0:
-            self.score_dict['div'].loc['d2'][0] = 0
+        # setting 'n/a' to 1 so as not to penalize companies who have no div
+        if last_div == 'n/a' or last12_avg == 'n/a':
+            self.score_dict['div'].loc['d2'][0] = 1
 
         elif last_div >= (last12_avg * 1.2):
             self.score_dict['div'].loc['d2'][0] = 2
@@ -543,8 +584,9 @@ class Company:
 
         #**************************************************************** d3
 
+        # setting 'n/a' to 1 so as not to penalize companies who have no div
         if div_y == 'n/a' or peer_div_y == 'n/a':
-            self.score_dict['div'].loc['d3'][0] = 0
+            self.score_dict['div'].loc['d3'][0] = 1
 
         elif div_y >= (peer_div_y * 1.2):
             self.score_dict['div'].loc['d3'][0] = 2
@@ -561,18 +603,15 @@ class Company:
         #**************************************************************** d4
 
         if div_y == 'n/a':
-            self.score_dict['div'].loc['d4'][0] = 0
-
-        elif div_y >= .02:
-            self.score_dict['div'].loc['d4'][0] = 4
-
-        elif div_y < .02 and div_y >= .01:
-            self.score_dict['div'].loc['d4'][0] = 2
-
-        elif div_y < .01 and div_y >= .005:
             self.score_dict['div'].loc['d4'][0] = 1
 
-        elif div_y < .005:
+        elif div_y >= .02:
+            self.score_dict['div'].loc['d4'][0] = 2
+
+        elif div_y < .02 and div_y >= .0075:
+            self.score_dict['div'].loc['d4'][0] = 1
+
+        elif div_y < .0075:
             self.score_dict['div'].loc['d4'][0] = 0
 
         else:
@@ -656,12 +695,9 @@ class Company:
             self.score_dict['pub_sent'].loc['p5'][0] = 0
 
         elif news_sent >= 0.25:
-            self.score_dict['pub_sent'].loc['p5'][0] = 2
-
-        elif news_sent < 0.25 and news_sent >= 0.1:
             self.score_dict['pub_sent'].loc['p5'][0] = 1
 
-        elif news_sent < 0.1:
+        elif news_sent < 0.25:
             self.score_dict['pub_sent'].loc['p5'][0] = 0
 
         else:
@@ -672,13 +708,10 @@ class Company:
         if news_sent == 'n/a':
             self.score_dict['pub_sent'].loc['p6'][0] = 0
 
-        elif news_sent >= (peer_news_sent * 1.2):
-            self.score_dict['pub_sent'].loc['p6'][0] = 2
-
-        elif news_sent < (peer_news_sent * 1.2) and news_sent >= peer_news_sent:
+        elif news_sent >= (peer_news_sent * 1.1):
             self.score_dict['pub_sent'].loc['p6'][0] = 1
 
-        elif news_sent < peer_news_sent:
+        elif news_sent < (peer_news_sent * 1.1):
             self.score_dict['pub_sent'].loc['p6'][0] = 0
 
         else:
@@ -715,13 +748,10 @@ class Company:
         if buys_perc == 'n/a':
             self.score_dict['analyst_data'].loc['a1'][0] = 0
 
-        elif buys_perc >= (peer_buys_perc * 1.2):
-            self.score_dict['analyst_data'].loc['a1'][0] = 2
-
-        elif buys_perc < (peer_buys_perc * 1.2) and buys_perc > peer_buys_perc:
+        elif buys_perc >= (peer_buys_perc * 1.1):
             self.score_dict['analyst_data'].loc['a1'][0] = 1
 
-        elif buys_perc <= peer_buys_perc:
+        elif buys_perc < (peer_buys_perc * 1.1):
             self.score_dict['analyst_data'].loc['a1'][0] = 0
 
         else:
@@ -732,13 +762,10 @@ class Company:
         if sells_perc == 'n/a':
             self.score_dict['analyst_data'].loc['a2'][0] = 0
 
-        elif sells_perc <= (peer_sells_perc * .8):
-            self.score_dict['analyst_data'].loc['a2'][0] = 2
-
-        elif sells_perc > (peer_sells_perc * .8) and sells_perc <= peer_sells_perc:
+        elif sells_perc <= (peer_sells_perc * .9):
             self.score_dict['analyst_data'].loc['a2'][0] = 1
 
-        elif sells_perc > peer_sells_perc:
+        elif sells_perc > (peer_sells_perc * .9):
             self.score_dict['analyst_data'].loc['a2'][0] = 0
 
         else:
@@ -769,10 +796,7 @@ class Company:
         if strong_buys == 'n/a':
             self.score_dict['analyst_data'].loc['a4'][0] = 0
 
-        elif strong_buys >= 12:
-            self.score_dict['analyst_data'].loc['a4'][0] = 3
-
-        elif strong_buys < 12 and strong_buys >= 10:
+        elif strong_buys >= 10:
             self.score_dict['analyst_data'].loc['a4'][0] = 2
 
         elif strong_buys < 10 and strong_buys >= 8:
@@ -804,6 +828,111 @@ class Company:
 
         else:
             print('a5 case slipped through')
+
+
+    def set_scores_esg(self, peer_group):
+
+        enviro = self.df_esg.loc['enviro'][0]
+        peer_enviro = peer_group.df_esg.loc['enviro'][0]
+        govern = self.df_esg.loc['govern'][0]
+        peer_govern = peer_group.df_esg.loc['govern'][0]
+        social = self.df_esg.loc['social'][0]
+        peer_social = peer_group.df_esg.loc['social'][0]
+        total_esg = self.df_esg.loc['total_esg'][0]
+        peer_total_esg = peer_group.df_esg.loc['total_esg'][0]
+        esg_perf = self.df_esg.loc['esg_perf'][0]
+
+        #**************************************************************** e1
+
+        # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
+        if enviro == 'n/a':
+            self.score_dict['esg'].loc['e1'][0] = 1
+
+        elif enviro >= (peer_enviro * 1.3):
+            self.score_dict['esg'].loc['e1'][0] = 2
+
+        elif enviro < (peer_enviro * 1.3) and enviro >= (peer_enviro * 0.95):
+            self.score_dict['esg'].loc['e1'][0] = 1
+
+        elif enviro < (peer_enviro * 0.95):
+            self.score_dict['esg'].loc['e1'][0] = 0
+
+        else:
+            print('e1 case slipped through')
+
+        #**************************************************************** e2
+
+        # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
+        if govern == 'n/a':
+            self.score_dict['esg'].loc['e2'][0] = 1
+
+        elif govern >= (peer_govern * 1.3):
+            self.score_dict['esg'].loc['e2'][0] = 2
+
+        elif govern < (peer_govern * 1.3) and govern >= (peer_govern * 0.95):
+            self.score_dict['esg'].loc['e2'][0] = 1
+
+        elif govern < (peer_govern * 0.95):
+            self.score_dict['esg'].loc['e2'][0] = 0
+
+        else:
+            print('e2 case slipped through')
+
+        #**************************************************************** e3
+
+        # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
+        if social == 'n/a':
+            self.score_dict['esg'].loc['e3'][0] = 1
+
+        elif social >= (peer_social * 1.3):
+            self.score_dict['esg'].loc['e3'][0] = 2
+
+        elif social < (peer_social * 1.3) and social >= (peer_social * 0.95):
+            self.score_dict['esg'].loc['e3'][0] = 1
+
+        elif social < (peer_social * 0.95):
+            self.score_dict['esg'].loc['e3'][0] = 0
+
+        else:
+            print('e3 case slipped through')
+
+        #**************************************************************** e4
+
+        # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
+        if total_esg == 'n/a':
+            self.score_dict['esg'].loc['e4'][0] = 1
+
+        elif total_esg >= (peer_total_esg * 1.2):
+            self.score_dict['esg'].loc['e4'][0] = 2
+
+        elif total_esg < (peer_total_esg * 1.2) and total_esg >= peer_total_esg:
+            self.score_dict['esg'].loc['e4'][0] = 1
+
+        elif total_esg < peer_total_esg:
+            self.score_dict['esg'].loc['e4'][0] = 0
+
+        else:
+            print('e4 case slipped through')
+
+        #**************************************************************** e5
+
+        # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
+        if esg_perf == 'n/a':
+            self.score_dict['esg'].loc['e5'][0] = 1
+
+        elif esg_perf == 'OUT_PERF':
+            self.score_dict['esg'].loc['e5'][0] = 2
+
+        elif esg_perf == 'AVG_PERF':
+            self.score_dict['esg'].loc['e5'][0] = 1
+
+        elif esg_perf == 'UNDER_PERF':
+            self.score_dict['esg'].loc['e5'][0] = 0
+
+        else:
+            print('e5 case slipped through')
+
+
 
 
     def data_to_excel(self):
@@ -976,7 +1105,6 @@ class PeerGroup(Company):
             else:
                 self.df_pub_sent[metric] = 'n/a'
 
-#            self.df_pub_sent[metric] = sum / len(result_list)
             result_list.clear()
 
         self.df_pub_sent = self.df_pub_sent.T
@@ -1001,8 +1129,29 @@ class PeerGroup(Company):
 
         self.analyst_data = [df_rating_30d, peer_df_rot_3mo]
 
-    def set_na_dfs(self):
-        self.df_esg = pd.DataFrame({'Data N/A': 'n/a'}, index=['ESG Data']).T
+    def set_df_esg(self):
+        """Set self.df_pub_sent values"""
+
+        result_list = []
+
+        for metric in self.company_list[0].df_esg.index:
+            for company in self.company_list:
+                result_list.append(company.df_esg.loc[metric])
+            
+            result_list = [series for series in result_list if not isinstance(series[0], str)]
+            sum = 0
+            for value in result_list:
+                sum += value
+
+            if len(result_list) != 0:
+                self.df_esg[metric] = sum / len(result_list)
+
+            else:
+                self.df_esg[metric] = 'n/a'
+
+            result_list.clear()
+
+        self.df_esg = self.df_esg.T
 
     def set_all_data(self):
         self.set_df_basic()
@@ -1013,4 +1162,4 @@ class PeerGroup(Company):
         self.set_df_pub_sent()
         self.set_news_dfs()
         self.set_analyst_data()
-        self.set_na_dfs()
+        self.set_df_esg()

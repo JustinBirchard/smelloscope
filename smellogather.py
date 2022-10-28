@@ -1,6 +1,6 @@
 # smellogather.py
-#* Version 0.9
-#* Last update 10/24/22
+#* Version 0.9.1
+#* Last update 10/28/22
 
 """smellogather takes a user supplied list of stocks and pulls in a 
    variety of metrics and data via OpenBB. 
@@ -66,6 +66,16 @@ def try_it(string, calltype, avg=False, p2f_bool=False):
         except KeyError:
             return 'n/a'
 
+    elif calltype == 'esg':    
+        try:
+            return df_esg.loc[string][0]
+            
+        except KeyError:
+            return 'n/a'
+
+        except AttributeError:
+            return 'n/a'
+
 for company in peers:
     
     stock = company[0]
@@ -109,6 +119,10 @@ for company in peers:
     # Analyst recommendation totals by type over last 3 months
     df_rot = obb.stocks.dd.rot(stock).T[0]
 
+    # Getting ESG data
+    df_esg = obb.stocks.fa.sust(stock)
+    if df_esg.empty:
+        df_esg = 'n/a'
 ################################################################################################    
 # Creating variables for readability then grouping values into DataFrames & Sequences       
     
@@ -301,11 +315,13 @@ for company in peers:
     analyst_data = [df_rating_30d, df_rot_3mo, wb_score]
     
 ############## *** ESG RATINGS *** ##############
-
-    df_esg = obb.stocks.fa.sust(stock)
-    if df_esg.empty:
-        df_esg = 'n/a'
+    enviro = try_it('Environment score', 'esg')
+    govern = try_it('Governance score', 'esg')
+    social = try_it('Social score', 'esg')
+    total_esg = try_it('Total esg', 'esg')
+    esg_perf = try_it('Esg performance', 'esg')
     
+    df_esg = pd.DataFrame({'enviro': enviro, 'govern': govern, 'social': social, 'total_esg': total_esg, 'esg_perf': esg_perf}, index=['ESG']).T
 ##################################################################################    
 ############## *** Creating Company objects: *** #################################  
 ##################################################################################
