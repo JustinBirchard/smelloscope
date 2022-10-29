@@ -1,7 +1,7 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
-    Version 0.8.1
-    Last updated 10/28/22
+    Version 0.8.5
+    Last updated 10/29/22
 """
 
 from copy import deepcopy
@@ -44,9 +44,35 @@ class Company:
                                                       'div': deepcopy(scores_div),
                                                       'pub_sent': deepcopy(scores_pub_sent),
                                                       'analyst_data': deepcopy(scores_analyst_data),
-                                                      'esg': deepcopy(scores_esg)}) # dict of dataframes that hold score cards
+                                                      'esg': deepcopy(scores_esg),
+                                                      'grand_total': None}) # dict that hold score cards and grand_total
 
 #******* BEGIN SCORING METHODS ******************************************************
+
+    def set_cat_total(self, score_cat):
+        """Calculate the total for a scoring category.
+           Creates new index name and value for a "scores" dataframe.
+           The value will be the sum of all points in the category.
+
+        Args:
+            score_cat (str): Should be one of: 'value', 'mgmt', 'ins', 'div', 'pub_sent', 
+                                               'analyst_data', or 'esg'
+        """
+        index = self.score_dict[score_cat].index
+        i_len = len(index)
+        index = index.insert(i_len, f'{score_cat[0]}Total')
+        self.score_dict[score_cat].loc[f'{score_cat[0]}Total'] = self.score_dict[score_cat].sum()
+
+    def set_grand_total(self):
+        """Gets the total from each category and sums all totals. Grand total will be added as
+           value for self.score_dict['grand_total']
+        """
+        grand_total = 0
+        for key in self.score_dict.keys():
+            if key != 'grand_total':
+                grand_total += self.score_dict[key].loc[f'{key[0]}Total'][0]
+
+        self.score_dict['grand_total'] = grand_total
 
 #*******  VALUE SCORING METHOD ******* 
     def set_scores_value(self, peer_group):
@@ -55,7 +81,7 @@ class Company:
         Args:
             peer_group (PeerGroup): Custom object. Subclass of Company.
         """
-        # setting VALUE variables
+        # setting VALUE metrics variables
         pe_ttm = self.df_value.loc['pe_ttm'][0]
         peer_pe_ttm = peer_group.df_value.loc['pe_ttm'][0]
         pe_5yr_avg = self.df_value.loc['pe_5yr_avg'][0]
@@ -266,6 +292,9 @@ class Company:
         else:
             print('v11 case slipped through')
 
+        #?---------------------------------------------------------------------- vTotal
+        self.set_cat_total('value')
+
 #*******  MANAGEMENT SCORING METHOD ******* 
     def set_scores_mgmt(self, peer_group):
 
@@ -450,6 +479,9 @@ class Company:
         else:
             print('m10 case slipped through')
 
+        #?---------------------------------------------------------------------- mTotal
+        self.set_cat_total('mgmt')
+
 #*******  INSIDER & INSTITUION SCORING METHOD ******* 
     def set_scores_ins(self, peer_group):
 
@@ -529,6 +561,9 @@ class Company:
 
         else:
             print('i04 case slipped through')
+
+        #?---------------------------------------------------------------------- iTotal
+        self.set_cat_total('ins')
 
 #*******  DIVIDEND SCORING METHOD ******* 
     def set_scores_div(self, peer_group):
@@ -629,6 +664,9 @@ class Company:
         else:
             print('d04 case slipped through')
 
+        #?---------------------------------------------------------------------- dTotal
+        self.set_cat_total('div')
+
 #*******  PUBLIC SENTIMENT SCORING METHOD ***
     def set_scores_pub_sent(self, peer_group):
 
@@ -728,6 +766,9 @@ class Company:
 
         else:
             print('p06 case slipped through')
+
+        #?---------------------------------------------------------------------- pTotal
+        self.set_cat_total('pub_sent')
 
 #*******  ANALYST DATA SCORING METHOD *****
     def set_scores_analyst_data(self, peer_group):
@@ -837,6 +878,9 @@ class Company:
         else:
             print('a05 case slipped through')
 
+        #?---------------------------------------------------------------------- aTotal
+        self.set_cat_total('analyst_data')
+
 #*******  ESG SCORING METHOD ************** 
     def set_scores_esg(self, peer_group):
 
@@ -940,9 +984,10 @@ class Company:
         else:
             print('e05 case slipped through')
 
+        #?---------------------------------------------------------------------- eTotal
+        self.set_cat_total('esg')      
 
 #*******  END OF SCORING METHODS ****************************************************
-
 
     def data_to_excel(self):
         """Combine selected data into a new dataframe and output to excel file.
