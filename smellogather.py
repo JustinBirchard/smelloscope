@@ -5,15 +5,15 @@
 """smellogather takes a user supplied list of stocks and pulls in a 
    variety of metrics and data via OpenBB. 
 
-   Each stock will become a Company object and can be examined via 
-   methods in company.py. 
+   Each stock in the list will become a Company object which will be populated with data that
+   can be examined via methods in TheSmelloScope lab.
 
-   Additionally, a PeerGroup object will be created which contains average
-   values drawn from user submitted stock list.
+   Additionally, a PeerGroup object will be created. PeerGroup is a subclass of Company 
+   and its methods will be used to pull in and calculate average values for every Company metric.
 
    The main point of this script is:
    1) Create company_list variable which holds one or more instaniated Company objects
-   2) Create peer_group object which 
+   2) Create peer_group object which holds the average value of every metric
 
 Returns:
     list: company_list containing Company class objects
@@ -143,82 +143,84 @@ for company in peers:
 ############## *** VALUE METRICS DATAFRAME *** ##############
  
     yahoo_success = 'no'
+    tries = 0
  
     while yahoo_success == 'no':
+        tries += 1
         try:
-            tca = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Total current assets'][0]
+            tca_mrfy = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Total current assets'][0]
             yahoo_success = 'yes'
-
 
         except AttributeError:
             print('Yahoo error. Trying again.')
 
+    print('Number of tries : ' + str(tries))
 
     # Cases for if the company has no debt
     try:
         if math.isnan(obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]) is True:
-            tld = 0 
+            tld_mrfy = 0 
         
         elif obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0] is None:
-            tld = 0         
+            tld_mrfy = 0         
         
         else:  
-            tld = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]
+            tld_mrfy = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]
 
-        if tld == 0:
+        if tld_mrfy == 0:
             tca_div_tld = 'n/a'
         else:
-            tca_div_tld = tca / tld
+            tca_div_tld = tca_mrfy / tld_mrfy
 
     except KeyError:
-        tld = 0
+        tld_mrfy = 0
         tca_div_tld = 'n/a'
  
     ptb_mrq = try_it('P/B', 'data')
-    ptb_ttm = try_it('Ptb ratio', 'metrics')
+    ptb_mrfy = try_it('Ptb ratio', 'metrics')
     ptb_5yr_avg = try_it('Ptb ratio', 'metrics', avg=True)
 
     bvps_mrq = float(obb.stocks.fa.data(stock).loc['Book/sh'][0])
-    bvps_ttm = df_metrics.loc['Book value per share'][0]
+    bvps_mrfy = df_metrics.loc['Book value per share'][0]
     bvps_5yr_avg = df_metrics.loc['Book value per share']['5yr Avg']
     
-    pe_mrq = try_it('P/E', 'data')
-    pe_ttm = try_it('Pe ratio', 'metrics')
+    pe_ttm = try_it('P/E', 'data')
+    pe_mrfy = try_it('Pe ratio', 'metrics')
     pe_5yr_avg = try_it('Pe ratio', 'metrics', avg=True)
         
-    pfcf_mrq = try_it('P/FCF', 'data')
-    pfcf_ttm = try_it('Pfcf ratio', 'metrics')
+    pfcf_ttm = try_it('P/FCF', 'data')
+    pfcf_mrfy = try_it('Pfcf ratio', 'metrics')
     pfcf_5yr_avg = try_it('Pfcf ratio', 'metrics', avg=True)
 
-    pts_mrq = try_it('P/S', 'data')
-    pts_ttm = try_it('Price to sales ratio', 'metrics')
+    pts_ttm = try_it('P/S', 'data')
+    pts_mrfy = try_it('Price to sales ratio', 'metrics')
     pts_5yr_avg = try_it('Price to sales ratio', 'metrics', avg=True)
 
     # DataFrame will be added to company object   
-    df_value = pd.DataFrame({'tca': tca, 'tld': tld, 'tca_div_tld': tca_div_tld,
-                             'ptb_mrq': ptb_mrq, 'ptb_ttm': ptb_ttm, 'ptb_5yr_avg': ptb_5yr_avg, 
-                             'bvps_mrq': bvps_mrq, 'bvps_ttm': bvps_ttm, 'bvps_5yr_avg': bvps_5yr_avg, 
-                             'pe_mrq': pe_mrq, 'pe_ttm': pe_ttm, 'pe_5yr_avg': pe_5yr_avg, 
-                             'pfcf_mrq': pfcf_mrq, 'pfcf_ttm': pfcf_ttm, 'pfcf_5yr_avg': pfcf_5yr_avg, 
-                             'pts_mrq': pts_mrq, 'pts_ttm': pts_ttm, 'pts_5yr_avg': pts_5yr_avg}, 
+    df_value = pd.DataFrame({'tca_mrfy': tca_mrfy, 'tld_mrfy': tld_mrfy, 'tca_div_tld': tca_div_tld,
+                             'ptb_mrq': ptb_mrq, 'ptb_mrfy': ptb_mrfy, 'ptb_5yr_avg': ptb_5yr_avg, 
+                             'bvps_mrq': bvps_mrq, 'bvps_mrfy': bvps_mrfy, 'bvps_5yr_avg': bvps_5yr_avg, 
+                             'pe_ttm': pe_ttm, 'pe_mrfy': pe_mrfy, 'pe_5yr_avg': pe_5yr_avg, 
+                             'pfcf_ttm': pfcf_ttm, 'pfcf_mrfy': pfcf_mrfy, 'pfcf_5yr_avg': pfcf_5yr_avg, 
+                             'pts_ttm': pts_ttm, 'pts_mrfy': pts_mrfy, 'pts_5yr_avg': pts_5yr_avg}, 
                               index=['Value Metrics']).T
         
 ############## *** MANAGEMENT METRICS DATAFRAME *** ##############
 
-    roe_mrq = p2f(obb.stocks.fa.data(stock).loc['ROE'][0])
-    roe_ttm = df_metrics.loc['Roe'][0]
-    roe_5yr_avg = df_metrics.loc['Roe']['5yr Avg']
-    
-    roa_mrq = p2f(obb.stocks.fa.data(stock).loc['ROA'][0])
-    roa_ttm = df_metrics.loc['Return on tangible assets'][0]
+    roa_ttm = p2f(obb.stocks.fa.data(stock).loc['ROA'][0])
+    roa_mrfy = df_metrics.loc['Return on tangible assets'][0]
     roa_5yr_avg = df_metrics.loc['Return on tangible assets']['5yr Avg']
+
+    roe_ttm = p2f(obb.stocks.fa.data(stock).loc['ROE'][0])
+    roe_mrfy = df_metrics.loc['Roe'][0]
+    roe_5yr_avg = df_metrics.loc['Roe']['5yr Avg']
+
+    gpr_mrfy = float(obb.stocks.fa.fmp_income(stock).loc['Gross profit ratio'][0])
     
-    gpr = float(obb.stocks.fa.fmp_income(stock).loc['Gross profit ratio'][0])
-    
-    pm = try_it('Profit Margin', 'data', p2f_bool=True)
+    pm_ttm = try_it('Profit Margin', 'data', p2f_bool=True)
 
     cr_mrq = float(obb.stocks.fa.data(stock).loc['Current Ratio'][0])
-    cr_ttm = df_metrics.loc['Current ratio'][0]
+    cr_mrfy = df_metrics.loc['Current ratio'][0]
     cr_5yr_avg = df_metrics.loc['Current ratio']['5yr Avg']
     
     dte_mrq = try_it('LT Debt/Eq', 'data')
@@ -226,9 +228,9 @@ for company in peers:
     dte_5yr_avg = df_metrics.loc['Debt to equity']['5yr Avg']
     
     # DataFrame will be added to company object    
-    df_mgmt = pd.DataFrame({'roe_mrq': roe_mrq, 'roe_ttm': roe_ttm, 'roe_5yr_avg': roe_5yr_avg,
-                            'roa_mrq': roa_mrq, 'roa_ttm': roa_ttm, 'roa_5yr_avg': roa_5yr_avg,
-                            'gpr': gpr, 'pm': pm, 'cr_mrq': cr_mrq, 'cr_ttm': cr_ttm, 
+    df_mgmt = pd.DataFrame({'roe_ttm': roe_ttm, 'roe_mrfy': roe_mrfy, 'roe_5yr_avg': roe_5yr_avg,
+                            'roa_ttm': roa_ttm, 'roa_mrfy': roa_mrfy, 'roa_5yr_avg': roa_5yr_avg,
+                            'gpr_mrfy': gpr_mrfy, 'pm_ttm': pm_ttm, 'cr_mrq': cr_mrq, 'cr_mrfy': cr_mrfy, 
                             'cr_5yr_avg': cr_5yr_avg, 'dte_mrq': dte_mrq, 'dte_ttm': dte_ttm,
                             'dte_5yr_avg': dte_5yr_avg}, index=['Management Metrics']).T
         
@@ -247,11 +249,11 @@ for company in peers:
 ############## *** DIVIDEND DATAFRAMES *** ##############
 # Note that there are 2 Dividend DataFrames: df_div & df_div_his
 
-    div = try_it('Dividend', 'data')
-    div_y = try_it('Dividend yield', 'metrics')
+    div_ann = try_it('Dividend', 'data')
+    div_y_mrfy = try_it('Dividend yield', 'metrics')
     
     # DataFrame will be added to company object via div_dfs list
-    df_div = pd.DataFrame({'div': div, 'div_y': div_y}, index=['Dividend Metrics']).T
+    df_div = pd.DataFrame({'div_ann': div_ann, 'div_y_mrfy': div_y_mrfy}, index=['Dividend Metrics']).T
     
     # DataFrame (or string if no dividend) will be added to company object via div_dfs list
     df_div_his = obb.stocks.fa.divs(stock)    
@@ -321,10 +323,12 @@ for company in peers:
     total_esg = try_it('Total esg', 'esg')
     esg_perf = try_it('Esg performance', 'esg')
     
-    df_esg = pd.DataFrame({'enviro': enviro, 'govern': govern, 'social': social, 'total_esg': total_esg, 'esg_perf': esg_perf}, index=['ESG']).T
-##################################################################################    
+    df_esg = pd.DataFrame({'enviro': enviro, 'govern': govern, 'social': social,
+                           'total_esg': total_esg, 'esg_perf': esg_perf}, index=['ESG']).T
+
+#*#################################################################################    
 ############## *** Creating Company objects: *** #################################  
-##################################################################################
+#*#################################################################################
 
     if slot == 1:
         c1 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
@@ -374,4 +378,4 @@ peer_group = PeerGroup(company_list=company_list)
 peer_group.set_all_data()
 
 # Fixes improper calculation set by set_all_data() for peer_group tca_div_tld
-peer_group.df_value.loc['tca_div_tld'][0] = peer_group.df_value.loc['tca'][0] / peer_group.df_value.loc['tld'][0]
+peer_group.df_value.loc['tca_div_tld'][0] = peer_group.df_value.loc['tca_mrfy'][0] / peer_group.df_value.loc['tld_mrfy'][0]

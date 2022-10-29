@@ -1,7 +1,7 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
-    Version 0.7.1
-    Last updated 10/27/22
+    Version 0.8.1
+    Last updated 10/28/22
 """
 
 from copy import deepcopy
@@ -10,28 +10,31 @@ import pandas as pd
 from dataclasses import dataclass, field
 from IPython.display import display
 
-scores_value = pd.DataFrame({'value': {'v1': None, 'v2': None, 'v3': None, 'v4': None, 'v5': None, 
-                                       'v6': None, 'v7': None, 'v8': None, 'v9': None, 'v10': None, 'v11': None}})
+scores_value = pd.DataFrame({'value': {'v01': None, 'v02': None, 'v03': None, 'v04': None, 'v05': None, 
+                                       'v06': None, 'v07': None, 'v08': None, 'v09': None, 'v10': None, 'v11': None}})
 
-scores_mgmt = pd.DataFrame({'mgmt': {'m1': None, 'm2': None, 'm3': None, 'm4': None, 
-                                     'm5': None, 'm6': None, 'm7': None, 'm8': None, 'm9': None, 'm10': None}})
+scores_mgmt = pd.DataFrame({'mgmt': {'m01': None, 'm02': None, 'm03': None, 'm04': None, 'm05': None,
+                                     'm06': None, 'm07': None, 'm08': None, 'm09': None, 'm10': None}})
 
-scores_ins = pd.DataFrame({'ins': {'i1': None, 'i2': None, 'i3': None, 'i4': None}})
-scores_div = pd.DataFrame({'div': {'d1': None, 'd2': None, 'd3': None, 'd4': None}})
-scores_pub_sent = pd.DataFrame({'pub_sent': {'p1': None, 'p2': None, 'p3': None, 'p4': None, 'p5': None, 'p6': None}})
-scores_analyst_data = pd.DataFrame({'analyst_data': {'a1': None, 'a2': None, 'a3': None, 'a4': None, 'a5': None}})
-scores_esg = pd.DataFrame({'esg': {'e1': None, 'e2': None, 'e3': None, 'e4': None, 'e5': None}})
+scores_ins = pd.DataFrame({'ins': {'i01': None, 'i02': None, 'i03': None, 'i04': None}})
+scores_div = pd.DataFrame({'div': {'d01': None, 'd02': None, 'd03': None, 'd04': None}})
+scores_pub_sent = pd.DataFrame({'pub_sent': {'p01': None, 'p02': None, 'p03': None, 'p04': None, 'p05': None, 'p06': None}})
+scores_analyst_data = pd.DataFrame({'analyst_data': {'a01': None, 'a02': None, 'a03': None, 'a04': None, 'a05': None}})
+scores_esg = pd.DataFrame({'esg': {'e01': None, 'e02': None, 'e03': None, 'e04': None, 'e05': None}})
 
 @dataclass
 class Company:
-    """Class Company for creating Company objects."""
-
-    df_basic: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(6,1), holds basic company details
-    df_value: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(18,1), holds value metrics
-    df_mgmt: pd.DataFrame = field(default_factory=pd.DataFrame)# shape=(14,1), holds management metrics
-    df_ins: pd.DataFrame = field(default_factory=pd.DataFrame)# shape=(4,1), holds insider & instituion data
+    """Company objects hold a wide variety of metrics and data.
+       Each stock in the user submitted stock list will become a Company object.
+       Methods for the Company class are mainly used for scoring. Methods will be
+       expanded in future updates.
+    """
+    df_basic: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(6,1), basic company details
+    df_value: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(18,1), value metrics
+    df_mgmt: pd.DataFrame = field(default_factory=pd.DataFrame)# shape=(14,1), management metrics
+    df_ins: pd.DataFrame = field(default_factory=pd.DataFrame)# shape=(4,1), insider & instituion data
     div_dfs: list = field(default_factory=list, repr=False) # holds 2 DataFrames containing dividend data
-    df_pub_sent: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(3,1), holds public sentiment data
+    df_pub_sent: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(3,1), public sentiment data
     news_dfs: list = field(default_factory=list, repr=False) # holds 3 DataFrames containing Company, Sector, & Industry news
     analyst_data: list = field(default_factory=list, repr=False) # holds 2 DataFrames containing Analyst ratingsmetrics
     df_esg: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(5,1), holds ESG data & metrics
@@ -41,392 +44,399 @@ class Company:
                                                       'div': deepcopy(scores_div),
                                                       'pub_sent': deepcopy(scores_pub_sent),
                                                       'analyst_data': deepcopy(scores_analyst_data),
-                                                      'esg': deepcopy(scores_esg)}) # a dictionary of dataframes
+                                                      'esg': deepcopy(scores_esg)}) # dict of dataframes that hold score cards
 
+#******* BEGIN SCORING METHODS ******************************************************
+
+#*******  VALUE SCORING METHOD ******* 
     def set_scores_value(self, peer_group):
+        """Calculates scores for Value category
 
-        # setting VALUE variables for ease of reading
-        pe_mrq = self.df_value.loc['pe_mrq'][0]
-        peer_pe_mrq = peer_group.df_value.loc['pe_mrq'][0]
+        Args:
+            peer_group (PeerGroup): Custom object. Subclass of Company.
+        """
+        # setting VALUE variables
+        pe_ttm = self.df_value.loc['pe_ttm'][0]
+        peer_pe_ttm = peer_group.df_value.loc['pe_ttm'][0]
         pe_5yr_avg = self.df_value.loc['pe_5yr_avg'][0]
         ptb_mrq = self.df_value.loc['ptb_mrq'][0]
         peer_ptb_mrq = peer_group.df_value.loc['ptb_mrq'][0]
-        roe_mrq = self.df_mgmt.loc['roe_mrq'][0]
-        peer_roe_mrq = peer_group.df_mgmt.loc['roe_mrq'][0]
+        roe_ttm = self.df_mgmt.loc['roe_ttm'][0]
+        peer_roe_ttm = peer_group.df_mgmt.loc['roe_ttm'][0]
         bvps_mrq = self.df_value.loc['bvps_mrq'][0]
         bvps_5yr_avg = self.df_value.loc['bvps_5yr_avg'][0]
-        pfcf_mrq = self.df_value.loc['pfcf_mrq'][0]
+        pfcf_ttm = self.df_value.loc['pfcf_ttm'][0]
         pfcf_5yr_avg = self.df_value.loc['pfcf_5yr_avg'][0]
-        peer_pfcf_mrq = peer_group.df_value.loc['pfcf_mrq'][0]
+        peer_pfcf_ttm = peer_group.df_value.loc['pfcf_ttm'][0]
         tca_div_tld = self.df_value.loc['tca_div_tld'][0]
         peer_tca_div_tld = peer_group.df_value.loc['tca_div_tld'][0]
-        pts_mrq = self.df_value.loc['pts_mrq'][0]
+        pts_ttm = self.df_value.loc['pts_ttm'][0]
         pts_5yr_avg = self.df_value.loc['pts_5yr_avg'][0]
-        peer_pts_mrq = peer_group.df_value.loc['pts_mrq'][0]
+        peer_pts_ttm = peer_group.df_value.loc['pts_ttm'][0]
 
-        #**************************************************************** v1
-        if pe_mrq == 'n/a':
-            self.score_dict['value'].loc['v1'][0] = 0
+        #?---------------------------------------------------------------------- v01
+        if pe_ttm == 'n/a':
+            self.score_dict['value'].loc['v01'][0] = 0
 
-        elif pe_mrq <= (peer_pe_mrq * 0.9):
-            self.score_dict['value'].loc['v1'][0] = 3
+        elif pe_ttm <= (peer_pe_ttm * 0.9):
+            self.score_dict['value'].loc['v01'][0] = 3
 
-        elif pe_mrq <= (peer_pe_mrq * 1.05):
-            self.score_dict['value'].loc['v1'][0] = 1
+        elif pe_ttm <= (peer_pe_ttm * 1.05):
+            self.score_dict['value'].loc['v01'][0] = 1
 
-        elif pe_mrq > (peer_pe_mrq * 1.05):
-            self.score_dict['value'].loc['v1'][0] = 0
-
-        else:
-            print('v1 case slipped through')
-
-        #**************************************************************** v2
-        if pe_mrq == 'n/a':
-            self.score_dict['value'].loc['v2'][0] = 0
-
-        elif pe_mrq <= (pe_5yr_avg * 0.75):
-            self.score_dict['value'].loc['v2'][0] = 3
-
-        elif pe_mrq < (pe_5yr_avg * 0.9):
-            self.score_dict['value'].loc['v2'][0] = 2
-
-        elif pe_mrq <= pe_5yr_avg:
-            self.score_dict['value'].loc['v2'][0] = 1
-
-        elif pe_mrq > pe_5yr_avg:
-            self.score_dict['value'].loc['v2'][0] = 0
+        elif pe_ttm > (peer_pe_ttm * 1.05):
+            self.score_dict['value'].loc['v01'][0] = 0
 
         else:
-            print('v2 case slipped through')
+            print('v01 case slipped through')
 
-        #**************************************************************** v3
-        if ptb_mrq == 'n/a' or roe_mrq == 'n/a':
-            self.score_dict['value'].loc['v3'][0] = 0
+        #?---------------------------------------------------------------------- v02
+        if pe_ttm == 'n/a':
+            self.score_dict['value'].loc['v02'][0] = 0
 
-        elif ptb_mrq <= (peer_ptb_mrq * 0.9) and roe_mrq >= (peer_roe_mrq * 1.1):
-            self.score_dict['value'].loc['v3'][0] = 3
+        elif pe_ttm <= (pe_5yr_avg * 0.75):
+            self.score_dict['value'].loc['v02'][0] = 3
 
-        elif ptb_mrq <= (peer_ptb_mrq * 1.05) and roe_mrq >= (peer_roe_mrq * .95):
-            self.score_dict['value'].loc['v3'][0] = 2
+        elif pe_ttm < (pe_5yr_avg * 0.9):
+            self.score_dict['value'].loc['v02'][0] = 2
 
-        elif ptb_mrq >= (peer_ptb_mrq * 1.05) and roe_mrq <= (peer_roe_mrq * .95):
-            self.score_dict['value'].loc['v3'][0] = 1
+        elif pe_ttm <= pe_5yr_avg:
+            self.score_dict['value'].loc['v02'][0] = 1
 
-        elif ptb_mrq > (peer_ptb_mrq * 1.05) or roe_mrq < (peer_roe_mrq * .95):
-            self.score_dict['value'].loc['v3'][0] = 0
+        elif pe_ttm > pe_5yr_avg:
+            self.score_dict['value'].loc['v02'][0] = 0
 
         else:
-            print('v3 case slipped through')
+            print('v02 case slipped through')
 
-        #**************************************************************** v4
+        #?----------------------------------------------------------------------  v03
+        if ptb_mrq == 'n/a' or roe_ttm == 'n/a':
+            self.score_dict['value'].loc['v03'][0] = 0
+
+        elif ptb_mrq <= (peer_ptb_mrq * 0.9) and roe_ttm >= (peer_roe_ttm * 1.1):
+            self.score_dict['value'].loc['v03'][0] = 3
+
+        elif ptb_mrq <= (peer_ptb_mrq * 1.05) and roe_ttm >= (peer_roe_ttm * .95):
+            self.score_dict['value'].loc['v03'][0] = 2
+
+        elif ptb_mrq >= (peer_ptb_mrq * 1.05) and roe_ttm <= (peer_roe_ttm * .95):
+            self.score_dict['value'].loc['v03'][0] = 1
+
+        elif ptb_mrq > (peer_ptb_mrq * 1.05) or roe_ttm < (peer_roe_ttm * .95):
+            self.score_dict['value'].loc['v03'][0] = 0
+
+        else:
+            print('v03 case slipped through')
+
+        #?---------------------------------------------------------------------- v04
         if ptb_mrq == 'n/a':
-            self.score_dict['value'].loc['v4'][0] = 0
+            self.score_dict['value'].loc['v04'][0] = 0
 
         elif ptb_mrq < 2:
-            self.score_dict['value'].loc['v4'][0] = 2
+            self.score_dict['value'].loc['v04'][0] = 2
 
         elif ptb_mrq >= 2 and ptb_mrq <= 4:
-            self.score_dict['value'].loc['v4'][0] = 1
+            self.score_dict['value'].loc['v04'][0] = 1
 
         elif ptb_mrq > 4:
-            self.score_dict['value'].loc['v4'][0] = 0
+            self.score_dict['value'].loc['v04'][0] = 0
 
         else:
-            print('v4 case slipped through')
+            print('v04 case slipped through')
 
-        #**************************************************************** v5
+        #?---------------------------------------------------------------------- v05
         if ptb_mrq == 'n/a' or bvps_mrq == 'n/a':
-            self.score_dict['value'].loc['v5'][0] = 0
+            self.score_dict['value'].loc['v05'][0] = 0
 
         elif ptb_mrq <= (peer_ptb_mrq * 0.9) and bvps_mrq > (bvps_5yr_avg * 1.05):
-            self.score_dict['value'].loc['v5'][0] = 3
+            self.score_dict['value'].loc['v05'][0] = 3
 
         elif ptb_mrq <= (peer_ptb_mrq * 0.9) and bvps_mrq >= (bvps_5yr_avg * 0.95):
-            self.score_dict['value'].loc['v5'][0] = 2
+            self.score_dict['value'].loc['v05'][0] = 2
 
         elif ptb_mrq <= (peer_ptb_mrq * 1.05) and bvps_mrq >= (bvps_5yr_avg * 0.95):
-            self.score_dict['value'].loc['v5'][0] = 1
+            self.score_dict['value'].loc['v05'][0] = 1
 
         elif ptb_mrq > (peer_ptb_mrq * 1.05) or bvps_mrq < (bvps_5yr_avg * 0.95):
-            self.score_dict['value'].loc['v5'][0] = 0
+            self.score_dict['value'].loc['v05'][0] = 0
 
         else:
-            print('v5 case slipped through')
+            print('v05 case slipped through')
 
-        #**************************************************************** v6
-        if pfcf_mrq == 'n/a':
-            self.score_dict['value'].loc['v6'][0] = 0
+        #?---------------------------------------------------------------------- v06
+        if pfcf_ttm == 'n/a':
+            self.score_dict['value'].loc['v06'][0] = 0
 
-        elif pfcf_mrq <= (peer_pfcf_mrq * .9):
-            self.score_dict['value'].loc['v6'][0] = 2
+        elif pfcf_ttm <= (peer_pfcf_ttm * .9):
+            self.score_dict['value'].loc['v06'][0] = 2
 
-        elif pfcf_mrq > (peer_pfcf_mrq * .9) and pfcf_mrq <= (peer_pfcf_mrq * 1.05):
-            self.score_dict['value'].loc['v6'][0] = 1
+        elif pfcf_ttm > (peer_pfcf_ttm * .9) and pfcf_ttm <= (peer_pfcf_ttm * 1.05):
+            self.score_dict['value'].loc['v06'][0] = 1
 
-        elif pfcf_mrq > (peer_pfcf_mrq * 1.05):
-            self.score_dict['value'].loc['v6'][0] = 0
-
-        else:
-            print('v6 case slipped through')
-
-        #**************************************************************** v7
-        if pfcf_mrq == 'n/a' or pfcf_5yr_avg == 'n/a':
-            self.score_dict['value'].loc['v7'][0] = 0
-
-        elif pfcf_mrq <= (pfcf_5yr_avg * 0.9):
-            self.score_dict['value'].loc['v7'][0] = 2
-
-        elif pfcf_mrq > (pfcf_5yr_avg * 0.9) and pfcf_mrq < (pfcf_5yr_avg * 1.05):
-            self.score_dict['value'].loc['v7'][0] = 1
-
-        elif pfcf_mrq > (pfcf_5yr_avg * 1.05):
-            self.score_dict['value'].loc['v7'][0] = 0
+        elif pfcf_ttm > (peer_pfcf_ttm * 1.05):
+            self.score_dict['value'].loc['v06'][0] = 0
 
         else:
-            print('v7 case slipped through')
+            print('v06 case slipped through')
 
-        #**************************************************************** v8
+        #?---------------------------------------------------------------------- v07
+        if pfcf_ttm == 'n/a' or pfcf_5yr_avg == 'n/a':
+            self.score_dict['value'].loc['v07'][0] = 0
+
+        elif pfcf_ttm <= (pfcf_5yr_avg * 0.9):
+            self.score_dict['value'].loc['v07'][0] = 2
+
+        elif pfcf_ttm > (pfcf_5yr_avg * 0.9) and pfcf_ttm < (pfcf_5yr_avg * 1.05):
+            self.score_dict['value'].loc['v07'][0] = 1
+
+        elif pfcf_ttm > (pfcf_5yr_avg * 1.05):
+            self.score_dict['value'].loc['v07'][0] = 0
+
+        else:
+            print('v07 case slipped through')
+
+        #?---------------------------------------------------------------------- v08
         if tca_div_tld == 'n/a':
-            self.score_dict['value'].loc['v8'][0] = 0
+            self.score_dict['value'].loc['v08'][0] = 0
 
         elif tca_div_tld >= 1.1:
-            self.score_dict['value'].loc['v8'][0] = 2
+            self.score_dict['value'].loc['v08'][0] = 2
 
         elif tca_div_tld < 1.1 and tca_div_tld >= 0.9:
-            self.score_dict['value'].loc['v8'][0] = 1
+            self.score_dict['value'].loc['v08'][0] = 1
 
         elif tca_div_tld < 0.9:
-            self.score_dict['value'].loc['v8'][0] = 0
+            self.score_dict['value'].loc['v08'][0] = 0
 
         else:
-            print('v8 case slipped through')
+            print('v08 case slipped through')
 
-        #**************************************************************** v9
+        #?---------------------------------------------------------------------- v09
         if tca_div_tld == 'n/a':
-            self.score_dict['value'].loc['v9'][0] = 0
+            self.score_dict['value'].loc['v09'][0] = 0
 
         elif tca_div_tld >= (peer_tca_div_tld * 1.2):
-            self.score_dict['value'].loc['v9'][0] = 2
+            self.score_dict['value'].loc['v09'][0] = 2
 
         elif tca_div_tld < (peer_tca_div_tld * 1.2) and tca_div_tld > peer_tca_div_tld:
-            self.score_dict['value'].loc['v9'][0] = 1
+            self.score_dict['value'].loc['v09'][0] = 1
 
         elif tca_div_tld <= peer_tca_div_tld:
-            self.score_dict['value'].loc['v9'][0] = 0
+            self.score_dict['value'].loc['v09'][0] = 0
 
         else:
-            print('v9 case slipped through')
+            print('v09 case slipped through')
 
-        #**************************************************************** v10
+        #?---------------------------------------------------------------------- v10
 
-        if pts_mrq == 'n/a' or tca_div_tld == 'n/a':
+        if pts_ttm == 'n/a' or tca_div_tld == 'n/a':
             self.score_dict['value'].loc['v10'][0] = 0
 
-        elif pts_mrq < (peer_pts_mrq * 0.9) and tca_div_tld >= 1.1:
+        elif pts_ttm < (peer_pts_ttm * 0.9) and tca_div_tld >= 1.1:
             self.score_dict['value'].loc['v10'][0] = 4
 
-        elif pts_mrq <= (peer_pts_mrq * 0.9) and tca_div_tld < 1.1 and tca_div_tld >= 0.95:
+        elif pts_ttm <= (peer_pts_ttm * 0.9) and tca_div_tld < 1.1 and tca_div_tld >= 0.95:
             self.score_dict['value'].loc['v10'][0] = 3
 
-        elif pts_mrq <= (peer_pts_mrq * 0.9) and tca_div_tld < 0.95 and tca_div_tld >= 0.8:
+        elif pts_ttm <= (peer_pts_ttm * 0.9) and tca_div_tld < 0.95 and tca_div_tld >= 0.8:
             self.score_dict['value'].loc['v10'][0] = 2
 
-        elif pts_mrq > (peer_pts_mrq * 0.9) and pts_mrq <= (peer_pts_mrq * 1.1) and tca_div_tld >= 0.8:
+        elif pts_ttm > (peer_pts_ttm * 0.9) and pts_ttm <= (peer_pts_ttm * 1.1) and tca_div_tld >= 0.8:
             self.score_dict['value'].loc['v10'][0] = 1
 
-        elif pts_mrq > (peer_pts_mrq * 0.9) or tca_div_tld < 0.8:
+        elif pts_ttm > (peer_pts_ttm * 0.9) or tca_div_tld < 0.8:
             self.score_dict['value'].loc['v10'][0] = 0
 
         else:
             print('v10 case slipped through')
 
-        #**************************************************************** v11
-        if pts_mrq == 'n/a' or pts_5yr_avg == 'n/a':
+        #?---------------------------------------------------------------------- v11
+        if pts_ttm == 'n/a' or pts_5yr_avg == 'n/a':
             self.score_dict['value'].loc['v11'][0] = 0
 
-        elif pts_mrq <= (pts_5yr_avg * 0.9):
+        elif pts_ttm <= (pts_5yr_avg * 0.9):
             self.score_dict['value'].loc['v11'][0] = 2
 
-        elif pts_mrq > (pts_5yr_avg * 0.9) and pts_mrq < (pts_5yr_avg * 1.05):
+        elif pts_ttm > (pts_5yr_avg * 0.9) and pts_ttm < (pts_5yr_avg * 1.05):
             self.score_dict['value'].loc['v11'][0] = 1
 
-        elif pts_mrq > (pts_5yr_avg * 1.05):
+        elif pts_ttm > (pts_5yr_avg * 1.05):
             self.score_dict['value'].loc['v11'][0] = 0
 
         else:
             print('v11 case slipped through')
 
-
+#*******  MANAGEMENT SCORING METHOD ******* 
     def set_scores_mgmt(self, peer_group):
 
         # setting MANAGEMENT variables for ease of reading
-        roa_mrq = self.df_mgmt.loc['roa_mrq'][0]
-        peer_roa_mrq = peer_group.df_mgmt.loc['roa_mrq'][0]
+        roa_ttm = self.df_mgmt.loc['roa_ttm'][0]
+        peer_roa_ttm = peer_group.df_mgmt.loc['roa_ttm'][0]
         roa_5yr_avg = self.df_mgmt.loc['roa_5yr_avg'][0]
-        roe_mrq = self.df_mgmt.loc['roe_mrq'][0]
-        peer_roe_mrq = peer_group.df_mgmt.loc['roe_mrq'][0]
+        roe_ttm = self.df_mgmt.loc['roe_ttm'][0]
+        peer_roe_ttm = peer_group.df_mgmt.loc['roe_ttm'][0]
         roe_5yr_avg = self.df_mgmt.loc['roe_5yr_avg'][0]
         dte_mrq = self.df_mgmt.loc['dte_mrq'][0]
         dte_5yr_avg = self.df_mgmt.loc['dte_5yr_avg'][0]
-        gpr = self.df_mgmt.loc['gpr'][0]
-        peer_gpr = peer_group.df_mgmt.loc['gpr'][0]
-        pm = self.df_mgmt.loc['pm'][0]
-        peer_pm = peer_group.df_mgmt.loc['pm'][0]
+        gpr_mrfy = self.df_mgmt.loc['gpr_mrfy'][0]
+        peer_gpr_mrfy = peer_group.df_mgmt.loc['gpr_mrfy'][0]
+        pm_ttm = self.df_mgmt.loc['pm_ttm'][0]
+        peer_pm_ttm = peer_group.df_mgmt.loc['pm_ttm'][0]
         cr_mrq = self.df_mgmt.loc['cr_mrq'][0]
         cr_5yr_avg = self.df_mgmt.loc['cr_5yr_avg'][0]
         peer_cr_mrq = peer_group.df_mgmt.loc['cr_mrq'][0]
 
-        #**************************************************************** m1
+        #?---------------------------------------------------------------------- m01
 
-        if roa_mrq == 'n/a':
-            self.score_dict['mgmt'].loc['m1'][0] = 0
+        if roa_ttm == 'n/a':
+            self.score_dict['mgmt'].loc['m01'][0] = 0
 
-        elif roa_mrq >= (peer_roa_mrq * 1.1):
-            self.score_dict['mgmt'].loc['m1'][0] = 3
+        elif roa_ttm >= (peer_roa_ttm * 1.1):
+            self.score_dict['mgmt'].loc['m01'][0] = 3
 
-        elif roa_mrq < (peer_roa_mrq * 1.1) and roa_mrq >= peer_roa_mrq:
-            self.score_dict['mgmt'].loc['m1'][0] = 1
+        elif roa_ttm < (peer_roa_ttm * 1.1) and roa_ttm >= peer_roa_ttm:
+            self.score_dict['mgmt'].loc['m01'][0] = 1
 
-        elif roa_mrq < peer_roa_mrq:
-            self.score_dict['mgmt'].loc['m1'][0] = 0
-
-        else:
-            print('m1 case slipped through')
-
-        #**************************************************************** m2
-
-        if roa_mrq == 'n/a':
-            self.score_dict['mgmt'].loc['m2'][0] = 0
-
-        elif roa_mrq > (roa_5yr_avg * 1.1):
-            self.score_dict['mgmt'].loc['m2'][0] = 3
-
-        elif roa_mrq <= (roa_5yr_avg * 1.1) and roa_mrq >= (roa_5yr_avg * 0.95):
-            self.score_dict['mgmt'].loc['m2'][0] = 1
-
-        elif roa_mrq < (roa_5yr_avg * 0.95):
-            self.score_dict['mgmt'].loc['m2'][0] = 0
+        elif roa_ttm < peer_roa_ttm:
+            self.score_dict['mgmt'].loc['m01'][0] = 0
 
         else:
-            print('m2 case slipped through')
+            print('m01 case slipped through')
 
-        #**************************************************************** m3
+        #?---------------------------------------------------------------------- m02
 
-        if roe_mrq == 'n/a':
-            self.score_dict['mgmt'].loc['m3'][0] = 0
+        if roa_ttm == 'n/a':
+            self.score_dict['mgmt'].loc['m02'][0] = 0
 
-        elif roe_mrq >= (peer_roe_mrq * 1.1):
-            self.score_dict['mgmt'].loc['m3'][0] = 3
+        elif roa_ttm > (roa_5yr_avg * 1.1):
+            self.score_dict['mgmt'].loc['m02'][0] = 3
 
-        elif roe_mrq < (peer_roe_mrq * 1.1) and roe_mrq >= peer_roe_mrq:
-            self.score_dict['mgmt'].loc['m3'][0] = 1
+        elif roa_ttm <= (roa_5yr_avg * 1.1) and roa_ttm >= (roa_5yr_avg * 0.95):
+            self.score_dict['mgmt'].loc['m02'][0] = 1
 
-        elif roe_mrq < peer_roe_mrq:
-            self.score_dict['mgmt'].loc['m3'][0] = 0
-
-        else:
-            print('m3 case slipped through')
-
-        #**************************************************************** m4
-
-        if roe_mrq == 'n/a':
-            self.score_dict['mgmt'].loc['m4'][0] = 0
-
-        elif roe_mrq > (roe_5yr_avg * 1.1):
-            self.score_dict['mgmt'].loc['m4'][0] = 3
-
-        elif roe_mrq <= (roe_5yr_avg * 1.1) and roe_mrq >= (roe_5yr_avg * 0.95):
-            self.score_dict['mgmt'].loc['m4'][0] = 1
-
-        elif roe_mrq < (roe_5yr_avg * 0.95):
-            self.score_dict['mgmt'].loc['m4'][0] = 0
+        elif roa_ttm < (roa_5yr_avg * 0.95):
+            self.score_dict['mgmt'].loc['m02'][0] = 0
 
         else:
-            print('m4 case slipped through')
+            print('m02 case slipped through')
 
-        #**************************************************************** m5
+        #?---------------------------------------------------------------------- m03
+
+        if roe_ttm == 'n/a':
+            self.score_dict['mgmt'].loc['m03'][0] = 0
+
+        elif roe_ttm >= (peer_roe_ttm * 1.1):
+            self.score_dict['mgmt'].loc['m03'][0] = 3
+
+        elif roe_ttm < (peer_roe_ttm * 1.1) and roe_ttm >= peer_roe_ttm:
+            self.score_dict['mgmt'].loc['m03'][0] = 1
+
+        elif roe_ttm < peer_roe_ttm:
+            self.score_dict['mgmt'].loc['m03'][0] = 0
+
+        else:
+            print('m03 case slipped through')
+
+        #?---------------------------------------------------------------------- m04
+
+        if roe_ttm == 'n/a':
+            self.score_dict['mgmt'].loc['m04'][0] = 0
+
+        elif roe_ttm > (roe_5yr_avg * 1.1):
+            self.score_dict['mgmt'].loc['m04'][0] = 3
+
+        elif roe_ttm <= (roe_5yr_avg * 1.1) and roe_ttm >= (roe_5yr_avg * 0.95):
+            self.score_dict['mgmt'].loc['m04'][0] = 1
+
+        elif roe_ttm < (roe_5yr_avg * 0.95):
+            self.score_dict['mgmt'].loc['m04'][0] = 0
+
+        else:
+            print('m04 case slipped through')
+
+        #?---------------------------------------------------------------------- m05
 
         if dte_mrq == 'n/a':
-            self.score_dict['mgmt'].loc['m5'][0] = 0
+            self.score_dict['mgmt'].loc['m05'][0] = 0
 
         elif dte_mrq < (dte_5yr_avg * 0.85):
-            self.score_dict['mgmt'].loc['m5'][0] = 3
+            self.score_dict['mgmt'].loc['m05'][0] = 3
 
         elif dte_mrq >= (dte_5yr_avg * 0.85) and dte_mrq <= dte_5yr_avg:
-            self.score_dict['mgmt'].loc['m5'][0] = 1
+            self.score_dict['mgmt'].loc['m05'][0] = 1
 
         elif dte_mrq >= dte_5yr_avg:
-            self.score_dict['mgmt'].loc['m5'][0] = 0
+            self.score_dict['mgmt'].loc['m05'][0] = 0
 
         else:
-            print('m5 case slipped through')
+            print('m05 case slipped through')
 
-        #**************************************************************** m6
+        #?---------------------------------------------------------------------- m06
 
-        if gpr == 'n/a':
-            self.score_dict['mgmt'].loc['m6'][0] = 0
+        if gpr_mrfy == 'n/a':
+            self.score_dict['mgmt'].loc['m06'][0] = 0
 
-        elif gpr > (peer_gpr * 1.1):
-            self.score_dict['mgmt'].loc['m6'][0] = 4
+        elif gpr_mrfy > (peer_gpr_mrfy * 1.1):
+            self.score_dict['mgmt'].loc['m06'][0] = 4
 
-        elif gpr <= (peer_gpr * 1.1) and gpr >= peer_gpr:
-            self.score_dict['mgmt'].loc['m6'][0] = 2
+        elif gpr_mrfy <= (peer_gpr_mrfy * 1.1) and gpr_mrfy >= peer_gpr_mrfy:
+            self.score_dict['mgmt'].loc['m06'][0] = 2
 
-        elif gpr < peer_gpr:
-            self.score_dict['mgmt'].loc['m6'][0] = 0
-
-        else:
-            print('m6 case slipped through')
-
-        #**************************************************************** m7
-
-        if pm == 'n/a':
-            self.score_dict['mgmt'].loc['m7'][0] = 0
-
-        elif pm > (peer_pm * 1.1):
-            self.score_dict['mgmt'].loc['m7'][0] = 4
-
-        elif pm <= (peer_pm * 1.1) and pm >= peer_pm:
-            self.score_dict['mgmt'].loc['m7'][0] = 2
-
-        elif pm < peer_pm:
-            self.score_dict['mgmt'].loc['m7'][0] = 0
+        elif gpr_mrfy < peer_gpr_mrfy:
+            self.score_dict['mgmt'].loc['m06'][0] = 0
 
         else:
-            print('m7 case slipped through')
+            print('m06 case slipped through')
 
-        #**************************************************************** m8
+        #?---------------------------------------------------------------------- m07
+
+        if pm_ttm == 'n/a':
+            self.score_dict['mgmt'].loc['m07'][0] = 0
+
+        elif pm_ttm > (peer_pm_ttm * 1.1):
+            self.score_dict['mgmt'].loc['m07'][0] = 4
+
+        elif pm_ttm <= (peer_pm_ttm * 1.1) and pm_ttm >= peer_pm_ttm:
+            self.score_dict['mgmt'].loc['m07'][0] = 2
+
+        elif pm_ttm < peer_pm_ttm:
+            self.score_dict['mgmt'].loc['m07'][0] = 0
+
+        else:
+            print('m07 case slipped through')
+
+        #?---------------------------------------------------------------------- m08
 
         if cr_mrq == 'n/a':
-            self.score_dict['mgmt'].loc['m8'][0] = 0
+            self.score_dict['mgmt'].loc['m08'][0] = 0
 
         elif cr_mrq >= 1.1 and cr_mrq <= 2:
-            self.score_dict['mgmt'].loc['m8'][0] = 2
+            self.score_dict['mgmt'].loc['m08'][0] = 2
 
         elif cr_mrq < 1.1 and cr_mrq >= 0.95 or cr_mrq > 2 and cr_mrq <= 3:
-            self.score_dict['mgmt'].loc['m8'][0] = 1
+            self.score_dict['mgmt'].loc['m08'][0] = 1
 
         elif cr_mrq < 0.95 or cr_mrq > 3:
-            self.score_dict['mgmt'].loc['m8'][0] = 0
+            self.score_dict['mgmt'].loc['m08'][0] = 0
 
         else:
-            print('m8 case slipped through')
+            print('m08 case slipped through')
 
-        #**************************************************************** m9
+        #?---------------------------------------------------------------------- m09
 
         if cr_mrq == 'n/a':
-            self.score_dict['mgmt'].loc['m9'][0] = 0
+            self.score_dict['mgmt'].loc['m09'][0] = 0
 
         elif cr_mrq <= (peer_cr_mrq * 1.2) and cr_mrq >= (peer_cr_mrq * 0.9):
-            self.score_dict['mgmt'].loc['m9'][0] = 1
+            self.score_dict['mgmt'].loc['m09'][0] = 1
 
         elif cr_mrq > (peer_cr_mrq * 1.2) or cr_mrq < (peer_cr_mrq * 0.9):
-            self.score_dict['mgmt'].loc['m9'][0] = 0
+            self.score_dict['mgmt'].loc['m09'][0] = 0
 
         else:
-            print('m9 case slipped through')
+            print('m09 case slipped through')
 
-        #**************************************************************** m10
+        #?---------------------------------------------------------------------- m10
 
         if cr_mrq == 'n/a':
             self.score_dict['mgmt'].loc['m10'][0] = 0
@@ -440,6 +450,7 @@ class Company:
         else:
             print('m10 case slipped through')
 
+#*******  INSIDER & INSTITUION SCORING METHOD ******* 
     def set_scores_ins(self, peer_group):
 
         io = self.df_ins.loc['io'][0]
@@ -448,83 +459,84 @@ class Company:
         peer_it = peer_group.df_ins.loc['it'][0]
         inst_t = self.df_ins.loc['inst_t'][0]
 
-        #**************************************************************** i1
+        #?---------------------------------------------------------------------- i01
 
         if io == 'n/a':
-            self.score_dict['ins'].loc['i1'][0] = 0
+            self.score_dict['ins'].loc['i01'][0] = 0
 
         elif io >= (peer_io * 1.5):
-            self.score_dict['ins'].loc['i1'][0] = 2
+            self.score_dict['ins'].loc['i01'][0] = 2
 
         elif io < (peer_io * 1.5) and io >= (peer_io * 1.05):
-            self.score_dict['ins'].loc['i1'][0] = 1
+            self.score_dict['ins'].loc['i01'][0] = 1
 
         elif io < (peer_io * 1.05):
-            self.score_dict['ins'].loc['i1'][0] = 0
+            self.score_dict['ins'].loc['i01'][0] = 0
 
         else:
-            print('i1 case slipped through')
+            print('i01 case slipped through')
 
-        #**************************************************************** i2
+        #?---------------------------------------------------------------------- i02
 
         if io == 'n/a':
-            self.score_dict['ins'].loc['i2'][0] = 0
+            self.score_dict['ins'].loc['i02'][0] = 0
 
         elif io >= 0.1:
-            self.score_dict['ins'].loc['i2'][0] = 3
+            self.score_dict['ins'].loc['i02'][0] = 3
 
         elif io < 0.1 and io >= .05:
-            self.score_dict['ins'].loc['i2'][0] = 2
+            self.score_dict['ins'].loc['i02'][0] = 2
 
         elif io < 0.05 and io >= 0.01:
-            self.score_dict['ins'].loc['i2'][0] = 1
+            self.score_dict['ins'].loc['i02'][0] = 1
 
         elif io < 0.01:
-            self.score_dict['ins'].loc['i2'][0] = 0
+            self.score_dict['ins'].loc['i02'][0] = 0
 
         else:
-            print('i2 case slipped through')
+            print('i02 case slipped through')
 
-        #**************************************************************** i3
+        #?---------------------------------------------------------------------- i03
 
         if it == 'n/a':
-            self.score_dict['ins'].loc['i3'][0] = 0
+            self.score_dict['ins'].loc['i03'][0] = 0
 
         elif it >= 0.03:
-            self.score_dict['ins'].loc['i3'][0] = 4
+            self.score_dict['ins'].loc['i03'][0] = 4
 
         elif it < 0.03 and io >= .015:
-            self.score_dict['ins'].loc['i3'][0] = 3
+            self.score_dict['ins'].loc['i03'][0] = 3
 
         elif it < 0.015 and io >= 0:
-            self.score_dict['ins'].loc['i3'][0] = 1
+            self.score_dict['ins'].loc['i03'][0] = 1
 
         elif it < 0:
-            self.score_dict['ins'].loc['i3'][0] = 0
+            self.score_dict['ins'].loc['i03'][0] = 0
 
         else:
-            print('i3 case slipped through')
+            print('i03 case slipped through')
 
-        #**************************************************************** i4
+        #?---------------------------------------------------------------------- i04
 
         if inst_t == 'n/a':
-            self.score_dict['ins'].loc['i4'][0] = 0
+            self.score_dict['ins'].loc['i04'][0] = 0
 
         elif inst_t >= 0.02:
-            self.score_dict['ins'].loc['i4'][0] = 1
+            self.score_dict['ins'].loc['i04'][0] = 1
 
         elif inst_t < 0.02:
-            self.score_dict['ins'].loc['i4'][0] = 0
+            self.score_dict['ins'].loc['i04'][0] = 0
 
         else:
-            print('i4 case slipped through')
+            print('i04 case slipped through')
 
+#*******  DIVIDEND SCORING METHOD ******* 
     def set_scores_div(self, peer_group):
 
-        div = self.div_dfs[0].loc['div'][0]
-        peer_div = peer_group.div_dfs[0].loc['div'][0]
-        div_y = self.div_dfs[0].loc['div_y'][0]
-        peer_div_y = peer_group.div_dfs[0].loc['div_y'][0]
+        div_ann = self.div_dfs[0].loc['div_ann'][0]
+        peer_div_ann = peer_group.div_dfs[0].loc['div_ann'][0]
+        div_y_mrfy = self.div_dfs[0].loc['div_y_mrfy'][0]
+        peer_div_y_mrfy = peer_group.div_dfs[0].loc['div_y_mrfy'][0]
 
         try: # The amount of the most recent dividend
             last_div = self.div_dfs[1].tail(1)['Dividends'][0]
@@ -544,80 +556,80 @@ class Company:
         except AttributeError:
             last12_avg = 'n/a'
 
-        #**************************************************************** d1
+        #?---------------------------------------------------------------------- d01
 
         # setting 'n/a' to 1 so as not to penalize companies who have no div
-        if div == 'n/a' or peer_div == 'n/a':
-            self.score_dict['div'].loc['d1'][0] = 1
+        if div_ann == 'n/a' or peer_div_ann == 'n/a':
+            self.score_dict['div'].loc['d01'][0] = 1
 
-        elif div >= (peer_div * 1.2):
-            self.score_dict['div'].loc['d1'][0] = 2
+        elif div_ann >= (peer_div_ann * 1.2):
+            self.score_dict['div'].loc['d01'][0] = 2
 
-        elif div < (peer_div * 1.2) and div >= peer_div:
-            self.score_dict['div'].loc['d1'][0] = 1
+        elif div_ann < (peer_div_ann * 1.2) and div_ann >= peer_div_ann:
+            self.score_dict['div'].loc['d01'][0] = 1
 
-        elif div < peer_div:
-            self.score_dict['div'].loc['d1'][0] = 0
+        elif div_ann < peer_div_ann:
+            self.score_dict['div'].loc['d01'][0] = 0
 
         else:
-            print('d1 case slipped through')
+            print('d01 case slipped through')
 
 
 
-        #**************************************************************** d2
+        #?---------------------------------------------------------------------- d02
 
         # setting 'n/a' to 1 so as not to penalize companies who have no div
         if last_div == 'n/a' or last12_avg == 'n/a':
-            self.score_dict['div'].loc['d2'][0] = 1
+            self.score_dict['div'].loc['d02'][0] = 1
 
         elif last_div >= (last12_avg * 1.2):
-            self.score_dict['div'].loc['d2'][0] = 2
+            self.score_dict['div'].loc['d02'][0] = 2
 
         elif last_div < (last12_avg * 1.2) and last_div >= last12_avg:
-            self.score_dict['div'].loc['d2'][0] = 1
+            self.score_dict['div'].loc['d02'][0] = 1
 
         elif last_div < last12_avg:
-            self.score_dict['div'].loc['d2'][0] = 0
+            self.score_dict['div'].loc['d02'][0] = 0
 
         else:
-            print('d2 case slipped through')
+            print('d02 case slipped through')
 
-        #**************************************************************** d3
+        #?---------------------------------------------------------------------- d03
 
         # setting 'n/a' to 1 so as not to penalize companies who have no div
-        if div_y == 'n/a' or peer_div_y == 'n/a':
-            self.score_dict['div'].loc['d3'][0] = 1
+        if div_y_mrfy == 'n/a' or peer_div_y_mrfy == 'n/a':
+            self.score_dict['div'].loc['d03'][0] = 1
 
-        elif div_y >= (peer_div_y * 1.2):
-            self.score_dict['div'].loc['d3'][0] = 2
+        elif div_y_mrfy >= (peer_div_y_mrfy * 1.2):
+            self.score_dict['div'].loc['d03'][0] = 2
 
-        elif div_y < (peer_div_y * 1.2) and div >= peer_div:
-            self.score_dict['div'].loc['d3'][0] = 1
+        elif div_y_mrfy < (peer_div_y_mrfy * 1.2) and div_y_mrfy >= peer_div_y_mrfy:
+            self.score_dict['div'].loc['d03'][0] = 1
 
-        elif div_y < peer_div_y:
-            self.score_dict['div'].loc['d3'][0] = 0
-
-        else:
-            print('d3 case slipped through')
-
-        #**************************************************************** d4
-
-        if div_y == 'n/a':
-            self.score_dict['div'].loc['d4'][0] = 1
-
-        elif div_y >= .02:
-            self.score_dict['div'].loc['d4'][0] = 2
-
-        elif div_y < .02 and div_y >= .0075:
-            self.score_dict['div'].loc['d4'][0] = 1
-
-        elif div_y < .0075:
-            self.score_dict['div'].loc['d4'][0] = 0
+        elif div_y_mrfy < peer_div_y_mrfy:
+            self.score_dict['div'].loc['d03'][0] = 0
 
         else:
-            print('d4 case slipped through')
+            print('d03 case slipped through')
 
+        #?---------------------------------------------------------------------- d04
 
+        if div_y_mrfy == 'n/a':
+            self.score_dict['div'].loc['d04'][0] = 1
+
+        elif div_y_mrfy >= .02:
+            self.score_dict['div'].loc['d04'][0] = 2
+
+        elif div_y_mrfy < .02 and div_y_mrfy >= .0075:
+            self.score_dict['div'].loc['d04'][0] = 1
+
+        elif div_y_mrfy < .0075:
+            self.score_dict['div'].loc['d04'][0] = 0
+
+        else:
+            print('d04 case slipped through')
+
+#*******  PUBLIC SENTIMENT SCORING METHOD ***
     def set_scores_pub_sent(self, peer_group):
 
         twits_perc = self.df_pub_sent.loc['twits_perc'][0]
@@ -627,98 +639,97 @@ class Company:
         news_sent = self.df_pub_sent.loc['news_sent'][0]
         peer_news_sent = peer_group.df_pub_sent.loc['news_sent'][0]
 
-        #**************************************************************** p1
+        #?---------------------------------------------------------------------- p01
 
         if twits_perc == 'n/a':
-            self.score_dict['pub_sent'].loc['p1'][0] = 0
+            self.score_dict['pub_sent'].loc['p01'][0] = 0
 
         elif twits_perc >= .8:
-            self.score_dict['pub_sent'].loc['p1'][0] = 1
+            self.score_dict['pub_sent'].loc['p01'][0] = 1
 
         elif twits_perc < .8:
-            self.score_dict['pub_sent'].loc['p1'][0] = 0
+            self.score_dict['pub_sent'].loc['p01'][0] = 0
 
         else:
-            print('p1 case slipped through')
+            print('p01 case slipped through')
 
-        #**************************************************************** p2
+        #?---------------------------------------------------------------------- p02
 
         if twits_perc == 'n/a':
-            self.score_dict['pub_sent'].loc['p2'][0] = 0
+            self.score_dict['pub_sent'].loc['p02'][0] = 0
 
         elif twits_perc >= (peer_twits_perc * 1.1):
-            self.score_dict['pub_sent'].loc['p2'][0] = 1
+            self.score_dict['pub_sent'].loc['p02'][0] = 1
 
         elif twits_perc < (peer_twits_perc * 1.1):
-            self.score_dict['pub_sent'].loc['p2'][0] = 0
+            self.score_dict['pub_sent'].loc['p02'][0] = 0
 
         else:
-            print('p2 case slipped through')
+            print('p02 case slipped through')
 
-        #**************************************************************** p3
+        #?---------------------------------------------------------------------- p03
 
         if shrt_int == 'n/a':
-            self.score_dict['pub_sent'].loc['p3'][0] = 0
+            self.score_dict['pub_sent'].loc['p03'][0] = 0
 
         elif shrt_int <= 0.01:
-            self.score_dict['pub_sent'].loc['p3'][0] = 2
+            self.score_dict['pub_sent'].loc['p03'][0] = 2
 
         elif shrt_int > 0.01 and shrt_int <= 0.02:
-            self.score_dict['pub_sent'].loc['p3'][0] = 1
+            self.score_dict['pub_sent'].loc['p03'][0] = 1
 
         elif shrt_int > 0.02:
-            self.score_dict['pub_sent'].loc['p3'][0] = 0
+            self.score_dict['pub_sent'].loc['p03'][0] = 0
 
         else:
-            print('p3 case slipped through')
+            print('p03 case slipped through')
 
-        #**************************************************************** p4
+        #?---------------------------------------------------------------------- p04
 
         if shrt_int == 'n/a':
-            self.score_dict['pub_sent'].loc['p4'][0] = 0
+            self.score_dict['pub_sent'].loc['p04'][0] = 0
 
         elif shrt_int <= (peer_shrt_int * 0.9):
-            self.score_dict['pub_sent'].loc['p4'][0] = 2
+            self.score_dict['pub_sent'].loc['p04'][0] = 2
 
         elif shrt_int > (peer_shrt_int * 0.9) and shrt_int <= (peer_shrt_int * 1.05):
-            self.score_dict['pub_sent'].loc['p4'][0] = 1
+            self.score_dict['pub_sent'].loc['p04'][0] = 1
 
         elif shrt_int > (peer_shrt_int * 1.05):
-            self.score_dict['pub_sent'].loc['p4'][0] = 0
+            self.score_dict['pub_sent'].loc['p04'][0] = 0
 
         else:
-            print('p4 case slipped through')
+            print('p04 case slipped through')
 
-        #**************************************************************** p5
+        #?---------------------------------------------------------------------- p05
 
         if news_sent == 'n/a':
-            self.score_dict['pub_sent'].loc['p5'][0] = 0
+            self.score_dict['pub_sent'].loc['p05'][0] = 0
 
         elif news_sent >= 0.25:
-            self.score_dict['pub_sent'].loc['p5'][0] = 1
+            self.score_dict['pub_sent'].loc['p05'][0] = 1
 
         elif news_sent < 0.25:
-            self.score_dict['pub_sent'].loc['p5'][0] = 0
+            self.score_dict['pub_sent'].loc['p05'][0] = 0
 
         else:
-            print('p5 case slipped through')
+            print('p05 case slipped through')
 
-        #**************************************************************** p6
+        #?---------------------------------------------------------------------- p06
 
         if news_sent == 'n/a':
-            self.score_dict['pub_sent'].loc['p6'][0] = 0
+            self.score_dict['pub_sent'].loc['p06'][0] = 0
 
-        elif news_sent >= (peer_news_sent * 1.1):
-            self.score_dict['pub_sent'].loc['p6'][0] = 1
+        elif news_sent >= (peer_news_sent * 1.05):
+            self.score_dict['pub_sent'].loc['p06'][0] = 1
 
-        elif news_sent < (peer_news_sent * 1.1):
-            self.score_dict['pub_sent'].loc['p6'][0] = 0
+        elif news_sent < (peer_news_sent * 1.05):
+            self.score_dict['pub_sent'].loc['p06'][0] = 0
 
         else:
-            print('p6 case slipped through')
+            print('p06 case slipped through')
 
-
-
+#*******  ANALYST DATA SCORING METHOD *****
     def set_scores_analyst_data(self, peer_group):
 
         wghtd_buys_sum = self.analyst_data[1].loc['Buy'][0] + (self.analyst_data[1].loc['Strong Buy'][0] * 1.25)
@@ -743,93 +754,90 @@ class Company:
 
         wb_score = self.analyst_data[2]
 
-        #**************************************************************** a1
+        #?---------------------------------------------------------------------- a01
 
         if buys_perc == 'n/a':
-            self.score_dict['analyst_data'].loc['a1'][0] = 0
+            self.score_dict['analyst_data'].loc['a01'][0] = 0
 
-        elif buys_perc >= (peer_buys_perc * 1.1):
-            self.score_dict['analyst_data'].loc['a1'][0] = 1
+        elif buys_perc >= (peer_buys_perc * 1.05):
+            self.score_dict['analyst_data'].loc['a01'][0] = 1
 
-        elif buys_perc < (peer_buys_perc * 1.1):
-            self.score_dict['analyst_data'].loc['a1'][0] = 0
+        elif buys_perc < (peer_buys_perc * 1.05):
+            self.score_dict['analyst_data'].loc['a01'][0] = 0
 
         else:
-            print('a1 case slipped through')
+            print('a01 case slipped through')
 
-        #**************************************************************** a2
+        #?---------------------------------------------------------------------- a02
 
         if sells_perc == 'n/a':
-            self.score_dict['analyst_data'].loc['a2'][0] = 0
+            self.score_dict['analyst_data'].loc['a02'][0] = 0
 
-        elif sells_perc <= (peer_sells_perc * .9):
-            self.score_dict['analyst_data'].loc['a2'][0] = 1
+        elif sells_perc <= (peer_sells_perc * .95):
+            self.score_dict['analyst_data'].loc['a02'][0] = 1
 
-        elif sells_perc > (peer_sells_perc * .9):
-            self.score_dict['analyst_data'].loc['a2'][0] = 0
+        elif sells_perc > (peer_sells_perc * .95):
+            self.score_dict['analyst_data'].loc['a02'][0] = 0
 
         else:
-            print('a2 case slipped through')
+            print('a02 case slipped through')
 
-        #**************************************************************** a3
+        #?---------------------------------------------------------------------- a03
 
         if wghtd_buys_sum == 'n/a':
-            self.score_dict['analyst_data'].loc['a3'][0] = 0
+            self.score_dict['analyst_data'].loc['a03'][0] = 0
 
         elif wghtd_buys_sum >= (wghtd_peer_buys_sum * 1.5):
-            self.score_dict['analyst_data'].loc['a3'][0] = 3
+            self.score_dict['analyst_data'].loc['a03'][0] = 3
 
         elif wghtd_buys_sum < (wghtd_peer_buys_sum * 1.5) and wghtd_buys_sum >= (wghtd_peer_buys_sum * 1.1):
-            self.score_dict['analyst_data'].loc['a3'][0] = 2
+            self.score_dict['analyst_data'].loc['a03'][0] = 2
 
         elif wghtd_buys_sum < (wghtd_peer_buys_sum * 1.1) and wghtd_buys_sum >= (wghtd_peer_buys_sum * 0.7):
-            self.score_dict['analyst_data'].loc['a3'][0] = 1
+            self.score_dict['analyst_data'].loc['a03'][0] = 1
 
         elif wghtd_buys_sum < (wghtd_peer_buys_sum * 0.7):
-            self.score_dict['analyst_data'].loc['a3'][0] = 0
+            self.score_dict['analyst_data'].loc['a03'][0] = 0
 
         else:
-            print('a3 case slipped through')
+            print('a03 case slipped through')
 
-        #**************************************************************** a4
+        #?---------------------------------------------------------------------- a04
 
         if strong_buys == 'n/a':
-            self.score_dict['analyst_data'].loc['a4'][0] = 0
+            self.score_dict['analyst_data'].loc['a04'][0] = 0
 
         elif strong_buys >= 10:
-            self.score_dict['analyst_data'].loc['a4'][0] = 2
+            self.score_dict['analyst_data'].loc['a04'][0] = 2
 
         elif strong_buys < 10 and strong_buys >= 8:
-            self.score_dict['analyst_data'].loc['a4'][0] = 1
+            self.score_dict['analyst_data'].loc['a04'][0] = 1
 
         elif strong_buys < 8:
-            self.score_dict['analyst_data'].loc['a4'][0] = 0
+            self.score_dict['analyst_data'].loc['a04'][0] = 0
 
         else:
-            print('a4 case slipped through')
+            print('a04 case slipped through')
 
-        #**************************************************************** a5
+        #?---------------------------------------------------------------------- a05
 
         # Scoring 'n/a' as worth 1pt so as not to punish those not on S&P or NASDAQ 100
         if wb_score == 'n/a':
-            self.score_dict['analyst_data'].loc['a5'][0] = 1
+            self.score_dict['analyst_data'].loc['a05'][0] = 1
 
         elif wb_score >= 80:
-            self.score_dict['analyst_data'].loc['a5'][0] = 3
+            self.score_dict['analyst_data'].loc['a05'][0] = 2
 
         elif wb_score < 80 and wb_score >= 75:
-            self.score_dict['analyst_data'].loc['a5'][0] = 2
+            self.score_dict['analyst_data'].loc['a05'][0] = 1
 
-        elif wb_score < 75 and wb_score >= 70:
-            self.score_dict['analyst_data'].loc['a5'][0] = 1
-
-        elif wb_score < 70:
-            self.score_dict['analyst_data'].loc['a5'][0] = 0
+        elif wb_score < 75:
+            self.score_dict['analyst_data'].loc['a05'][0] = 0
 
         else:
-            print('a5 case slipped through')
+            print('a05 case slipped through')
 
-
+#*******  ESG SCORING METHOD ************** 
     def set_scores_esg(self, peer_group):
 
         enviro = self.df_esg.loc['enviro'][0]
@@ -842,97 +850,98 @@ class Company:
         peer_total_esg = peer_group.df_esg.loc['total_esg'][0]
         esg_perf = self.df_esg.loc['esg_perf'][0]
 
-        #**************************************************************** e1
+        #?---------------------------------------------------------------------- e01
 
         # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
         if enviro == 'n/a':
-            self.score_dict['esg'].loc['e1'][0] = 1
+            self.score_dict['esg'].loc['e01'][0] = 1
 
         elif enviro >= (peer_enviro * 1.3):
-            self.score_dict['esg'].loc['e1'][0] = 2
+            self.score_dict['esg'].loc['e01'][0] = 2
 
         elif enviro < (peer_enviro * 1.3) and enviro >= (peer_enviro * 0.95):
-            self.score_dict['esg'].loc['e1'][0] = 1
+            self.score_dict['esg'].loc['e01'][0] = 1
 
         elif enviro < (peer_enviro * 0.95):
-            self.score_dict['esg'].loc['e1'][0] = 0
+            self.score_dict['esg'].loc['e01'][0] = 0
 
         else:
-            print('e1 case slipped through')
+            print('e01 case slipped through')
 
-        #**************************************************************** e2
+        #?---------------------------------------------------------------------- e02
 
         # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
         if govern == 'n/a':
-            self.score_dict['esg'].loc['e2'][0] = 1
+            self.score_dict['esg'].loc['e02'][0] = 1
 
         elif govern >= (peer_govern * 1.3):
-            self.score_dict['esg'].loc['e2'][0] = 2
+            self.score_dict['esg'].loc['e02'][0] = 2
 
         elif govern < (peer_govern * 1.3) and govern >= (peer_govern * 0.95):
-            self.score_dict['esg'].loc['e2'][0] = 1
+            self.score_dict['esg'].loc['e02'][0] = 1
 
         elif govern < (peer_govern * 0.95):
-            self.score_dict['esg'].loc['e2'][0] = 0
+            self.score_dict['esg'].loc['e02'][0] = 0
 
         else:
-            print('e2 case slipped through')
+            print('e02 case slipped through')
 
-        #**************************************************************** e3
+        #?---------------------------------------------------------------------- e03
 
         # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
         if social == 'n/a':
-            self.score_dict['esg'].loc['e3'][0] = 1
+            self.score_dict['esg'].loc['e03'][0] = 1
 
         elif social >= (peer_social * 1.3):
-            self.score_dict['esg'].loc['e3'][0] = 2
+            self.score_dict['esg'].loc['e03'][0] = 2
 
         elif social < (peer_social * 1.3) and social >= (peer_social * 0.95):
-            self.score_dict['esg'].loc['e3'][0] = 1
+            self.score_dict['esg'].loc['e03'][0] = 1
 
         elif social < (peer_social * 0.95):
-            self.score_dict['esg'].loc['e3'][0] = 0
+            self.score_dict['esg'].loc['e03'][0] = 0
 
         else:
-            print('e3 case slipped through')
+            print('e03 case slipped through')
 
-        #**************************************************************** e4
+        #?---------------------------------------------------------------------- e04
 
         # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
         if total_esg == 'n/a':
-            self.score_dict['esg'].loc['e4'][0] = 1
+            self.score_dict['esg'].loc['e04'][0] = 1
 
         elif total_esg >= (peer_total_esg * 1.2):
-            self.score_dict['esg'].loc['e4'][0] = 2
+            self.score_dict['esg'].loc['e04'][0] = 2
 
         elif total_esg < (peer_total_esg * 1.2) and total_esg >= peer_total_esg:
-            self.score_dict['esg'].loc['e4'][0] = 1
+            self.score_dict['esg'].loc['e04'][0] = 1
 
         elif total_esg < peer_total_esg:
-            self.score_dict['esg'].loc['e4'][0] = 0
+            self.score_dict['esg'].loc['e04'][0] = 0
 
         else:
-            print('e4 case slipped through')
+            print('e04 case slipped through')
 
-        #**************************************************************** e5
+        #?---------------------------------------------------------------------- e05
 
         # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
         if esg_perf == 'n/a':
-            self.score_dict['esg'].loc['e5'][0] = 1
+            self.score_dict['esg'].loc['e05'][0] = 1
 
         elif esg_perf == 'OUT_PERF':
-            self.score_dict['esg'].loc['e5'][0] = 2
+            self.score_dict['esg'].loc['e05'][0] = 2
 
         elif esg_perf == 'AVG_PERF':
-            self.score_dict['esg'].loc['e5'][0] = 1
+            self.score_dict['esg'].loc['e05'][0] = 1
 
         elif esg_perf == 'UNDER_PERF':
-            self.score_dict['esg'].loc['e5'][0] = 0
+            self.score_dict['esg'].loc['e05'][0] = 0
 
         else:
-            print('e5 case slipped through')
+            print('e05 case slipped through')
 
 
+#*******  END OF SCORING METHODS ****************************************************
 
 
     def data_to_excel(self):
@@ -1080,7 +1089,6 @@ class PeerGroup(Company):
             else:
                 self.div_dfs[0][metric] = 'n/a'
 
-#            self.div_dfs[0][metric] = sum / len(result_list)
             result_list.clear()
 
         self.div_dfs[0] = self.div_dfs[0].T
