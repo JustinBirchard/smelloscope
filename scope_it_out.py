@@ -1,37 +1,53 @@
-# smellogather.py
-#* Version 0.9.1
-#* Last update 10/28/22
+# scope_it_out.py
+# file previously called: smellogather.py
+#* Version 0.9.5
+#* Last update 10/30/22
 
-"""smellogather takes a user supplied list of stocks and pulls in a 
-   variety of metrics and data via OpenBB. 
+"""scope_it_out takes the user supplied list from stocklist.py and 
+   pulls in a variety of metrics and data via OpenBB. 
 
-   Each stock in the list will become a Company object which will be populated with data that
-   can be examined via methods in TheSmelloScope lab.
+   Each stock in the list will become a Company object and will be 
+   populated with data. Data can be examined via Company methods in 
+   TheSmelloscope lab.
 
-   Additionally, a PeerGroup object will be created. PeerGroup is a subclass of Company 
-   and its methods will be used to pull in and calculate average values for every Company metric.
+   A PeerGroup object will also be created. PeerGroup is a subclass 
+   of Company and its methods will be used to pull in every metric 
+   from every Company and then calculate an average value for 
+   each metric.
+
+   After all data has been gathered and assembled, the sniffer.py
+   will give each Company object a big_phat_whiff. 
+   
+   Once the whiff is complete, the Company's score card will be 
+   accessable via the TheSmelloscope lab.
 
    The main point of this script is:
-   1) Create company_list variable which holds one or more instaniated Company objects
-   2) Create peer_group object which holds the average value of every metric
+   1) Instantiate a Company object for each stock in stocklist.py
+   2) Instantiate a PeerGroup object
+   3) Create company_list which holds one or more Company objects.
+   4) Analyze the data in the PeerGroup object and each Company object 
+   5) Populate the score_card of each Company object
 
 Returns:
     list: company_list containing Company class objects
     object: PeerGroup subclass object
 """
 
+from sniffer import big_phat_whiff
+from company import Company, PeerGroup
+from stocklist import stocks
+
 import math
 import pandas as pd
 from openbb_terminal.api import openbb as obb
-from company import Company, PeerGroup
-from stocklist import stocks
+
 
 # crating peers list based on user selected stocks from stocklist.py
 peers = []
 for index, stock in enumerate(stocks):
     peers.append((stock, index + 1))
 
-# used to convert strings representing percentage to a float, eg '10%' becomes 0.1
+# converts strings representing percentage to a float, eg '10%' becomes 0.1
 def p2f(str_perc):
     return float(str_perc.strip('%'))/100
 
@@ -379,3 +395,7 @@ peer_group.set_all_data()
 
 # Fixes improper calculation set by set_all_data() for peer_group tca_div_tld
 peer_group.df_value.loc['tca_div_tld'][0] = peer_group.df_value.loc['tca_mrfy'][0] / peer_group.df_value.loc['tld_mrfy'][0]
+
+# For each stock, calculates scores for each category using company history and peer averages
+for slot in range(0, len(company_list)):
+    big_phat_whiff(company_list[slot], peer_group)
