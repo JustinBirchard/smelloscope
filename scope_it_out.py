@@ -1,7 +1,7 @@
 # scope_it_out.py
 # file previously called: smellogather.py
-#* Version 0.9.5
-#* Last update 10/30/22
+#* Version 0.9.5.1
+#* Last update 10/31/22
 
 """scope_it_out.py returns a list of Company objects and a PeerGroup 
    object, both of which are imported into the Smelloscope lab.
@@ -36,13 +36,31 @@ Returns:
     object: PeerGroup subclass object
 """
 
+print('Preparing olfactory sensory neurons...\n')
+
+import math
+import pandas as pd
+import io, logging
+from contextlib import redirect_stdout, redirect_stderr
+
+#Creating log file and IO object
+logging.basicConfig(filename='output_log.log', level=logging.INFO)
+f = io.StringIO()
+
+#Redirecting api messages from obb to log file
+with redirect_stdout(f), redirect_stderr(f):
+   from openbb_terminal.api import openbb as obb      
+   logging.info(f.getvalue())
+
+print('Angling the scope towards an interesting cluster...\n\n')
+
 from sniffer import big_phat_whiff
 from company import Company, PeerGroup
 from stocklist import stocks
 
-import math
-import pandas as pd
-from openbb_terminal.api import openbb as obb
+
+
+# from openbb_terminal.api import openbb as obb
 
 from contextlib import redirect_stdout, redirect_stderr 
 import io, logging 
@@ -414,4 +432,4 @@ peer_group.df_value.loc['tca_div_tld'][0] = peer_group.df_value.loc['tca_mrfy'][
 for slot in range(0, len(company_list)):
     big_phat_whiff(company_list[slot], peer_group)
 
-print('Stocks are smelt and scores are dealt!')
+print('STOCKS ARE SMELT AND SCORES ARE DEALT!')

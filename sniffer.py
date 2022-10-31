@@ -98,7 +98,7 @@ def set_scores_value(company, peer_group):
         print('v01 case slipped through')
 
     #?---------------------------------------------------------------------- v02
-    if pe_ttm == 'n/a':
+    if pe_ttm == 'n/a' or pe_5yr_avg == 'n/a':
         company.score_card['value'].loc['v02'][0] = 0
 
     elif pe_ttm <= (pe_5yr_avg * 0.75):
