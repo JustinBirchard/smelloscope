@@ -3,8 +3,11 @@
 #* Version 0.9.5
 #* Last update 10/30/22
 
-"""scope_it_out takes the user supplied list from stocklist.py and 
-   pulls in a variety of metrics and data via OpenBB. 
+"""scope_it_out.py returns a list of Company objects and a PeerGroup 
+   object, both of which are imported into the Smelloscope lab.
+
+   To accomplish this, scope_it_out.py takes the user supplied list 
+   from stocklist.py and pulls in a variety of data via OpenBB.
 
    Each stock in the list will become a Company object and will be 
    populated with data. Data can be examined via Company methods in 
@@ -41,6 +44,12 @@ import math
 import pandas as pd
 from openbb_terminal.api import openbb as obb
 
+from contextlib import redirect_stdout, redirect_stderr 
+import io, logging 
+
+# We'll suppress the output of some api calls, but we'll log suppressed output
+logging.basicConfig(filename='output_log.log', level=logging.INFO)
+f = io.StringIO() 
 
 # crating peers list based on user selected stocks from stocklist.py
 peers = []
@@ -145,6 +154,7 @@ for company in peers:
 ############## *** BASIC DETAILS DATAFRAME *** ##############
 
     name = obb.stocks.fa.profile(stock).loc['companyName'][0]
+    print(f'Getting a whiff of {name}')
     ticker = stock
     sector = obb.stocks.fa.profile(stock).loc['sector'][0]
     industry = obb.stocks.fa.profile(stock).loc['industry'][0]
@@ -159,18 +169,15 @@ for company in peers:
 ############## *** VALUE METRICS DATAFRAME *** ##############
  
     yahoo_success = 'no'
-    tries = 0
  
     while yahoo_success == 'no':
-        tries += 1
+
         try:
             tca_mrfy = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Total current assets'][0]
             yahoo_success = 'yes'
 
         except AttributeError:
             print('Yahoo error. Trying again.')
-
-    print('Number of tries : ' + str(tries))
 
     # Cases for if the company has no debt
     try:
@@ -307,10 +314,10 @@ for company in peers:
                                 'news_sent': news_sent}, index=['Public Sentiment Metrics']).T
         
 ############## *** COMPANY, SECTOR, & INDUSTRY NEWS *** ##############
-
+    
     df_com_news = obb.common.news(name, sort='published').head(20)
-    df_sec_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Company News'])
-    df_ind_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Company News'])
+    df_sec_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Sector News'])
+    df_ind_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Industry News'])
 
     # List will be added to company object
     news_dfs = [df_com_news, df_sec_news, df_ind_news]
@@ -325,11 +332,16 @@ for company in peers:
     df_rot_3mo = pd.DataFrame({'Strong Buy': df_rot['strongBuy'], 'Buy': df_rot['buy'], 'Hold': df_rot['hold'], 
                                'Sell': df_rot['sell'], 'Strong Sell': df_rot['strongSell']}, index=['Last 3mo']).T
 
-    # Warren Buffet Investing Score
-    wb_score = obb.stocks.fa.score(stock)
-    if wb_score is None:
-        wb_score = 'n/a'       
+    # Warren Buffet Investing Score. Suppressing API output
+    with redirect_stdout(f), redirect_stderr(f): 
+        wb_score = obb.stocks.fa.score(stock)
+        if wb_score is None:
+            wb_score = 'n/a'   
+        
+    # Logging the API output in output_log.log    
+    logging.info(f.getvalue())
 
+    # Creating list that holds Analyst data
     analyst_data = [df_rating_30d, df_rot_3mo, wb_score]
     
 ############## *** ESG RATINGS *** ##############
@@ -387,6 +399,8 @@ for company in peers:
         c10 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
         company_list.append(c10)
 
+    print(f'{ticker} has been sniffed.\n')
+
 # Creating PeerGroup object
 peer_group = PeerGroup(company_list=company_list)
 
@@ -399,3 +413,5 @@ peer_group.df_value.loc['tca_div_tld'][0] = peer_group.df_value.loc['tca_mrfy'][
 # For each stock, calculates scores for each category using company history and peer averages
 for slot in range(0, len(company_list)):
     big_phat_whiff(company_list[slot], peer_group)
+
+print('Stocks are smelt and scores are dealt!')

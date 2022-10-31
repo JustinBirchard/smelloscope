@@ -10,25 +10,44 @@ import pandas as pd
 from dataclasses import dataclass, field
 from IPython.display import display
 
-# The following DataFrames serve as templates for company score cards. They will be deep-copied into Company objects
-scores_value = pd.DataFrame({'value': {'v01': None, 'v02': None, 'v03': None, 'v04': None, 'v05': None, 
-                                       'v06': None, 'v07': None, 'v08': None, 'v09': None, 'v10': None, 'v11': None}})
+# DataFrames below serve as templates for company score cards
+# They'll be deep-copied into Company objects
+scores_value = pd.DataFrame({'value': {'v01': None, 'v02': None, 
+                                       'v03': None, 'v04': None, 
+                                       'v05': None, 'v06': None, 
+                                       'v07': None, 'v08': None, 
+                                       'v09': None, 'v10': None, 
+                                       'v11': None}})
 
-scores_mgmt = pd.DataFrame({'mgmt': {'m01': None, 'm02': None, 'm03': None, 'm04': None, 'm05': None,
-                                     'm06': None, 'm07': None, 'm08': None, 'm09': None, 'm10': None}})
+scores_mgmt = pd.DataFrame({'mgmt': {'m01': None, 'm02': None,
+                                     'm03': None, 'm04': None, 
+                                     'm05': None, 'm06': None, 
+                                     'm07': None, 'm08': None, 
+                                     'm09': None, 'm10': None}})
 
-scores_ins = pd.DataFrame({'ins': {'i01': None, 'i02': None, 'i03': None, 'i04': None}})
-scores_div = pd.DataFrame({'div': {'d01': None, 'd02': None, 'd03': None, 'd04': None}})
-scores_pub_sent = pd.DataFrame({'pub_sent': {'p01': None, 'p02': None, 'p03': None, 'p04': None, 'p05': None, 'p06': None}})
-scores_analyst_data = pd.DataFrame({'analyst_data': {'a01': None, 'a02': None, 'a03': None, 'a04': None, 'a05': None}})
-scores_esg = pd.DataFrame({'esg': {'e01': None, 'e02': None, 'e03': None, 'e04': None, 'e05': None}})
+scores_ins = pd.DataFrame({'ins': {'i01': None, 'i02': None, 
+                                   'i03': None, 'i04': None}})
+
+scores_div = pd.DataFrame({'div': {'d01': None, 'd02': None, 
+                                   'd03': None, 'd04': None}})
+
+scores_pub_sent = pd.DataFrame({'pub_sent': {'p01': None, 'p02': None, 
+                                             'p03': None, 'p04': None,
+                                             'p05': None, 'p06': None}})
+
+scores_analyst_data = pd.DataFrame({'analyst_data': {'a01': None, 'a02': None,
+                                                     'a03': None, 'a04': None,
+                                                     'a05': None}})
+
+scores_esg = pd.DataFrame({'esg': {'e01': None, 'e02': None,
+                                   'e03': None, 'e04': None,
+                                   'e05': None}})
 
 @dataclass
 class Company:
-    """Company objects hold a wide variety of metrics and data.
-       Each stock in the user submitted stock list will become a Company object.
-       Methods for the Company class are mainly used for scoring. Methods will be
-       expanded in future updates.
+    """Company objects hold a variety of metrics and data.
+       Each stock in stocklist.py will become a Company object.
+       Methods are meant to be called in TheSmelloscope lab.
     """
     df_basic: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(6,1), basic company details
     df_value: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(18,1), value metrics
@@ -36,7 +55,7 @@ class Company:
     df_ins: pd.DataFrame = field(default_factory=pd.DataFrame)# shape=(4,1), insider & instituion data
     div_dfs: list = field(default_factory=list, repr=False) # holds 2 DataFrames containing dividend data
     df_pub_sent: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(3,1), public sentiment data
-    news_dfs: list = field(default_factory=list, repr=False) # holds 3 DataFrames containing Company, Sector, & Industry news
+    news_dfs: list = field(default_factory=list, repr=False) # holds 3 DFs containing Company, Sector, & Industry news
     analyst_data: list = field(default_factory=list, repr=False) # holds 2 DataFrames containing Analyst ratingsmetrics
     df_esg: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(5,1), holds ESG data & metrics
     score_card: dict = field(default_factory=lambda: {'value': deepcopy(scores_value), 

@@ -4,7 +4,7 @@
     Choose 1-10 stocks to add to this list and then save before running TheSmelloscope.
 """
 
-stocks = ['MA', 'V']
+stocks = ['TDOC', 'MA', 'V']
 # stocks = ['MA', 'V', 'ACN', 'SPGI', 'ADP', 'FISV', 'FIS', 'GPN', 'BR', 'FLT']
 # stocks = ['VEEV', 'PAYC', 'ANSS', 'SHOP', 'CHKP', 'TYL', 'NTES', 'TEAM']
 #stocks = ['MSFT', 'AAPL', 'GOOGL', 'ORCL', 'NOW', 'VMW', 'QLYS', 'CVLT', 'PRGS']
