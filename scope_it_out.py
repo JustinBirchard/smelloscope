@@ -27,12 +27,12 @@
    The main point of this script is:
    1) Instantiate a Company object for each stock in stocklist.py
    2) Instantiate a PeerGroup object
-   3) Create company_dict which holds one or more Company objects.
+   3) Create companies which holds one or more Company objects.
    4) Analyze the data in the PeerGroup object and each Company object 
    5) Populate the score_card of each Company object
 
 Returns:
-    list: company_dict containing Company class objects
+    list: companies containing Company class objects
     object: PeerGroup subclass object
 """
 
@@ -40,6 +40,7 @@ print('Preparing olfactory sensory neurons...\n')
 
 import math
 import pandas as pd
+from IPython.display import display
 import io, logging
 from contextlib import redirect_stdout, redirect_stderr
 
@@ -73,6 +74,42 @@ f = io.StringIO()
 peers = []
 for index, stock in enumerate(stocks):
     peers.append((stock, index + 1))
+
+def show_total_scores(companies):
+    for slot in range(1, len(companies) + 1):
+        print(companies[f'c{slot}'].df_basic.loc['name'][0])
+        print(str(companies[f'c{slot}'].score_card['grand_total']))
+        print('')
+        print('')
+
+def show_scorecards(companies):
+    # view the scorecards for each company
+    for slot in range(1, len(companies) + 1):
+        print(companies[f'c{slot}'].df_basic.loc['name'][0])
+        print('TOTAL SCORE=  ' + str(companies[f'c{slot}'].score_card['grand_total']))
+        print('')
+        display(companies[f'c{slot}'].score_card['value'].T)
+        display(companies[f'c{slot}'].score_card['mgmt'].T)
+        display(companies[f'c{slot}'].score_card['ins'].T)
+        display(companies[f'c{slot}'].score_card['div'].T)
+        display(companies[f'c{slot}'].score_card['pub_sent'].T)
+        display(companies[f'c{slot}'].score_card['analyst_data'].T)
+        display(companies[f'c{slot}'].score_card['esg'].T)
+        print('')
+        print('')
+        print('')
+
+# View metrics for each company
+def show_metrics(companies):
+    for slot in range(1, len(companies.keys()) + 1):
+        companies[f'c{slot}'].display_dfs()
+
+# Export company metrics into Exel file
+def export_metrics(companies):
+
+    for company in companies.values():
+        company.data_to_excel()
+        print(f"{company.df_basic.loc['ticker'][0]} metrics saved as Excel file.")
 
 # converts strings representing percentage to a float, eg '10%' becomes 0.1
 def p2f(str_perc):
@@ -121,7 +158,7 @@ def try_it(string, calltype, avg=False, p2f_bool=False):
 
 # At the end of the for loop, company objects will be added to the dictionary
 # Key will be "c1", "c2", etc and value will be Company object
-company_dict = {}
+companies = {}
 
 for company in peers:
     
@@ -389,14 +426,14 @@ for company in peers:
 ############## *** Creating Company objects: *** #################################  
 #*#################################################################################
 
-    # Adding new key (eg- 'c1', 'c2', etc) and value (Company object) to company_dict
-    company_dict[f'c{slot}'] = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, 
+    # Adding new key (eg- 'c1', 'c2', etc) and value (Company object) to companies
+    companies[f'c{slot}'] = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, 
                                         df_pub_sent, news_dfs, analyst_data, df_esg)
 
     print(f'{ticker} has been sniffed.\n')
 
 # Creating PeerGroup object
-peer_group = PeerGroup(company_dict=company_dict)
+peer_group = PeerGroup(companies=companies)
 
 # Pulling in the data for PeerGroup object
 peer_group.set_all_data()
@@ -405,7 +442,7 @@ peer_group.set_all_data()
 peer_group.df_value.loc['tca_div_tld'][0] = peer_group.df_value.loc['tca_mrfy'][0] / peer_group.df_value.loc['tld_mrfy'][0]
 
 # For each stock, calculates scores for each category using company history and peer averages
-for slot in range(1, len(company_dict.keys()) + 1):
-        big_phat_whiff(company_dict[f'c{slot}'], peer_group)
+for slot in range(1, len(companies.keys()) + 1):
+        big_phat_whiff(companies[f'c{slot}'], peer_group)
 
 print('STOCKS ARE SMELT AND SCORES ARE DEALT!')
