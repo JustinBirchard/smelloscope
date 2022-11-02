@@ -1,8 +1,8 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
-    Version 0.9
-    Last updated 10/30/22
 """
+#* version 0.9.6
+#* last updated 11/2/22
 
 from copy import deepcopy
 from openbb_terminal.api import openbb as obb
@@ -100,7 +100,7 @@ class PeerGroup(Company):
         Company (Object): Class Company Object
     """
     
-    company_list: list = field(default_factory=list) # List of 1 or more Company objects
+    company_dict: dict = field(default_factory=dict) # List of 1 or more Company objects
 
     def set_all_data(self):
         self.set_df_basic()
@@ -116,10 +116,10 @@ class PeerGroup(Company):
     def set_df_basic(self):
         """Set self.df_basic values"""
 
-        self.df_basic['name'] = self.company_list[0].df_basic.loc['ticker'] + ' Peer Group Avg'
-        self.df_basic['ticker'] = self.company_list[0].df_basic.loc['ticker'] + ' Peer Avg'
-        self.df_basic['sector'] = self.company_list[0].df_basic.loc['sector']
-        self.df_basic['industry'] = self.company_list[0].df_basic.loc['industry']
+        self.df_basic['name'] = self.company_dict['c1'].df_basic.loc['ticker'] + ' Peer Group Avg'
+        self.df_basic['ticker'] = self.company_dict['c1'].df_basic.loc['ticker'] + ' Peer Avg'
+        self.df_basic['sector'] = self.company_dict['c1'].df_basic.loc['sector']
+        self.df_basic['industry'] = self.company_dict['c1'].df_basic.loc['industry']
         self.df_basic['cap'] = 'temp n/a'
         self.df_basic['price'] = 'temp n/a'
 
@@ -130,8 +130,8 @@ class PeerGroup(Company):
 
         result_list = []
 
-        for metric in self.company_list[0].df_value.index:
-            for company in self.company_list:
+        for metric in self.company_dict['c1'].df_value.index:
+            for company in self.company_dict.values():
 
                 result_list.append(company.df_value.loc[metric])
 
@@ -152,8 +152,8 @@ class PeerGroup(Company):
 
         result_list = []
 
-        for metric in self.company_list[0].df_mgmt.index:
-            for company in self.company_list:
+        for metric in self.company_dict['c1'].df_mgmt.index:
+            for company in self.company_dict.values():
                 result_list.append(company.df_mgmt.loc[metric])
             
             result_list = [series for series in result_list if not isinstance(series[0], str)]
@@ -177,8 +177,8 @@ class PeerGroup(Company):
 
         result_list = []
 
-        for metric in self.company_list[0].df_ins.index:
-            for company in self.company_list:
+        for metric in self.company_dict['c1'].df_ins.index:
+            for company in self.company_dict.values():
                 result_list.append(company.df_ins.loc[metric])
             
             result_list = [series for series in result_list if not isinstance(series[0], str)]
@@ -206,8 +206,8 @@ class PeerGroup(Company):
 
         result_list = []
 
-        for metric in self.company_list[0].div_dfs[0].index:
-            for company in self.company_list:
+        for metric in self.company_dict['c1'].div_dfs[0].index:
+            for company in self.company_dict.values():
                 result_list.append(company.div_dfs[0].loc[metric])
             
             result_list = [series for series in result_list if not isinstance(series[0], str)]
@@ -231,8 +231,8 @@ class PeerGroup(Company):
 
         result_list = []
 
-        for metric in self.company_list[0].df_pub_sent.index:
-            for company in self.company_list:
+        for metric in self.company_dict['c1'].df_pub_sent.index:
+            for company in self.company_dict.values():
                 result_list.append(company.df_pub_sent.loc[metric])
             
             result_list = [series for series in result_list if not isinstance(series[0], str)]
@@ -254,8 +254,8 @@ class PeerGroup(Company):
         """Set self.div_dfs values"""
 
         df_com_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Company News'])
-        df_sec_news = obb.common.news(self.company_list[0].df_basic.loc['sector'][0] + 'Sector News Stock Market', sort='published').head(50)
-        df_ind_news = obb.common.news(self.company_list[0].df_basic.loc['industry'][0] + 'Industry News Stock Market', sort='published').head(50)
+        df_sec_news = obb.common.news(self.company_dict['c1'].df_basic.loc['sector'][0] + 'Sector News Stock Market', sort='published').head(50)
+        df_ind_news = obb.common.news(self.company_dict['c1'].df_basic.loc['industry'][0] + 'Industry News Stock Market', sort='published').head(50)
 
         self.news_dfs = [df_com_news, df_sec_news, df_ind_news]
 
@@ -263,10 +263,10 @@ class PeerGroup(Company):
         df_rating_30d = pd.DataFrame({'Data N/A': 'n/a'}, index=['df_rating_30d']).T
         peer_df_rot_3mo = pd.DataFrame({'Strong Buy': 0, 'Buy': 0, 'Hold': 0, 'Sell': 0, 'Strong Sell': 0}, index=['Last 3mo']).T
 
-        for company in self.company_list:
+        for company in self.company_dict.values():
             peer_df_rot_3mo += company.analyst_data[1]
 
-        peer_df_rot_3mo = peer_df_rot_3mo / len(self.company_list)
+        peer_df_rot_3mo = peer_df_rot_3mo / len(self.company_dict.keys())
 
         self.analyst_data = [df_rating_30d, peer_df_rot_3mo]
 
@@ -275,8 +275,8 @@ class PeerGroup(Company):
 
         result_list = []
 
-        for metric in self.company_list[0].df_esg.index:
-            for company in self.company_list:
+        for metric in self.company_dict['c1'].df_esg.index:
+            for company in self.company_dict.values():
                 result_list.append(company.df_esg.loc[metric])
             
             result_list = [series for series in result_list if not isinstance(series[0], str)]

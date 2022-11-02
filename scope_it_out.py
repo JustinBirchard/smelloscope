@@ -1,7 +1,7 @@
 # scope_it_out.py
 # file previously called: smellogather.py
-#* Version 0.9.5.1
-#* Last update 10/31/22
+#* Version 0.9.6
+#* Last update 11/2/22
 
 """scope_it_out.py returns a list of Company objects and a PeerGroup 
    object, both of which are imported into the Smelloscope lab.
@@ -27,12 +27,12 @@
    The main point of this script is:
    1) Instantiate a Company object for each stock in stocklist.py
    2) Instantiate a PeerGroup object
-   3) Create company_list which holds one or more Company objects.
+   3) Create company_dict which holds one or more Company objects.
    4) Analyze the data in the PeerGroup object and each Company object 
    5) Populate the score_card of each Company object
 
 Returns:
-    list: company_list containing Company class objects
+    list: company_dict containing Company class objects
     object: PeerGroup subclass object
 """
 
@@ -119,6 +119,10 @@ def try_it(string, calltype, avg=False, p2f_bool=False):
         except AttributeError:
             return 'n/a'
 
+# At the end of the for loop, company objects will be added to the dictionary
+# Key will be "c1", "c2", etc and value will be Company object
+company_dict = {}
+
 for company in peers:
     
     stock = company[0]
@@ -142,7 +146,12 @@ for company in peers:
                 df_metrics[column][row] = float(df_metrics[column][row])
                 
             except ValueError: # catching the row names for those that cannot be converted to float
-                float_error_set.add(row)
+                try: # rare case for if FMP returns a value that incorrectly has a "K" listed at the end of string
+                    get_rid_of_k = df_metrics[column][row].strip('K')
+                    df_metrics[column][row] = float(get_rid_of_k.strip())
+
+                except ValueError:
+                    float_error_set.add(row)
                 
     df_metrics_discarded = pd.DataFrame() # holds data removed from df_metrics in case needed later
     for row in float_error_set: # Adding appropriate rows to the new dataframe
@@ -248,11 +257,11 @@ for company in peers:
         
 ############## *** MANAGEMENT METRICS DATAFRAME *** ##############
 
-    roa_ttm = p2f(obb.stocks.fa.data(stock).loc['ROA'][0])
+    roa_ttm = try_it('ROA', 'data', p2f_bool=True)
     roa_mrfy = df_metrics.loc['Return on tangible assets'][0]
     roa_5yr_avg = df_metrics.loc['Return on tangible assets']['5yr Avg']
 
-    roe_ttm = p2f(obb.stocks.fa.data(stock).loc['ROE'][0])
+    roe_ttm = try_it('ROE', 'data', p2f_bool=True)
     roe_mrfy = df_metrics.loc['Roe'][0]
     roe_5yr_avg = df_metrics.loc['Roe']['5yr Avg']
 
@@ -260,7 +269,7 @@ for company in peers:
     
     pm_ttm = try_it('Profit Margin', 'data', p2f_bool=True)
 
-    cr_mrq = float(obb.stocks.fa.data(stock).loc['Current Ratio'][0])
+    cr_mrq = try_it('Current Ratio', 'data')
     cr_mrfy = df_metrics.loc['Current ratio'][0]
     cr_5yr_avg = df_metrics.loc['Current ratio']['5yr Avg']
     
@@ -277,8 +286,8 @@ for company in peers:
         
 ############## *** INSIDER & INSTITUION DATAFRAME *** ##############
 
-    io = p2f(obb.stocks.fa.data(stock).loc['Insider Own'][0])
-    it = p2f(obb.stocks.fa.data(stock).loc['Insider Trans'][0])
+    io = try_it('Insider Own', 'data', p2f_bool=True)
+    it = try_it('Insider Trans', 'data', p2f_bool=True)
 
     inst_o = try_it('Inst Own', 'data', p2f_bool=True)
     inst_t = try_it('Inst Trans', 'data', p2f_bool=True)
@@ -323,7 +332,11 @@ for company in peers:
         sent_list.append(float(df_news_sent.loc[date][0]))
         
     # Calculating the average sentiment over last 10 days
-    news_sent = sum(sent_list)/len(sent_list)
+    if len(sent_list) < 1:
+        news_sent = 'n/a'
+
+    else:
+        news_sent = sum(sent_list)/len(sent_list)
         
     shrt_int = p2f(obb.stocks.fa.data(stock).loc['Short Float'][0])
     
@@ -376,51 +389,14 @@ for company in peers:
 ############## *** Creating Company objects: *** #################################  
 #*#################################################################################
 
-    if slot == 1:
-        c1 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
-        company_list = []
-        company_list.append(c1)
-        
-    elif slot == 2:
-        c2 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
-        company_list.append(c2)
-
-    elif slot == 3:
-        c3 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
-        company_list.append(c3)
-        
-    elif slot == 4:
-        c4 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
-        company_list.append(c4)
-
-    elif slot == 5:
-        c5 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
-        company_list.append(c5)
-
-    elif slot == 6:
-        c6 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
-        company_list.append(c6)
-
-    elif slot == 7:
-        c7 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
-        company_list.append(c7)
-
-    elif slot == 8:
-        c8 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
-        company_list.append(c8)
-
-    elif slot == 9:
-        c9 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
-        company_list.append(c9)
-
-    elif slot == 10:
-        c10 = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, df_pub_sent, news_dfs, analyst_data, df_esg)
-        company_list.append(c10)
+    # Adding new key (eg- 'c1', 'c2', etc) and value (Company object) to company_dict
+    company_dict[f'c{slot}'] = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, 
+                                        df_pub_sent, news_dfs, analyst_data, df_esg)
 
     print(f'{ticker} has been sniffed.\n')
 
 # Creating PeerGroup object
-peer_group = PeerGroup(company_list=company_list)
+peer_group = PeerGroup(company_dict=company_dict)
 
 # Pulling in the data for PeerGroup object
 peer_group.set_all_data()
@@ -429,7 +405,7 @@ peer_group.set_all_data()
 peer_group.df_value.loc['tca_div_tld'][0] = peer_group.df_value.loc['tca_mrfy'][0] / peer_group.df_value.loc['tld_mrfy'][0]
 
 # For each stock, calculates scores for each category using company history and peer averages
-for slot in range(0, len(company_list)):
-    big_phat_whiff(company_list[slot], peer_group)
+for slot in range(1, len(company_dict.keys()) + 1):
+        big_phat_whiff(company_dict[f'c{slot}'], peer_group)
 
 print('STOCKS ARE SMELT AND SCORES ARE DEALT!')

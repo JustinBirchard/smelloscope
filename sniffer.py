@@ -1,4 +1,6 @@
 # sniffer.py
+#* version 0.9.6
+#* last updated 11/2/22
 """A collection of functions used for analyzing the data in 
    Company objects.
 
@@ -29,6 +31,34 @@ def big_phat_whiff(company, peer_group):
     set_scores_analyst_data(company, peer_group)
     set_scores_esg(company, peer_group)
     set_grand_total(company)
+
+def try_it(string, calltype, peer_group):
+    
+    if calltype == 'esg':
+
+        if peer_group.df_esg.loc[string].empty:
+            return 'n/a'
+
+        else:
+            try:
+                if isinstance(peer_group.df_esg.loc[string][0], float):
+                    return peer_group.df_esg.loc[string][0]
+
+            except KeyError:
+                return 'n/a'
+
+    elif calltype == 'div':
+
+        if peer_group.div_dfs[0].loc['div_ann'].empty:
+            return 'n/a'
+
+        else:
+            try:
+                if isinstance(peer_group.div_dfs[0].loc['div_ann'][0], float):
+                    return peer_group.div_dfs[0].loc['div_ann'][0]
+
+            except KeyError:
+                return 'n/a'      
 
 def set_cat_total(company, score_cat):
     """Calculate the total for a scoring category.
@@ -551,9 +581,9 @@ def set_scores_ins(company, peer_group):
 def set_scores_div(company, peer_group):
 
     div_ann = company.div_dfs[0].loc['div_ann'][0]
-    peer_div_ann = peer_group.div_dfs[0].loc['div_ann'][0]
+    peer_div_ann = try_it('div_ann', 'div', peer_group)
     div_y_mrfy = company.div_dfs[0].loc['div_y_mrfy'][0]
-    peer_div_y_mrfy = peer_group.div_dfs[0].loc['div_y_mrfy'][0]
+    peer_div_y_mrfy = try_it('div_y_mrfy', 'div', peer_group)
 
     try: # The amount of the most recent dividend
         last_div = company.div_dfs[1].tail(1)['Dividends'][0]
@@ -867,13 +897,13 @@ def set_scores_analyst_data(company, peer_group):
 def set_scores_esg(company, peer_group):
 
     enviro = company.df_esg.loc['enviro'][0]
-    peer_enviro = peer_group.df_esg.loc['enviro'][0]
+    peer_enviro = try_it('enviro', 'esg', peer_group)
     govern = company.df_esg.loc['govern'][0]
-    peer_govern = peer_group.df_esg.loc['govern'][0]
+    peer_govern = try_it('govern', 'esg', peer_group)
     social = company.df_esg.loc['social'][0]
-    peer_social = peer_group.df_esg.loc['social'][0]
+    peer_social = try_it('social', 'esg', peer_group)
     total_esg = company.df_esg.loc['total_esg'][0]
-    peer_total_esg = peer_group.df_esg.loc['total_esg'][0]
+    peer_total_esg = try_it('total_esg', 'esg', peer_group)
     esg_perf = company.df_esg.loc['esg_perf'][0]
 
     #?---------------------------------------------------------------------- e01
@@ -954,13 +984,13 @@ def set_scores_esg(company, peer_group):
     if esg_perf == 'n/a':
         company.score_card['esg'].loc['e05'][0] = 1
 
-    elif esg_perf == 'OUT_PERF':
+    elif esg_perf == 'OUT_PERF' or esg_perf == 'LEAD_PERF':
         company.score_card['esg'].loc['e05'][0] = 2
 
     elif esg_perf == 'AVG_PERF':
         company.score_card['esg'].loc['e05'][0] = 1
 
-    elif esg_perf == 'UNDER_PERF':
+    elif esg_perf == 'UNDER_PERF' or esg_perf == 'LAG_PERF':
         company.score_card['esg'].loc['e05'][0] = 0
 
     else:
