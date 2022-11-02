@@ -1,23 +1,46 @@
 #stocklist.py
-"""User selected stock list. Will be imported into smellogather.py
-   Choose between 2 and infinity stocks. Add them to a list. 
-   Save before running TheSmelloscope.
+"""User selected stock list. Will be imported into scope_it_out.py
+
+   Use one of the pre-made peer groups below or make your own by
+   choosing between two and infinity stocks.
+
+   Save changes before running TheSmelloscope.
 """
-# stocks = ['ACN', 'MA']
-# stocks = ['CRSP', 'DNLI', 'EXEL', 'BCRX']
-# stocks = ['TDOC', 'CRSP', 'ITCI', 'HAE', 'GRFS', 'NTRA']
-# stocks = ['PCAR', 'RACE', 'HMC', 'STLA', 'TTM', 'F', 'GM']
-# stocks = ['MA', 'V']
-# stocks = ['MA', 'V', 'ACN', 'SPGI', 'ADP', 'FISV', 'FIS', 'GPN', 'BR', 'FLT', 'PYPL']
-# stocks = ['VEEV', 'PAYC', 'ANSS', 'SHOP', 'CHKP', 'TYL', 'NTES', 'TEAM']
-# stocks = ['MSFT', 'AAPL', 'GOOGL', 'ORCL', 'NOW', 'VMW', 'QLYS', 'CVLT', 'PRGS']
+
+#* Medical Services
+# stocks = ['TDOC', 'AMN', 'ICLR', 'VTRS', 'CRL', 'NVCR', 'HQY', 'ITCI', 'HAE', 'GRFS', 'NTRA']
+
+#* Toys/Games/Hobbies
+# stocks = ['ATVI', 'EA', 'TTWO', 'HAS', 'MAT', 'JAKK']
+
+#* Entertainment/Media conglomerate
+# stocks = ['DIS', 'NKE', 'CMCSA', 'NFLX', 'SONY', 'CHTR']
+
+#* Computer software/information
+#stocks = ['MSFT', 'AAPL', 'CRM', 'ADBE', 'INTU', 'ORCL', 'SAP', 'VMW', 'ADSK', 'SNPS', 'CDNS']
+
+#* Financial services
+# stocks = ['MA', 'EFX', 'WU', 'V', 'ACN', 'SPGI', 'ADP', 'FISV', 'FIS', 'GPN', 'BR', 'FLT', 'PYPL', 'INTU']
+
+#* Computer hardware & semiconductors
 # stocks = ['INTC', 'AMD', 'IBM', 'NVDA', 'MCHP', 'TXN', 'ADI']
-# stocks = ['SPB', 'MSFT', 'TDOC', 'VEEV', 'SPCE', 'INTC', 'AMD', 'AAPL', 'META', 'SBUX']
 
-stocks = ['MA', 'V', 'ACN', 'SPGI', 'ADP', 'FISV', 'FIS', 'GPN', 'BR', 'FLT', 'PYPL', 
-          'MSFT', 'AAPL', 'GOOGL', 'ORCL', 'NOW', 'VMW', 'QLYS', 'CVLT', 'PRGS',
-          'INTC', 'AMD', 'IBM', 'NVDA', 'MCHP', 'TXN', 'ADI']
+#* Biomedical
+# stocks = ['CRSP', 'DNLI', 'EXEL', 'BCRX']
 
-# stocks not available on Financial Modeling Prep API:
+#* Car & Auto
+# stocks = ['PCAR', 'RACE', 'HMC', 'STLA', 'TTM', 'F', 'GM']
+
+
+
+
+#* Huge group for testing
+#stocks = ['MA', 'V', 'ACN', 'SPGI', 'ADP', 'FISV', 'FIS', 'GPN', 'BR', 'FLT', 'PYPL', 
+#          'MSFT', 'AAPL', 'GOOGL', 'ORCL', 'NOW', 'VMW', 'QLYS', 'CVLT', 'PRGS',
+#          'INTC', 'AMD', 'IBM', 'NVDA', 'MCHP', 'TXN', 'ADI']
+
+
+
+#! stocks not available on Financial Modeling Prep API:
 # DDOG, CRWD, RIVN, LCID, NIO, LI, ONEM, CANO, MRVI, CERE, NARI, DNA, BEAM
-# VIR, IMCR, PCVX, RLAY
+# VIR, IMCR, PCVX, RLAY, UBER, DOCS, PGNY, MEDP, OGN
