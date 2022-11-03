@@ -7,6 +7,9 @@
    Save changes before running TheSmelloscope.
 """
 
+#* DRUG MANUFACTURERS
+# stocks = ['ZTS', 'TAK', 'NBIX', 'UTHR', 'JAZZ', 'CTLT', 'IONS']
+
 #* Medical Services
 # stocks = ['TDOC', 'AMN', 'ICLR', 'VTRS', 'CRL', 'NVCR', 'HQY', 'ITCI', 'HAE', 'GRFS', 'NTRA']
 
@@ -17,7 +20,7 @@
 # stocks = ['DIS', 'NKE', 'CMCSA', 'NFLX', 'SONY', 'CHTR']
 
 #* Computer software/information
-#stocks = ['MSFT', 'AAPL', 'CRM', 'ADBE', 'INTU', 'ORCL', 'SAP', 'VMW', 'ADSK', 'SNPS', 'CDNS']
+stocks = ['GOOGL', 'MSFT', 'AAPL', 'CRM', 'ADBE', 'INTU', 'ORCL', 'SAP', 'VMW', 'ADSK', 'SNPS', 'CDNS']
 
 #* Financial services
 # stocks = ['MA', 'EFX', 'WU', 'V', 'ACN', 'SPGI', 'ADP', 'FISV', 'FIS', 'GPN', 'BR', 'FLT', 'PYPL', 'INTU']
@@ -32,7 +35,8 @@
 # stocks = ['PCAR', 'RACE', 'HMC', 'STLA', 'TTM', 'F', 'GM']
 
 
-
+#* Small group for testing
+# stocks = ['INTC', 'AMD']
 
 #* Huge group for testing
 #stocks = ['MA', 'V', 'ACN', 'SPGI', 'ADP', 'FISV', 'FIS', 'GPN', 'BR', 'FLT', 'PYPL', 

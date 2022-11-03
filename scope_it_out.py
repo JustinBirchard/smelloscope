@@ -1,7 +1,7 @@
 # scope_it_out.py
 # file previously called: smellogather.py
-#* Version 0.9.6
-#* Last update 11/2/22
+#* Version 0.9.6.1
+#* Last update 11/3/22
 
 """scope_it_out.py returns a list of Company objects and a PeerGroup 
    object, both of which are imported into the Smelloscope lab.
@@ -76,33 +76,33 @@ for index, stock in enumerate(stocks):
     peers.append((stock, index + 1))
 
 def show_total_scores(companies):
-    for slot in range(1, len(companies) + 1):
-        print(companies[f'c{slot}'].df_basic.loc['name'][0])
-        print(str(companies[f'c{slot}'].score_card['grand_total']))
+    for ticker in stocks:
+        print(companies[ticker].df_basic.loc['name'][0])
+        print(str(companies[ticker].score_card['grand_total']))
         print('')
         print('')
 
 def show_scorecards(companies):
     # view the scorecards for each company
-    for slot in range(1, len(companies) + 1):
-        print(companies[f'c{slot}'].df_basic.loc['name'][0])
-        print('TOTAL SCORE=  ' + str(companies[f'c{slot}'].score_card['grand_total']))
+    for ticker in stocks:
+        print(companies[ticker].df_basic.loc['name'][0])
+        print('TOTAL SCORE=  ' + str(companies[ticker].score_card['grand_total']))
         print('')
-        display(companies[f'c{slot}'].score_card['value'].T)
-        display(companies[f'c{slot}'].score_card['mgmt'].T)
-        display(companies[f'c{slot}'].score_card['ins'].T)
-        display(companies[f'c{slot}'].score_card['div'].T)
-        display(companies[f'c{slot}'].score_card['pub_sent'].T)
-        display(companies[f'c{slot}'].score_card['analyst_data'].T)
-        display(companies[f'c{slot}'].score_card['esg'].T)
+        display(companies[ticker].score_card['value'].T)
+        display(companies[ticker].score_card['mgmt'].T)
+        display(companies[ticker].score_card['ins'].T)
+        display(companies[ticker].score_card['div'].T)
+        display(companies[ticker].score_card['pub_sent'].T)
+        display(companies[ticker].score_card['analyst_data'].T)
+        display(companies[ticker].score_card['esg'].T)
         print('')
         print('')
         print('')
 
 # View metrics for each company
 def show_metrics(companies):
-    for slot in range(1, len(companies.keys()) + 1):
-        companies[f'c{slot}'].display_dfs()
+    for ticker in stocks:
+        companies[ticker].display_dfs()
 
 # Export company metrics into Exel file
 def export_metrics(companies):
@@ -427,7 +427,7 @@ for company in peers:
 #*#################################################################################
 
     # Adding new key (eg- 'c1', 'c2', etc) and value (Company object) to companies
-    companies[f'c{slot}'] = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, 
+    companies[ticker] = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, 
                                         df_pub_sent, news_dfs, analyst_data, df_esg)
 
     print(f'{ticker} has been sniffed.\n')
@@ -442,7 +442,7 @@ peer_group.set_all_data()
 peer_group.df_value.loc['tca_div_tld'][0] = peer_group.df_value.loc['tca_mrfy'][0] / peer_group.df_value.loc['tld_mrfy'][0]
 
 # For each stock, calculates scores for each category using company history and peer averages
-for slot in range(1, len(companies.keys()) + 1):
-        big_phat_whiff(companies[f'c{slot}'], peer_group)
+for ticker in stocks:
+        big_phat_whiff(companies[ticker], peer_group)
 
 print('STOCKS ARE SMELT AND SCORES ARE DEALT!')

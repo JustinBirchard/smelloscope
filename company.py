@@ -1,14 +1,18 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
 """
-#* version 0.9.6
-#* last updated 11/2/22
+#* version 0.9.6.1
+#* last updated 11/3/22
 
+from stocklist import stocks
 from copy import deepcopy
 from openbb_terminal.api import openbb as obb
 import pandas as pd
 from dataclasses import dataclass, field
 from IPython.display import display
+
+# Retrieving the first stock in stocks and using as the primary stock
+primary_stock = stocks[0]
 
 # DataFrames below serve as templates for company score cards
 # They'll be deep-copied into Company objects
@@ -94,6 +98,91 @@ class Company:
         for df in group:
             display(df)
 
+    def metric_names(self, data_type):
+        if data_type == 'basic':
+            print([x for x in self.df_basic.index])
+
+        elif data_type == 'value':
+            print([x for x in self.df_value.index])
+
+        elif data_type == 'mgmt':
+            print([x for x in self.df_mgmt.index])
+
+        elif data_type == 'ins':
+            print([x for x in self.df_ins.index])
+
+        elif data_type == 'div':
+            print([x for x in self.div_dfs[0].index])
+
+        elif data_type == 'pub_sent':
+            print([x for x in self.df_pub_sent.index])
+
+        elif data_type == 'analyst':
+            print(['analyst'])
+
+        elif data_type == 'esg':
+            print([x for x in self.df_esg.index])
+
+    def access_data(self, data_type, value_name):
+
+        if data_type == 'basic' and value_name == 'options':
+            self.metric_names(data_type)
+
+        elif data_type == 'basic':
+            print(self.df_basic.loc['name'][0])
+            print(str(self.df_basic.loc[value_name][0]) + '\n')
+
+        elif data_type == 'value' and value_name == 'options':
+            self.metric_names(data_type)
+
+        elif data_type == 'value':
+            print(self.df_basic.loc['name'][0])
+            print(str(self.df_value.loc[value_name][0]) + '\n')
+
+        elif data_type == 'mgmt' and value_name == 'options':
+            self.metric_names(data_type)
+
+        elif data_type == 'mgmt':
+            print(self.df_basic.loc['name'][0])
+            print(str(self.df_mgmt.loc[value_name][0]) + '\n')
+
+        elif data_type == 'ins' and value_name == 'options':
+            self.metric_names(data_type)
+
+        elif data_type == 'ins':
+            print(self.df_basic.loc['name'][0])
+            print(str(self.df_ins.loc[value_name][0]) + '\n')
+
+        elif data_type == 'div' and value_name == 'options':
+            self.metric_names(data_type)
+
+        elif data_type == 'div':
+            print(self.df_basic.loc['name'][0])
+            print(str(self.div_dfs[0].loc[value_name][0]) + '\n')
+
+        elif data_type == 'pub_sent' and value_name == 'options':
+            self.metric_names(data_type)
+
+        elif data_type == 'pub_sent':
+            print(self.df_basic.loc['name'][0])
+            print(str(self.df_pub_sent.loc[value_name][0]) + '\n')
+
+        elif data_type == 'analyst' and value_name == 'options':
+            self.metric_names(data_type)
+
+        elif data_type == 'analyst' and value_name == 'analyst':
+            print(self.df_basic.loc['name'][0] + '\n')
+            print(f'Warren Buffet Score = {self.analyst_data[2]}')
+            display(self.analyst_data[1])
+            print('\n')
+
+        elif data_type == 'esg' and value_name == 'options':
+            self.metric_names(data_type)
+
+        elif data_type == 'esg':
+            print(self.df_basic.loc['name'][0])
+            print(str(self.df_esg.loc[value_name][0]) + '\n')
+
 @dataclass
 class PeerGroup(Company):
     """Subclass PeerGroup for creating PeerGroup objects
@@ -118,10 +207,10 @@ class PeerGroup(Company):
     def set_df_basic(self):
         """Set self.df_basic values"""
 
-        self.df_basic['name'] = self.companies['c1'].df_basic.loc['ticker'] + ' Peer Group Avg'
-        self.df_basic['ticker'] = self.companies['c1'].df_basic.loc['ticker'] + ' Peer Avg'
-        self.df_basic['sector'] = self.companies['c1'].df_basic.loc['sector']
-        self.df_basic['industry'] = self.companies['c1'].df_basic.loc['industry']
+        self.df_basic['name'] = self.companies[primary_stock].df_basic.loc['ticker'] + ' Peer Group Avg'
+        self.df_basic['ticker'] = self.companies[primary_stock].df_basic.loc['ticker'] + ' Peer Avg'
+        self.df_basic['sector'] = self.companies[primary_stock].df_basic.loc['sector']
+        self.df_basic['industry'] = self.companies[primary_stock].df_basic.loc['industry']
         self.df_basic['cap'] = 'temp n/a'
         self.df_basic['price'] = 'temp n/a'
 
@@ -132,7 +221,7 @@ class PeerGroup(Company):
 
         result_list = []
 
-        for metric in self.companies['c1'].df_value.index:
+        for metric in self.companies[primary_stock].df_value.index:
             for company in self.companies.values():
 
                 result_list.append(company.df_value.loc[metric])
@@ -154,7 +243,7 @@ class PeerGroup(Company):
 
         result_list = []
 
-        for metric in self.companies['c1'].df_mgmt.index:
+        for metric in self.companies[primary_stock].df_mgmt.index:
             for company in self.companies.values():
                 result_list.append(company.df_mgmt.loc[metric])
             
@@ -179,7 +268,7 @@ class PeerGroup(Company):
 
         result_list = []
 
-        for metric in self.companies['c1'].df_ins.index:
+        for metric in self.companies[primary_stock].df_ins.index:
             for company in self.companies.values():
                 result_list.append(company.df_ins.loc[metric])
             
@@ -208,7 +297,7 @@ class PeerGroup(Company):
 
         result_list = []
 
-        for metric in self.companies['c1'].div_dfs[0].index:
+        for metric in self.companies[primary_stock].div_dfs[0].index:
             for company in self.companies.values():
                 result_list.append(company.div_dfs[0].loc[metric])
             
@@ -233,7 +322,7 @@ class PeerGroup(Company):
 
         result_list = []
 
-        for metric in self.companies['c1'].df_pub_sent.index:
+        for metric in self.companies[primary_stock].df_pub_sent.index:
             for company in self.companies.values():
                 result_list.append(company.df_pub_sent.loc[metric])
             
@@ -256,8 +345,8 @@ class PeerGroup(Company):
         """Set self.div_dfs values"""
 
         df_com_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Company News'])
-        df_sec_news = obb.common.news(self.companies['c1'].df_basic.loc['sector'][0] + 'Sector News Stock Market', sort='published').head(50)
-        df_ind_news = obb.common.news(self.companies['c1'].df_basic.loc['industry'][0] + 'Industry News Stock Market', sort='published').head(50)
+        df_sec_news = obb.common.news(self.companies[primary_stock].df_basic.loc['sector'][0] + 'Sector News Stock Market', sort='published').head(50)
+        df_ind_news = obb.common.news(self.companies[primary_stock].df_basic.loc['industry'][0] + 'Industry News Stock Market', sort='published').head(50)
 
         self.news_dfs = [df_com_news, df_sec_news, df_ind_news]
 
@@ -277,7 +366,7 @@ class PeerGroup(Company):
 
         result_list = []
 
-        for metric in self.companies['c1'].df_esg.index:
+        for metric in self.companies[primary_stock].df_esg.index:
             for company in self.companies.values():
                 result_list.append(company.df_esg.loc[metric])
             

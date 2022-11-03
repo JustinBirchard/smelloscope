@@ -548,10 +548,10 @@ def set_scores_ins(company, peer_group):
     elif it >= 0.03:
         company.score_card['ins'].loc['i03'][0] = 4
 
-    elif it < 0.03 and io >= .015:
+    elif it < 0.03 and it >= 0.015:
         company.score_card['ins'].loc['i03'][0] = 3
 
-    elif it < 0.015 and io >= 0:
+    elif it < 0.015 and it >= 0:
         company.score_card['ins'].loc['i03'][0] = 1
 
     elif it < 0:
