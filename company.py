@@ -1,8 +1,8 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
 """
-#* version 0.9.6.1
-#* last updated 11/3/22
+#* Version 0.9.8
+#* last updated 11/4/22
 
 from stocklist import stocks
 from copy import deepcopy
@@ -10,6 +10,9 @@ from openbb_terminal.api import openbb as obb
 import pandas as pd
 from dataclasses import dataclass, field
 from IPython.display import display
+
+# Setting display options for viewing dataframes in Lab
+pd.set_option('display.float_format', lambda x: '%.4f' % x)
 
 # Retrieving the first stock in stocks and using as the primary stock
 primary_stock = stocks[0]
@@ -217,14 +220,26 @@ class PeerGroup(Company):
         self.df_basic = self.df_basic.T
 
     def set_df_value(self):
-        """Set self.df_value values"""
+        """Set self.df_value by calculating average value for each metric in the 
+           Value category and assigning it to PeerGroup object.
+
+           Metrics that are discarded from calculation if:
+           1) They are < 0 or > 50
+           2) They have 'n/a' value
+        """
 
         result_list = []
 
         for metric in self.companies[primary_stock].df_value.index:
             for company in self.companies.values():
+                value = company.df_value.loc[metric][0]
 
-                result_list.append(company.df_value.loc[metric])
+                if metric not in ['tca_mrfy', 'tld_mrfy', 'tca_div_tld'] and value != 'n/a':
+                    if value >= 0 and value <= 50: 
+                        result_list.append(company.df_value.loc[metric])
+
+                elif metric == 'tca_mrfy' or metric == 'tld_mrfy' or metric == 'tca_div_tld':
+                    result_list.append(company.df_value.loc[metric])
 
             # discarding series objects that hold string values
             result_list = [series for series in result_list if not isinstance(series[0], str)]
@@ -236,17 +251,35 @@ class PeerGroup(Company):
             self.df_value[metric] = sum / len(result_list)
             result_list.clear()
 
+        self.df_value = self.df_value.round(4)
         self.df_value = self.df_value.T
 
     def set_df_mgmt(self):
-        """Set self.df_mgmt values"""
+        """Set self.df_mgt by calculating average value for each metric 
+           in the Management category and assigning it to PeerGroup object.
+
+           Percentage based values are discarded from calculation if 
+           they are < -1 or > 1
+           
+           Ratio based values are discarded if they are < 0 or >= 8
+        """
 
         result_list = []
 
         for metric in self.companies[primary_stock].df_mgmt.index:
             for company in self.companies.values():
-                result_list.append(company.df_mgmt.loc[metric])
-            
+                value = company.df_mgmt.loc[metric][0]
+                special_keys = ['cr_mrq', 'cr_mrfy', 'cr_5yr_avg', 
+                                'dte_mrq', 'dte_ttm', 'dte_5yr_avg']
+
+                if metric not in special_keys and value != 'n/a':
+                    if value >= -1 and value <= 1: 
+                        result_list.append(company.df_mgmt.loc[metric])
+
+                elif metric in special_keys and value != 'n/a':
+                    if value >= 0 and value <= 8: 
+                        result_list.append(company.df_mgmt.loc[metric])
+           
             result_list = [series for series in result_list if not isinstance(series[0], str)]
 
             sum = 0
@@ -261,11 +294,14 @@ class PeerGroup(Company):
 
             result_list.clear()
 
+        self.df_mgmt = self.df_mgmt.round(4)
         self.df_mgmt = self.df_mgmt.T
 
     def set_df_ins(self):
-        """Set self.df_ins values"""
-
+        """Set self.df_ins by calculating average value for each metric 
+           in the Management category and assigning it to PeerGroup object.
+           'n/a' values are discarded
+        """
         result_list = []
 
         for metric in self.companies[primary_stock].df_ins.index:
@@ -286,10 +322,17 @@ class PeerGroup(Company):
 
             result_list.clear()
 
+        self.df_ins = self.df_ins.round(4)
         self.df_ins = self.df_ins.T
 
     def set_div_dfs(self):
-        """Set self.div_dfs values"""
+        """Set self.div_dfs[0] and self.div_dfs[1] by calculating average value 
+           for each applicable metric in the Dividend category and assigning it 
+           to PeerGroup object.
+           'n/a' values are discarded.
+           self.div_dfs[0] will be set as 'n/a' as that dataframe is a 
+           line-by-line dividend history report and doesn't makes sense for PeerGroup.
+        """
         self.df_div = pd.DataFrame()
         self.df_div_his = pd.DataFrame({'Data N/A': 'n/a'}, index=[0]).T
         self.div_dfs.append(self.df_div)
@@ -315,10 +358,14 @@ class PeerGroup(Company):
 
             result_list.clear()
 
+        self.div_dfs[0] = self.div_dfs[0].round(4)
         self.div_dfs[0] = self.div_dfs[0].T
 
     def set_df_pub_sent(self):
-        """Set self.df_pub_sent values"""
+        """Set self.df_pub_sent by calculating average value for each metric 
+           in the Public Sentiment category and assigning it to PeerGroup object.
+           'n/a' values are discarded
+        """
 
         result_list = []
 
@@ -339,10 +386,13 @@ class PeerGroup(Company):
 
             result_list.clear()
 
+        self.df_pub_sent = self.df_pub_sent.round(4)
         self.df_pub_sent = self.df_pub_sent.T
 
     def set_news_dfs(self):
-        """Set self.div_dfs values"""
+        """Set self.news_dfs values. 
+           self.news_dfs[0] will be set to 'n/a' as it is company specific.
+        """
 
         df_com_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Company News'])
         df_sec_news = obb.common.news(self.companies[primary_stock].df_basic.loc['sector'][0] + 'Sector News Stock Market', sort='published').head(50)
@@ -351,6 +401,10 @@ class PeerGroup(Company):
         self.news_dfs = [df_com_news, df_sec_news, df_ind_news]
 
     def set_analyst_data(self):
+        """Set self.analyst_data values
+           self.analyst_data[0] dataframe will be set with 'n/a' values as it 
+           is a company spcefic data point.
+        """
         df_rating_30d = pd.DataFrame({'Data N/A': 'n/a'}, index=['df_rating_30d']).T
         peer_df_rot_3mo = pd.DataFrame({'Strong Buy': 0, 'Buy': 0, 'Hold': 0, 'Sell': 0, 'Strong Sell': 0}, index=['Last 3mo']).T
 
@@ -362,8 +416,10 @@ class PeerGroup(Company):
         self.analyst_data = [df_rating_30d, peer_df_rot_3mo]
 
     def set_df_esg(self):
-        """Set self.df_pub_sent values"""
-
+        """Set self.df_esg by calculating average value for each metric 
+           in the ESG category and assigning it to PeerGroup object.
+           'n/a' values are discarded
+        """
         result_list = []
 
         for metric in self.companies[primary_stock].df_esg.index:
@@ -383,4 +439,5 @@ class PeerGroup(Company):
 
             result_list.clear()
 
+        self.df_esg = self.df_esg.round(4)
         self.df_esg = self.df_esg.T

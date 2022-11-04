@@ -1,6 +1,6 @@
 # sniffer.py
-#* version 0.9.6
-#* last updated 11/2/22
+#* Version 0.9.8
+#* last updated 11/4/22
 """A collection of functions used for analyzing the data in 
    Company objects.
 
@@ -236,13 +236,13 @@ def set_scores_value(company, peer_group):
     if tca_div_tld == 'n/a':
         company.score_card['value'].loc['v08'][0] = 0
 
-    elif tca_div_tld >= 1.1:
+    elif tca_div_tld >= 1.3:
         company.score_card['value'].loc['v08'][0] = 2
 
-    elif tca_div_tld < 1.1 and tca_div_tld >= 0.9:
+    elif tca_div_tld < 1.3 and tca_div_tld >= 1:
         company.score_card['value'].loc['v08'][0] = 1
 
-    elif tca_div_tld < 0.9:
+    elif tca_div_tld < 1:
         company.score_card['value'].loc['v08'][0] = 0
 
     else:
@@ -252,10 +252,10 @@ def set_scores_value(company, peer_group):
     if tca_div_tld == 'n/a':
         company.score_card['value'].loc['v09'][0] = 0
 
-    elif tca_div_tld >= (peer_tca_div_tld * 1.2):
+    elif tca_div_tld >= (peer_tca_div_tld * 1.3):
         company.score_card['value'].loc['v09'][0] = 2
 
-    elif tca_div_tld < (peer_tca_div_tld * 1.2) and tca_div_tld > peer_tca_div_tld:
+    elif tca_div_tld < (peer_tca_div_tld * 1.3) and tca_div_tld > peer_tca_div_tld:
         company.score_card['value'].loc['v09'][0] = 1
 
     elif tca_div_tld <= peer_tca_div_tld:
@@ -266,22 +266,22 @@ def set_scores_value(company, peer_group):
 
     #?---------------------------------------------------------------------- v10
 
-    if pts_ttm == 'n/a' or tca_div_tld == 'n/a':
+    if pts_ttm == 'n/a':
         company.score_card['value'].loc['v10'][0] = 0
 
-    elif pts_ttm < (peer_pts_ttm * 0.9) and tca_div_tld >= 1.1:
+    elif pts_ttm < (peer_pts_ttm * 0.8) and tca_div_tld >= 1.3:
         company.score_card['value'].loc['v10'][0] = 4
 
-    elif pts_ttm <= (peer_pts_ttm * 0.9) and tca_div_tld < 1.1 and tca_div_tld >= 0.95:
+    elif pts_ttm <= (peer_pts_ttm * 0.8) and tca_div_tld < 1.3 and tca_div_tld >= 1.05:
         company.score_card['value'].loc['v10'][0] = 3
 
-    elif pts_ttm <= (peer_pts_ttm * 0.9) and tca_div_tld < 0.95 and tca_div_tld >= 0.8:
+    elif pts_ttm <= (peer_pts_ttm * 0.9) and tca_div_tld < 1.05 and tca_div_tld >= 0.95:
         company.score_card['value'].loc['v10'][0] = 2
 
-    elif pts_ttm > (peer_pts_ttm * 0.9) and pts_ttm <= (peer_pts_ttm * 1.1) and tca_div_tld >= 0.8:
+    elif pts_ttm > (peer_pts_ttm * 0.9) and pts_ttm <= peer_pts_ttm and tca_div_tld >= 0.95:
         company.score_card['value'].loc['v10'][0] = 1
 
-    elif pts_ttm > (peer_pts_ttm * 0.9) or tca_div_tld < 0.8:
+    elif pts_ttm > peer_pts_ttm or tca_div_tld < 0.95:
         company.score_card['value'].loc['v10'][0] = 0
 
     else:
@@ -318,6 +318,7 @@ def set_scores_mgmt(company, peer_group):
     peer_roe_ttm = peer_group.df_mgmt.loc['roe_ttm'][0]
     roe_5yr_avg = company.df_mgmt.loc['roe_5yr_avg'][0]
     dte_mrq = company.df_mgmt.loc['dte_mrq'][0]
+    peer_dte_mrq = peer_group.df_mgmt.loc['dte_mrq'][0]
     dte_5yr_avg = company.df_mgmt.loc['dte_5yr_avg'][0]
     gpr_mrfy = company.df_mgmt.loc['gpr_mrfy'][0]
     peer_gpr_mrfy = peer_group.df_mgmt.loc['gpr_mrfy'][0]
@@ -332,8 +333,11 @@ def set_scores_mgmt(company, peer_group):
     if roa_ttm == 'n/a':
         company.score_card['mgmt'].loc['m01'][0] = 0
 
-    elif roa_ttm >= (peer_roa_ttm * 1.1):
-        company.score_card['mgmt'].loc['m01'][0] = 3
+    elif roa_ttm >= (peer_roa_ttm * 1.3):
+        company.score_card['mgmt'].loc['m01'][0] = 4
+
+    elif roa_ttm < (peer_roa_ttm * 1.3) and roa_ttm >= (peer_roa_ttm * 1.1):
+        company.score_card['mgmt'].loc['m01'][0] = 2
 
     elif roa_ttm < (peer_roa_ttm * 1.1) and roa_ttm >= peer_roa_ttm:
         company.score_card['mgmt'].loc['m01'][0] = 1
@@ -349,13 +353,13 @@ def set_scores_mgmt(company, peer_group):
     if roa_ttm == 'n/a':
         company.score_card['mgmt'].loc['m02'][0] = 0
 
-    elif roa_ttm > (roa_5yr_avg * 1.1):
+    elif roa_ttm > (roa_5yr_avg * 1.2):
         company.score_card['mgmt'].loc['m02'][0] = 3
 
-    elif roa_ttm <= (roa_5yr_avg * 1.1) and roa_ttm >= (roa_5yr_avg * 0.95):
+    elif roa_ttm <= (roa_5yr_avg * 1.2) and roa_ttm >= roa_5yr_avg:
         company.score_card['mgmt'].loc['m02'][0] = 1
 
-    elif roa_ttm < (roa_5yr_avg * 0.95):
+    elif roa_ttm < roa_5yr_avg:
         company.score_card['mgmt'].loc['m02'][0] = 0
 
     else:
@@ -366,13 +370,13 @@ def set_scores_mgmt(company, peer_group):
     if roe_ttm == 'n/a':
         company.score_card['mgmt'].loc['m03'][0] = 0
 
-    elif roe_ttm >= (peer_roe_ttm * 1.1):
-        company.score_card['mgmt'].loc['m03'][0] = 3
+    elif roe_ttm >= (peer_roe_ttm * 1.2):
+        company.score_card['mgmt'].loc['m03'][0] = 2
 
-    elif roe_ttm < (peer_roe_ttm * 1.1) and roe_ttm >= peer_roe_ttm:
+    elif roe_ttm < (peer_roe_ttm * 1.2) and roe_ttm >= (peer_roe_ttm * 1.05):
         company.score_card['mgmt'].loc['m03'][0] = 1
 
-    elif roe_ttm < peer_roe_ttm:
+    elif roe_ttm < (peer_roe_ttm * 1.05):
         company.score_card['mgmt'].loc['m03'][0] = 0
 
     else:
@@ -383,13 +387,13 @@ def set_scores_mgmt(company, peer_group):
     if roe_ttm == 'n/a':
         company.score_card['mgmt'].loc['m04'][0] = 0
 
-    elif roe_ttm > (roe_5yr_avg * 1.1):
+    elif roe_ttm > (roe_5yr_avg * 1.2):
         company.score_card['mgmt'].loc['m04'][0] = 3
 
-    elif roe_ttm <= (roe_5yr_avg * 1.1) and roe_ttm >= (roe_5yr_avg * 0.95):
+    elif roe_ttm <= (roe_5yr_avg * 1.2) and roe_ttm >= roe_5yr_avg:
         company.score_card['mgmt'].loc['m04'][0] = 1
 
-    elif roe_ttm < (roe_5yr_avg * 0.95):
+    elif roe_ttm < roe_5yr_avg:
         company.score_card['mgmt'].loc['m04'][0] = 0
 
     else:
@@ -397,16 +401,16 @@ def set_scores_mgmt(company, peer_group):
 
     #?---------------------------------------------------------------------- m05
 
-    if dte_mrq == 'n/a':
+    if dte_mrq == 'n/a' or dte_5yr_avg == 'n/a':
         company.score_card['mgmt'].loc['m05'][0] = 0
 
-    elif dte_mrq < (dte_5yr_avg * 0.85):
+    elif dte_mrq < (dte_5yr_avg * 0.85) and dte_mrq < (peer_dte_mrq * 0.85):
         company.score_card['mgmt'].loc['m05'][0] = 3
 
-    elif dte_mrq >= (dte_5yr_avg * 0.85) and dte_mrq <= dte_5yr_avg:
+    elif ((dte_mrq >= (dte_5yr_avg * 0.85)) and (dte_mrq <= dte_5yr_avg)) and ((dte_mrq >= (peer_dte_mrq * 0.85)) and (dte_mrq <= peer_dte_mrq)):
         company.score_card['mgmt'].loc['m05'][0] = 1
 
-    elif dte_mrq >= dte_5yr_avg:
+    elif dte_mrq > dte_5yr_avg or dte_mrq > peer_dte_mrq:
         company.score_card['mgmt'].loc['m05'][0] = 0
 
     else:

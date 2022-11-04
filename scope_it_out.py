@@ -1,7 +1,7 @@
 # scope_it_out.py
 # file previously called: smellogather.py
-#* Version 0.9.6.1
-#* Last update 11/3/22
+#* Version 0.9.8
+#* last updated 11/4/22
 
 """scope_it_out.py returns a list of Company objects and a PeerGroup 
    object, both of which are imported into the Smelloscope lab.
@@ -255,13 +255,13 @@ for company in peers:
             tld_mrfy = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]
 
         if tld_mrfy == 0:
-            tca_div_tld = 'n/a'
+            tca_div_tld = tca_mrfy
         else:
             tca_div_tld = tca_mrfy / tld_mrfy
 
     except KeyError:
         tld_mrfy = 0
-        tca_div_tld = 'n/a'
+        tca_div_tld = tca_mrfy
  
     ptb_mrq = try_it('P/B', 'data')
     ptb_mrfy = try_it('Ptb ratio', 'metrics')
@@ -290,7 +290,10 @@ for company in peers:
                              'pe_ttm': pe_ttm, 'pe_mrfy': pe_mrfy, 'pe_5yr_avg': pe_5yr_avg, 
                              'pfcf_ttm': pfcf_ttm, 'pfcf_mrfy': pfcf_mrfy, 'pfcf_5yr_avg': pfcf_5yr_avg, 
                              'pts_ttm': pts_ttm, 'pts_mrfy': pts_mrfy, 'pts_5yr_avg': pts_5yr_avg}, 
-                              index=['Value Metrics']).T
+                              index=['Value Metrics'])
+
+    df_value = df_value.round(4)
+    df_value = df_value.T
         
 ############## *** MANAGEMENT METRICS DATAFRAME *** ##############
 
@@ -319,7 +322,10 @@ for company in peers:
                             'roa_ttm': roa_ttm, 'roa_mrfy': roa_mrfy, 'roa_5yr_avg': roa_5yr_avg,
                             'gpr_mrfy': gpr_mrfy, 'pm_ttm': pm_ttm, 'cr_mrq': cr_mrq, 'cr_mrfy': cr_mrfy, 
                             'cr_5yr_avg': cr_5yr_avg, 'dte_mrq': dte_mrq, 'dte_ttm': dte_ttm,
-                            'dte_5yr_avg': dte_5yr_avg}, index=['Management Metrics']).T
+                            'dte_5yr_avg': dte_5yr_avg}, index=['Management Metrics'])
+
+    df_mgmt = df_mgmt.round(4)
+    df_mgmt = df_mgmt.T
         
 ############## *** INSIDER & INSTITUION DATAFRAME *** ##############
 
@@ -331,7 +337,10 @@ for company in peers:
 
     # DataFrame will be added to company object
     df_ins = pd.DataFrame({'io': io, 'it': it, 'inst_o': inst_o, 
-                           'inst_t': inst_t}, index=['Insider & Insitution Data']).T
+                           'inst_t': inst_t}, index=['Insider & Insitution Data'])
+
+    df_ins = df_ins.round(4)
+    df_ins = df_ins.T
     
 ############## *** DIVIDEND DATAFRAMES *** ##############
 # Note that there are 2 Dividend DataFrames: df_div & df_div_his
@@ -379,8 +388,11 @@ for company in peers:
     
     # DataFrame will be added to company object
     df_pub_sent = pd.DataFrame({'twits_perc': twits_perc, 'shrt_int': shrt_int, 
-                                'news_sent': news_sent}, index=['Public Sentiment Metrics']).T
-        
+                                'news_sent': news_sent}, index=['Public Sentiment Metrics'])
+
+    df_pub_sent = df_pub_sent.round(4)
+    df_pub_sent = df_pub_sent.T
+
 ############## *** COMPANY, SECTOR, & INDUSTRY NEWS *** ##############
     
     df_com_news = obb.common.news(name, sort='published').head(20)
@@ -420,13 +432,16 @@ for company in peers:
     esg_perf = try_it('Esg performance', 'esg')
     
     df_esg = pd.DataFrame({'enviro': enviro, 'govern': govern, 'social': social,
-                           'total_esg': total_esg, 'esg_perf': esg_perf}, index=['ESG']).T
+                           'total_esg': total_esg, 'esg_perf': esg_perf}, index=['ESG'])
+
+    df_esg = df_esg.round(4)
+    df_esg = df_esg.T
 
 #*#################################################################################    
 ############## *** Creating Company objects: *** #################################  
 #*#################################################################################
 
-    # Adding new key (eg- 'c1', 'c2', etc) and value (Company object) to companies
+    # Adding new key (stock ticker) and value (Company object) to companies
     companies[ticker] = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, 
                                         df_pub_sent, news_dfs, analyst_data, df_esg)
 

@@ -7,6 +7,9 @@
    Save changes before running TheSmelloscope.
 """
 
+# stocks = ['GOOGL', 'META']
+stocks = ['GOOGL', 'META', 'SHOP', 'BIDU', 'TTD', 'ZS', 'ETSY', 'AKAM', 'ZG', 'VEEV']
+
 #* DRUG MANUFACTURERS
 # stocks = ['ZTS', 'TAK', 'NBIX', 'UTHR', 'JAZZ', 'CTLT', 'IONS']
 
@@ -20,7 +23,7 @@
 # stocks = ['DIS', 'NKE', 'CMCSA', 'NFLX', 'SONY', 'CHTR']
 
 #* Computer software/information
-stocks = ['GOOGL', 'MSFT', 'AAPL', 'CRM', 'ADBE', 'INTU', 'ORCL', 'SAP', 'VMW', 'ADSK', 'SNPS', 'CDNS']
+#stocks = ['GOOGL', 'MSFT', 'AAPL', 'CRM', 'ADBE', 'INTU', 'ORCL', 'SAP', 'VMW', 'ADSK', 'SNPS', 'CDNS']
 
 #* Financial services
 # stocks = ['MA', 'EFX', 'WU', 'V', 'ACN', 'SPGI', 'ADP', 'FISV', 'FIS', 'GPN', 'BR', 'FLT', 'PYPL', 'INTU']
@@ -47,4 +50,4 @@ stocks = ['GOOGL', 'MSFT', 'AAPL', 'CRM', 'ADBE', 'INTU', 'ORCL', 'SAP', 'VMW', 
 
 #! stocks not available on Financial Modeling Prep API:
 # DDOG, CRWD, RIVN, LCID, NIO, LI, ONEM, CANO, MRVI, CERE, NARI, DNA, BEAM
-# VIR, IMCR, PCVX, RLAY, UBER, DOCS, PGNY, MEDP, OGN
+# VIR, IMCR, PCVX, RLAY, UBER, DOCS, PGNY, MEDP, OGN, SNOW, DASH
