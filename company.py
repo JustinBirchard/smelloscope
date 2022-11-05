@@ -1,7 +1,7 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
 """
-#* Version 0.9.8.1
+#* Version 0.9.8.2
 #* last updated 11/5/22
 
 from stocklist import stocks
@@ -31,7 +31,9 @@ scores_mgmt = pd.DataFrame({'mgmt': {'m01': None, 'm02': None,
                                      'm03': None, 'm04': None, 
                                      'm05': None, 'm06': None, 
                                      'm07': None, 'm08': None, 
-                                     'm09': None, 'm10': None}})
+                                     'm09': None, 'm10': None,
+                                     'm11': None, 'm12': None,
+                                     'm13': None}})
 
 scores_ins = pd.DataFrame({'ins': {'i01': None, 'i02': None, 
                                    'i03': None, 'i04': None}})
@@ -45,7 +47,7 @@ scores_pub_sent = pd.DataFrame({'pub_sent': {'p01': None, 'p02': None,
 
 scores_analyst_data = pd.DataFrame({'analyst_data': {'a01': None, 'a02': None,
                                                      'a03': None, 'a04': None,
-                                                     'a05': None}})
+                                                     'a05': None, 'a06': None}})
 
 scores_esg = pd.DataFrame({'esg': {'e01': None, 'e02': None,
                                    'e03': None, 'e04': None,
@@ -177,6 +179,7 @@ class Company:
         elif data_type == 'analyst' and value_name == 'analyst':
             print(self.df_basic.loc['name'][0] + '\n')
             print(f'Warren Buffet Score = {self.analyst_data[2]}')
+            print(f'Forward P/E = {self.analyst_data[3]}')
             display(self.analyst_data[1])
             print('\n')
 

@@ -1,6 +1,6 @@
 # scope_it_out.py
 # file previously called: smellogather.py
-#* Version 0.9.8.1
+#* Version 0.9.8.2
 #* last updated 11/5/22
 
 """scope_it_out.py returns a list of Company objects and a PeerGroup 
@@ -156,6 +156,26 @@ def try_it(string, calltype, avg=False, p2f_bool=False):
         except AttributeError:
             return 'n/a'
 
+    elif calltype == 'ratios' and avg is True:
+        try:
+            return df_ratios.loc[string]['5yr Avg']
+            
+        except KeyError:
+            return 'n/a'
+
+        except AttributeError:
+            return 'n/a'       
+
+    elif calltype == 'ratios' and avg is False:
+        try:
+            return df_ratios.loc[string][0]
+            
+        except KeyError:
+            return 'n/a'
+
+        except AttributeError:
+            return 'n/a'   
+
 # At the end of the for loop, company objects will be added to the dictionary
 # Key will be "c1", "c2", etc and value will be Company object
 companies = {}
@@ -167,7 +187,8 @@ for company in peers:
 
 ############## *** Making calls to OpenBB to get collections of data: *** ###################
 # Sequences in this section will be massaged and used later to set company object variables #
-  
+
+# BEGIN df_metrics
     # fmp's api will sometimes throw error and return an empty list instead of requested dataframe
     df_metrics = obb.stocks.fa.fmp_metrics(stock)                                                                                    
     if not isinstance(df_metrics, pd.DataFrame):
@@ -201,6 +222,29 @@ for company in peers:
     
     # Creating new column that will hold the average of each row
     df_metrics['5yr Avg'] = df_metrics.mean(axis=1)
+# END df_metrics
+
+# BEGIN df_ratios
+    df_ratios = obb.stocks.fa.fmp_ratios(stock)
+
+    # Where possible, converting strings to floats in df_ratios    
+    float_error_set = set() 
+    for column in df_ratios.columns:
+        
+        for row in df_ratios.index:
+            
+            try:
+                df_ratios[column][row] = float(df_ratios[column][row])
+                
+            except ValueError:
+                    float_error_set.add(row)
+                   
+    # Removing any row from df_ratios where values cannot be converted to float
+    df_ratios = df_ratios.drop(index= float_error_set)
+    
+    # Creating new column that will hold the average of each row
+    df_ratios['5yr Avg'] = df_ratios.mean(axis=1)
+# END df_ratios
 
     # Getting Stock Twits sentiment data as a tuple:
     tuple_twits = obb.stocks.ba.bullbear(stock)
@@ -309,9 +353,15 @@ for company in peers:
     roe_mrfy = df_metrics.loc['Roe'][0]
     roe_5yr_avg = df_metrics.loc['Roe']['5yr Avg']
 
-    gpr_mrfy = float(obb.stocks.fa.fmp_income(stock).loc['Gross profit ratio'][0])
-    
-    pm_ttm = try_it('Profit Margin', 'data', p2f_bool=True)
+    npm_mrfy = try_it('Net profit margin', 'ratios')
+    npm_5yr_avg = try_it('Net profit margin', 'ratios', avg=True)
+    opm_mrfy = try_it('Operating profit margin', 'ratios')
+    opm_5yr_avg = try_it('Operating profit margin', 'ratios', avg=True)
+    gpm_mrfy = try_it('Gross profit margin', 'ratios')
+    gpm_5yr_avg = try_it('Gross profit margin', 'ratios', avg=True)
+
+#    gpr_mrfy = float(obb.stocks.fa.fmp_income(stock).loc['Gross profit ratio'][0])   
+#    pm_ttm = try_it('Profit Margin', 'data', p2f_bool=True)
 
     cr_mrq = try_it('Current Ratio', 'data')
     cr_mrfy = df_metrics.loc['Current ratio'][0]
@@ -322,11 +372,14 @@ for company in peers:
     dte_5yr_avg = df_metrics.loc['Debt to equity']['5yr Avg']
     
     # DataFrame will be added to company object    
-    df_mgmt = pd.DataFrame({'roe_ttm': roe_ttm, 'roe_mrfy': roe_mrfy, 'roe_5yr_avg': roe_5yr_avg,
-                            'roa_ttm': roa_ttm, 'roa_mrfy': roa_mrfy, 'roa_5yr_avg': roa_5yr_avg,
-                            'gpr_mrfy': gpr_mrfy, 'pm_ttm': pm_ttm, 'cr_mrq': cr_mrq, 'cr_mrfy': cr_mrfy, 
-                            'cr_5yr_avg': cr_5yr_avg, 'dte_mrq': dte_mrq, 'dte_ttm': dte_ttm,
-                            'dte_5yr_avg': dte_5yr_avg}, index=['Management Metrics'])
+    df_mgmt = pd.DataFrame({'roa_ttm': roa_ttm, 'roa_mrfy': roa_mrfy, 'roa_5yr_avg': roa_5yr_avg,
+                            'roe_ttm': roe_ttm, 'roe_mrfy': roe_mrfy, 'roe_5yr_avg': roe_5yr_avg,
+                            'npm_mrfy': npm_mrfy, 'npm_5yr_avg': npm_5yr_avg,
+                            'opm_mrfy': opm_mrfy, 'opm_5yr_avg': opm_5yr_avg,
+                            'gpm_mrfy': gpm_mrfy, 'gpm_5yr_avg': gpm_5yr_avg,                         
+                            'cr_mrq': cr_mrq, 'cr_mrfy': cr_mrfy, 'cr_5yr_avg': cr_5yr_avg, 
+                            'dte_mrq': dte_mrq, 'dte_ttm': dte_ttm, 'dte_5yr_avg': dte_5yr_avg},
+                            index=['Management Metrics'])
 
     df_mgmt = df_mgmt.round(4)
     df_mgmt = df_mgmt.T
@@ -425,8 +478,10 @@ for company in peers:
     # Logging the API output in output_log.log    
     logging.info(f.getvalue())
 
+    fwd_pe = try_it('Forward P/E', 'data')
+
     # Creating list that holds Analyst data
-    analyst_data = [df_rating_30d, df_rot_3mo, wb_score]
+    analyst_data = [df_rating_30d, df_rot_3mo, wb_score, fwd_pe]
     
 ############## *** ESG RATINGS *** ##############
     enviro = try_it('Environment score', 'esg')
