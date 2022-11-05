@@ -1,8 +1,8 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
 """
-#* Version 0.9.8
-#* last updated 11/4/22
+#* Version 0.9.8.1
+#* last updated 11/5/22
 
 from stocklist import stocks
 from copy import deepcopy
@@ -24,7 +24,8 @@ scores_value = pd.DataFrame({'value': {'v01': None, 'v02': None,
                                        'v05': None, 'v06': None, 
                                        'v07': None, 'v08': None, 
                                        'v09': None, 'v10': None, 
-                                       'v11': None}})
+                                       'v11': None, 'v12': None,
+                                       'v13': None}})
 
 scores_mgmt = pd.DataFrame({'mgmt': {'m01': None, 'm02': None,
                                      'm03': None, 'm04': None, 

@@ -1,7 +1,7 @@
 # scope_it_out.py
 # file previously called: smellogather.py
-#* Version 0.9.8
-#* last updated 11/4/22
+#* Version 0.9.8.1
+#* last updated 11/5/22
 
 """scope_it_out.py returns a list of Company objects and a PeerGroup 
    object, both of which are imported into the Smelloscope lab.
@@ -283,13 +283,17 @@ for company in peers:
     pts_mrfy = try_it('Price to sales ratio', 'metrics')
     pts_5yr_avg = try_it('Price to sales ratio', 'metrics', avg=True)
 
+    graham_mrfy = try_it('Graham number', 'metrics')
+    peg = try_it('PEG', 'data')
+
     # DataFrame will be added to company object   
     df_value = pd.DataFrame({'tca_mrfy': tca_mrfy, 'tld_mrfy': tld_mrfy, 'tca_div_tld': tca_div_tld,
                              'ptb_mrq': ptb_mrq, 'ptb_mrfy': ptb_mrfy, 'ptb_5yr_avg': ptb_5yr_avg, 
                              'bvps_mrq': bvps_mrq, 'bvps_mrfy': bvps_mrfy, 'bvps_5yr_avg': bvps_5yr_avg, 
                              'pe_ttm': pe_ttm, 'pe_mrfy': pe_mrfy, 'pe_5yr_avg': pe_5yr_avg, 
                              'pfcf_ttm': pfcf_ttm, 'pfcf_mrfy': pfcf_mrfy, 'pfcf_5yr_avg': pfcf_5yr_avg, 
-                             'pts_ttm': pts_ttm, 'pts_mrfy': pts_mrfy, 'pts_5yr_avg': pts_5yr_avg}, 
+                             'pts_ttm': pts_ttm, 'pts_mrfy': pts_mrfy, 'pts_5yr_avg': pts_5yr_avg, 
+                             'graham_mrfy': graham_mrfy, 'peg': peg}, 
                               index=['Value Metrics'])
 
     df_value = df_value.round(4)
