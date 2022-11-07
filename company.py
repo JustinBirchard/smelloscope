@@ -1,8 +1,8 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
 """
-#* Version 0.9.8.2
-#* last updated 11/5/22
+#* Version 0.9.8.3
+#* last updated 11/6/22
 
 from stocklist import stocks
 from copy import deepcopy
@@ -251,8 +251,14 @@ class PeerGroup(Company):
             sum = 0
             for value in result_list:
                 sum += value
+            
+            try:
+                self.df_value[metric] = sum / len(result_list)
 
-            self.df_value[metric] = sum / len(result_list)
+            except ZeroDivisionError:
+                self.df_value[metric] = 'n/a'
+
+
             result_list.clear()
 
         self.df_value = self.df_value.round(4)

@@ -1,6 +1,6 @@
 # sniffer.py
-#* Version 0.9.8.2
-#* last updated 11/5/22
+#* Version 0.9.8.3
+#* last updated 11/6/22
 """A collection of functions used for analyzing the data in 
    Company objects.
 
@@ -114,12 +114,12 @@ def set_scores_value(company, peer_group):
     price = company.df_basic.loc['price'][0]
     peg = company.df_value.loc['peg'][0]
 
-    #?---------------------------------------------------------------------- v01
+    #??---------------------------------------------------------------------- v01
     if pe_ttm == 'n/a':
         company.score_card['value'].loc['v01'][0] = 0
 
     elif pe_ttm <= (peer_pe_ttm * 0.9):
-        company.score_card['value'].loc['v01'][0] = 3
+        company.score_card['value'].loc['v01'][0] = 2
 
     elif pe_ttm <= (peer_pe_ttm * 1.05):
         company.score_card['value'].loc['v01'][0] = 1
@@ -130,7 +130,7 @@ def set_scores_value(company, peer_group):
     else:
         print('v01 case slipped through')
 
-    #?---------------------------------------------------------------------- v02
+    #??---------------------------------------------------------------------- v02
     if pe_ttm == 'n/a' or pe_5yr_avg == 'n/a':
         company.score_card['value'].loc['v02'][0] = 0
 
@@ -149,17 +149,14 @@ def set_scores_value(company, peer_group):
     else:
         print('v02 case slipped through')
 
-    #?----------------------------------------------------------------------  v03
+    #??----------------------------------------------------------------------  v03
     if ptb_mrq == 'n/a' or roe_ttm == 'n/a':
         company.score_card['value'].loc['v03'][0] = 0
 
     elif ptb_mrq <= (peer_ptb_mrq * 0.9) and roe_ttm >= (peer_roe_ttm * 1.1):
-        company.score_card['value'].loc['v03'][0] = 3
-
-    elif ptb_mrq <= (peer_ptb_mrq * 1.05) and roe_ttm >= (peer_roe_ttm * .95):
         company.score_card['value'].loc['v03'][0] = 2
 
-    elif ptb_mrq >= (peer_ptb_mrq * 1.05) and roe_ttm <= (peer_roe_ttm * .95):
+    elif ptb_mrq <= (peer_ptb_mrq * 1.05) and roe_ttm >= (peer_roe_ttm * .95):
         company.score_card['value'].loc['v03'][0] = 1
 
     elif ptb_mrq > (peer_ptb_mrq * 1.05) or roe_ttm < (peer_roe_ttm * .95):
@@ -168,42 +165,36 @@ def set_scores_value(company, peer_group):
     else:
         print('v03 case slipped through')
 
-    #?---------------------------------------------------------------------- v04
+    #??---------------------------------------------------------------------- v04
     if ptb_mrq == 'n/a':
         company.score_card['value'].loc['v04'][0] = 0
 
-    elif ptb_mrq < 2:
-        company.score_card['value'].loc['v04'][0] = 2
-
-    elif ptb_mrq >= 2 and ptb_mrq <= 4:
+    elif ptb_mrq < 4:
         company.score_card['value'].loc['v04'][0] = 1
 
-    elif ptb_mrq > 4:
+    elif ptb_mrq >= 4:
         company.score_card['value'].loc['v04'][0] = 0
 
     else:
         print('v04 case slipped through')
 
-    #?---------------------------------------------------------------------- v05
+    #??---------------------------------------------------------------------- v05
     if ptb_mrq == 'n/a' or bvps_mrq == 'n/a':
         company.score_card['value'].loc['v05'][0] = 0
 
-    elif ptb_mrq <= (peer_ptb_mrq * 0.9) and bvps_mrq > (bvps_5yr_avg * 1.05):
-        company.score_card['value'].loc['v05'][0] = 3
-
-    elif ptb_mrq <= (peer_ptb_mrq * 0.9) and bvps_mrq >= (bvps_5yr_avg * 0.95):
+    elif ptb_mrq <= (peer_ptb_mrq * 0.9) and bvps_mrq > (bvps_5yr_avg * 1.1):
         company.score_card['value'].loc['v05'][0] = 2
 
-    elif ptb_mrq <= (peer_ptb_mrq * 1.05) and bvps_mrq >= (bvps_5yr_avg * 0.95):
+    elif ptb_mrq <= peer_ptb_mrq and bvps_mrq >= bvps_5yr_avg:
         company.score_card['value'].loc['v05'][0] = 1
 
-    elif ptb_mrq > (peer_ptb_mrq * 1.05) or bvps_mrq < (bvps_5yr_avg * 0.95):
+    elif ptb_mrq > peer_ptb_mrq or bvps_mrq < bvps_5yr_avg:
         company.score_card['value'].loc['v05'][0] = 0
 
     else:
         print('v05 case slipped through')
 
-    #?---------------------------------------------------------------------- v06
+    #??---------------------------------------------------------------------- v06
     if pfcf_ttm == 'n/a':
         company.score_card['value'].loc['v06'][0] = 0
 
@@ -219,7 +210,7 @@ def set_scores_value(company, peer_group):
     else:
         print('v06 case slipped through')
 
-    #?---------------------------------------------------------------------- v07
+    #??---------------------------------------------------------------------- v07
     if pfcf_ttm == 'n/a' or pfcf_5yr_avg == 'n/a':
         company.score_card['value'].loc['v07'][0] = 0
 
@@ -235,39 +226,36 @@ def set_scores_value(company, peer_group):
     else:
         print('v07 case slipped through')
 
-    #?---------------------------------------------------------------------- v08
+    #??---------------------------------------------------------------------- v08
     if tca_div_tld == 'n/a':
         company.score_card['value'].loc['v08'][0] = 0
 
-    elif tca_div_tld >= 1.3:
+    elif tca_div_tld >= 1.5:
         company.score_card['value'].loc['v08'][0] = 2
 
-    elif tca_div_tld < 1.3 and tca_div_tld >= 1:
+    elif tca_div_tld < 1.5 and tca_div_tld >= 1.1:
         company.score_card['value'].loc['v08'][0] = 1
 
-    elif tca_div_tld < 1:
+    elif tca_div_tld < 1.1:
         company.score_card['value'].loc['v08'][0] = 0
 
     else:
         print('v08 case slipped through')
 
-    #?---------------------------------------------------------------------- v09
+    #??---------------------------------------------------------------------- v09
     if tca_div_tld == 'n/a':
         company.score_card['value'].loc['v09'][0] = 0
 
-    elif tca_div_tld >= (peer_tca_div_tld * 1.3):
-        company.score_card['value'].loc['v09'][0] = 2
-
-    elif tca_div_tld < (peer_tca_div_tld * 1.3) and tca_div_tld > peer_tca_div_tld:
+    elif tca_div_tld >= (peer_tca_div_tld * 1.2):
         company.score_card['value'].loc['v09'][0] = 1
 
-    elif tca_div_tld <= peer_tca_div_tld:
+    elif tca_div_tld < (peer_tca_div_tld * 1.2):
         company.score_card['value'].loc['v09'][0] = 0
 
     else:
         print('v09 case slipped through')
 
-    #?---------------------------------------------------------------------- v10
+    #??---------------------------------------------------------------------- v10
 
     if pts_ttm == 'n/a':
         company.score_card['value'].loc['v10'][0] = 0
@@ -275,13 +263,13 @@ def set_scores_value(company, peer_group):
     elif pts_ttm < (peer_pts_ttm * 0.8) and tca_div_tld >= 1.3:
         company.score_card['value'].loc['v10'][0] = 4
 
-    elif pts_ttm >= (peer_pts_ttm * 0.8) and pts_ttm <= (peer_pts_ttm * 0.9) and tca_div_tld >= 1.3:
+    elif pts_ttm < (peer_pts_ttm * 0.9) and tca_div_tld >= 1.3:
         company.score_card['value'].loc['v10'][0] = 3
 
-    elif pts_ttm >= (peer_pts_ttm * 0.8) and pts_ttm <= (peer_pts_ttm * 0.9) and tca_div_tld >= 1.2:
+    elif pts_ttm < (peer_pts_ttm * 0.9) and tca_div_tld >= 1.1:
         company.score_card['value'].loc['v10'][0] = 2
 
-    elif pts_ttm > (peer_pts_ttm * 0.9) and pts_ttm <= peer_pts_ttm and tca_div_tld >= 1:
+    elif pts_ttm < peer_pts_ttm and tca_div_tld >= 1:
         company.score_card['value'].loc['v10'][0] = 1
 
     elif pts_ttm > peer_pts_ttm or tca_div_tld < 1:
@@ -294,13 +282,13 @@ def set_scores_value(company, peer_group):
     if pts_ttm == 'n/a' or pts_5yr_avg == 'n/a':
         company.score_card['value'].loc['v11'][0] = 0
 
-    elif pts_ttm <= (pts_5yr_avg * 0.9):
+    elif pts_ttm <= (pts_5yr_avg * 0.8):
         company.score_card['value'].loc['v11'][0] = 2
 
-    elif pts_ttm > (pts_5yr_avg * 0.9) and pts_ttm < (pts_5yr_avg * 1.05):
+    elif pts_ttm > (pts_5yr_avg * 0.8) and pts_ttm < pts_5yr_avg:
         company.score_card['value'].loc['v11'][0] = 1
 
-    elif pts_ttm > (pts_5yr_avg * 1.05):
+    elif pts_ttm > pts_5yr_avg:
         company.score_card['value'].loc['v11'][0] = 0
 
     else:
@@ -338,7 +326,7 @@ def set_scores_value(company, peer_group):
     else:
         print('v13 case slipped through')
 
-    #?---------------------------------------------------------------------- vTotal
+    #??---------------------------------------------------------------------- vTotal
     set_cat_total(company, 'value')
     
 
@@ -370,13 +358,13 @@ def set_scores_mgmt(company, peer_group):
     cr_5yr_avg = company.df_mgmt.loc['cr_5yr_avg'][0]
     peer_cr_mrq = peer_group.df_mgmt.loc['cr_mrq'][0]
 
-    #?---------------------------------------------------------------------- m01
+    #??---------------------------------------------------------------------- m01
 
     if roa_ttm == 'n/a':
         company.score_card['mgmt'].loc['m01'][0] = 0
 
     elif roa_ttm >= (peer_roa_ttm * 1.3):
-        company.score_card['mgmt'].loc['m01'][0] = 4
+        company.score_card['mgmt'].loc['m01'][0] = 3
 
     elif roa_ttm < (peer_roa_ttm * 1.3) and roa_ttm >= (peer_roa_ttm * 1.1):
         company.score_card['mgmt'].loc['m01'][0] = 2
@@ -390,7 +378,7 @@ def set_scores_mgmt(company, peer_group):
     else:
         print('m01 case slipped through')
 
-    #?---------------------------------------------------------------------- m02
+    #??---------------------------------------------------------------------- m02
 
     if roa_ttm == 'n/a':
         company.score_card['mgmt'].loc['m02'][0] = 0
@@ -407,7 +395,7 @@ def set_scores_mgmt(company, peer_group):
     else:
         print('m02 case slipped through')
 
-    #?---------------------------------------------------------------------- m03
+    #??---------------------------------------------------------------------- m03
 
     if roe_ttm == 'n/a':
         company.score_card['mgmt'].loc['m03'][0] = 0
@@ -424,13 +412,13 @@ def set_scores_mgmt(company, peer_group):
     else:
         print('m03 case slipped through')
 
-    #?---------------------------------------------------------------------- m04
+    #??---------------------------------------------------------------------- m04
 
     if roe_ttm == 'n/a':
         company.score_card['mgmt'].loc['m04'][0] = 0
 
     elif roe_ttm > (roe_5yr_avg * 1.2):
-        company.score_card['mgmt'].loc['m04'][0] = 3
+        company.score_card['mgmt'].loc['m04'][0] = 2
 
     elif roe_ttm <= (roe_5yr_avg * 1.2) and roe_ttm >= roe_5yr_avg:
         company.score_card['mgmt'].loc['m04'][0] = 1
@@ -441,7 +429,7 @@ def set_scores_mgmt(company, peer_group):
     else:
         print('m04 case slipped through')
 
-    #?---------------------------------------------------------------------- m05
+    #??---------------------------------------------------------------------- m05
 
     if dte_mrq == 'n/a' or dte_5yr_avg == 'n/a':
         company.score_card['mgmt'].loc['m05'][0] = 0
@@ -455,7 +443,7 @@ def set_scores_mgmt(company, peer_group):
     else:
         print('m05 case slipped through')
 
-    #?---------------------------------------------------------------------- m06
+    #??---------------------------------------------------------------------- m06
 
     if dte_mrq == 'n/a':
         company.score_card['mgmt'].loc['m06'][0] = 0
@@ -469,7 +457,7 @@ def set_scores_mgmt(company, peer_group):
     else:
         print('m06 case slipped through')
 
-    #?---------------------------------------------------------------------- m07
+    #??---------------------------------------------------------------------- m07
 
     if npm_mrfy == 'n/a':
         company.score_card['mgmt'].loc['m07'][0] = 0
@@ -486,35 +474,38 @@ def set_scores_mgmt(company, peer_group):
     else:
         print('m07 case slipped through')
 
-    #?---------------------------------------------------------------------- m08
+    #??---------------------------------------------------------------------- m08
 
     if npm_mrfy == 'n/a':
         company.score_card['mgmt'].loc['m08'][0] = 0
 
-    elif npm_mrfy > (peer_npm_mrfy * 1.1):
+    elif npm_mrfy >= (peer_npm_mrfy * 1.2):
+        company.score_card['mgmt'].loc['m08'][0] = 2
+
+    elif npm_mrfy < (peer_npm_mrfy * 1.2) and npm_mrfy >= peer_npm_mrfy:
         company.score_card['mgmt'].loc['m08'][0] = 1
 
-    elif npm_mrfy <= (peer_npm_mrfy * 1.1):
+    elif npm_mrfy < peer_npm_mrfy:
         company.score_card['mgmt'].loc['m08'][0] = 0
 
     else:
         print('m08 case slipped through')
 
-    #?---------------------------------------------------------------------- m09
+    #??---------------------------------------------------------------------- m09
 
     if opm_mrfy == 'n/a':
         company.score_card['mgmt'].loc['m09'][0] = 0
 
-    elif opm_mrfy > (opm_5yr_avg * 1.1):
+    elif opm_mrfy >= (opm_5yr_avg * 1.1):
         company.score_card['mgmt'].loc['m09'][0] = 1
 
-    elif opm_mrfy <= (opm_5yr_avg * 1.1):
+    elif opm_mrfy < (opm_5yr_avg * 1.1):
         company.score_card['mgmt'].loc['m09'][0] = 0
 
     else:
         print('m09 case slipped through')
 
-    #?---------------------------------------------------------------------- m10
+    #??---------------------------------------------------------------------- m10
 
     if gpm_mrfy == 'n/a':
         company.score_card['mgmt'].loc['m10'][0] = 0
@@ -528,7 +519,7 @@ def set_scores_mgmt(company, peer_group):
     else:
         print('m10 case slipped through')
 
-    #?---------------------------------------------------------------------- m11
+    #??---------------------------------------------------------------------- m11
 
     if cr_mrq == 'n/a':
         company.score_card['mgmt'].loc['m11'][0] = 0
@@ -545,7 +536,7 @@ def set_scores_mgmt(company, peer_group):
     else:
         print('m11 case slipped through')
 
-    #?---------------------------------------------------------------------- m12
+    #??---------------------------------------------------------------------- m12
 
     if cr_mrq == 'n/a':
         company.score_card['mgmt'].loc['m12'][0] = 0
@@ -559,7 +550,7 @@ def set_scores_mgmt(company, peer_group):
     else:
         print('m12 case slipped through')
 
-    #?---------------------------------------------------------------------- m13
+    #??---------------------------------------------------------------------- m13
 
     if cr_mrq == 'n/a':
         company.score_card['mgmt'].loc['m13'][0] = 0
@@ -574,7 +565,7 @@ def set_scores_mgmt(company, peer_group):
         print('m13 case slipped through')
 
 
-    #?---------------------------------------------------------------------- mTotal
+    #??---------------------------------------------------------------------- mTotal
     set_cat_total(company, 'mgmt')
 
 #*******  INSIDER & INSTITUION SCORING METHOD ******* 
@@ -586,7 +577,7 @@ def set_scores_ins(company, peer_group):
     peer_it = peer_group.df_ins.loc['it'][0]
     inst_t = company.df_ins.loc['inst_t'][0]
 
-    #?---------------------------------------------------------------------- i01
+    #??---------------------------------------------------------------------- i01
 
     if io == 'n/a':
         company.score_card['ins'].loc['i01'][0] = 0
@@ -603,7 +594,7 @@ def set_scores_ins(company, peer_group):
     else:
         print('i01 case slipped through')
 
-    #?---------------------------------------------------------------------- i02
+    #??---------------------------------------------------------------------- i02
 
     if io == 'n/a':
         company.score_card['ins'].loc['i02'][0] = 0
@@ -623,13 +614,13 @@ def set_scores_ins(company, peer_group):
     else:
         print('i02 case slipped through')
 
-    #?---------------------------------------------------------------------- i03
+    #??---------------------------------------------------------------------- i03
 
     if it == 'n/a':
         company.score_card['ins'].loc['i03'][0] = 0
 
     elif it >= 0.03:
-        company.score_card['ins'].loc['i03'][0] = 4
+        company.score_card['ins'].loc['i03'][0] = 5
 
     elif it < 0.03 and it >= 0.015:
         company.score_card['ins'].loc['i03'][0] = 3
@@ -643,7 +634,7 @@ def set_scores_ins(company, peer_group):
     else:
         print('i03 case slipped through')
 
-    #?---------------------------------------------------------------------- i04
+    #??---------------------------------------------------------------------- i04
 
     if inst_t == 'n/a':
         company.score_card['ins'].loc['i04'][0] = 0
@@ -657,7 +648,7 @@ def set_scores_ins(company, peer_group):
     else:
         print('i04 case slipped through')
 
-    #?---------------------------------------------------------------------- iTotal
+    #??---------------------------------------------------------------------- iTotal
     set_cat_total(company, 'ins')
 
 #*******  DIVIDEND SCORING METHOD ******* 
@@ -686,7 +677,7 @@ def set_scores_div(company, peer_group):
     except AttributeError:
         last12_avg = 'n/a'
 
-    #?---------------------------------------------------------------------- d01
+    #??---------------------------------------------------------------------- d01
 
     # setting 'n/a' to 1 so as not to penalize companies who have no div
     if div_ann == 'n/a' or peer_div_ann == 'n/a':
@@ -706,7 +697,7 @@ def set_scores_div(company, peer_group):
 
 
 
-    #?---------------------------------------------------------------------- d02
+    #??---------------------------------------------------------------------- d02
 
     # setting 'n/a' to 1 so as not to penalize companies who have no div
     if last_div == 'n/a' or last12_avg == 'n/a':
@@ -724,7 +715,7 @@ def set_scores_div(company, peer_group):
     else:
         print('d02 case slipped through')
 
-    #?---------------------------------------------------------------------- d03
+    #??---------------------------------------------------------------------- d03
 
     # setting 'n/a' to 1 so as not to penalize companies who have no div
     if div_y_mrfy == 'n/a' or peer_div_y_mrfy == 'n/a':
@@ -742,7 +733,7 @@ def set_scores_div(company, peer_group):
     else:
         print('d03 case slipped through')
 
-    #?---------------------------------------------------------------------- d04
+    #??---------------------------------------------------------------------- d04
 
     if div_y_mrfy == 'n/a':
         company.score_card['div'].loc['d04'][0] = 1
@@ -759,7 +750,7 @@ def set_scores_div(company, peer_group):
     else:
         print('d04 case slipped through')
 
-    #?---------------------------------------------------------------------- dTotal
+    #??---------------------------------------------------------------------- dTotal
     set_cat_total(company, 'div')
 
 #*******  PUBLIC SENTIMENT SCORING METHOD ***
@@ -772,7 +763,7 @@ def set_scores_pub_sent(company, peer_group):
     news_sent = company.df_pub_sent.loc['news_sent'][0]
     peer_news_sent = peer_group.df_pub_sent.loc['news_sent'][0]
 
-    #?---------------------------------------------------------------------- p01
+    #??---------------------------------------------------------------------- p01
 
     if twits_perc == 'n/a':
         company.score_card['pub_sent'].loc['p01'][0] = 0
@@ -786,7 +777,7 @@ def set_scores_pub_sent(company, peer_group):
     else:
         print('p01 case slipped through')
 
-    #?---------------------------------------------------------------------- p02
+    #??---------------------------------------------------------------------- p02
 
     if twits_perc == 'n/a':
         company.score_card['pub_sent'].loc['p02'][0] = 0
@@ -800,7 +791,7 @@ def set_scores_pub_sent(company, peer_group):
     else:
         print('p02 case slipped through')
 
-    #?---------------------------------------------------------------------- p03
+    #??---------------------------------------------------------------------- p03
 
     if shrt_int == 'n/a':
         company.score_card['pub_sent'].loc['p03'][0] = 0
@@ -817,7 +808,7 @@ def set_scores_pub_sent(company, peer_group):
     else:
         print('p03 case slipped through')
 
-    #?---------------------------------------------------------------------- p04
+    #??---------------------------------------------------------------------- p04
 
     if shrt_int == 'n/a':
         company.score_card['pub_sent'].loc['p04'][0] = 0
@@ -834,7 +825,7 @@ def set_scores_pub_sent(company, peer_group):
     else:
         print('p04 case slipped through')
 
-    #?---------------------------------------------------------------------- p05
+    #??---------------------------------------------------------------------- p05
 
     if news_sent == 'n/a':
         company.score_card['pub_sent'].loc['p05'][0] = 0
@@ -848,7 +839,7 @@ def set_scores_pub_sent(company, peer_group):
     else:
         print('p05 case slipped through')
 
-    #?---------------------------------------------------------------------- p06
+    #??---------------------------------------------------------------------- p06
 
     if news_sent == 'n/a':
         company.score_card['pub_sent'].loc['p06'][0] = 0
@@ -862,7 +853,7 @@ def set_scores_pub_sent(company, peer_group):
     else:
         print('p06 case slipped through')
 
-    # #?---------------------------------------------------------------------- pTotal
+    #??---------------------------------------------------------------------- pTotal
     set_cat_total(company, 'pub_sent')
 
 #*******  ANALYST DATA SCORING METHOD *****
@@ -892,7 +883,7 @@ def set_scores_analyst_data(company, peer_group):
     fwd_pe = company.analyst_data[3]
     pe_ttm = company.df_value.loc['pe_ttm'][0]
 
-    #?---------------------------------------------------------------------- a01
+    #??---------------------------------------------------------------------- a01
 
     if buys_perc == 'n/a':
         company.score_card['analyst_data'].loc['a01'][0] = 0
@@ -906,7 +897,7 @@ def set_scores_analyst_data(company, peer_group):
     else:
         print('a01 case slipped through')
 
-    #?---------------------------------------------------------------------- a02
+    #??---------------------------------------------------------------------- a02
 
     if sells_perc == 'n/a':
         company.score_card['analyst_data'].loc['a02'][0] = 0
@@ -920,27 +911,24 @@ def set_scores_analyst_data(company, peer_group):
     else:
         print('a02 case slipped through')
 
-    #?---------------------------------------------------------------------- a03
+    #??---------------------------------------------------------------------- a03
 
     if wghtd_buys_sum == 'n/a':
         company.score_card['analyst_data'].loc['a03'][0] = 0
 
     elif wghtd_buys_sum >= (wghtd_peer_buys_sum * 1.5):
-        company.score_card['analyst_data'].loc['a03'][0] = 3
-
-    elif wghtd_buys_sum < (wghtd_peer_buys_sum * 1.5) and wghtd_buys_sum >= (wghtd_peer_buys_sum * 1.1):
         company.score_card['analyst_data'].loc['a03'][0] = 2
 
-    elif wghtd_buys_sum < (wghtd_peer_buys_sum * 1.1) and wghtd_buys_sum >= (wghtd_peer_buys_sum * 0.7):
+    elif wghtd_buys_sum < (wghtd_peer_buys_sum * 1.5) and wghtd_buys_sum >= (wghtd_peer_buys_sum * 1.1):
         company.score_card['analyst_data'].loc['a03'][0] = 1
 
-    elif wghtd_buys_sum < (wghtd_peer_buys_sum * 0.7):
+    elif wghtd_buys_sum < (wghtd_peer_buys_sum * 1.1):
         company.score_card['analyst_data'].loc['a03'][0] = 0
 
     else:
         print('a03 case slipped through')
 
-    #?---------------------------------------------------------------------- a04
+    #??---------------------------------------------------------------------- a04
 
     if strong_buys == 'n/a':
         company.score_card['analyst_data'].loc['a04'][0] = 0
@@ -957,7 +945,7 @@ def set_scores_analyst_data(company, peer_group):
     else:
         print('a04 case slipped through')
 
-    #?---------------------------------------------------------------------- a05
+    #??---------------------------------------------------------------------- a05
 
     # Scoring 'n/a' as worth 1pt so as not to punish those not on S&P or NASDAQ 100
     if wb_score == 'n/a':
@@ -975,13 +963,13 @@ def set_scores_analyst_data(company, peer_group):
     else:
         print('a05 case slipped through')
 
-    #?---------------------------------------------------------------------- a06
+    #??---------------------------------------------------------------------- a06
 
-    if fwd_pe == 'n/a':
+    if fwd_pe == 'n/a' or pe_ttm == 'n/a':
         company.score_card['analyst_data'].loc['a06'][0] = 0
 
     elif fwd_pe <=  (pe_ttm * 0.8):
-        company.score_card['analyst_data'].loc['a06'][0] = 3
+        company.score_card['analyst_data'].loc['a06'][0] = 2
 
     elif fwd_pe >= (pe_ttm * 0.8) and fwd_pe <= (pe_ttm * 0.95):
         company.score_card['analyst_data'].loc['a06'][0] = 1
@@ -992,7 +980,7 @@ def set_scores_analyst_data(company, peer_group):
     else:
         print('a06 case slipped through')
 
-    #?---------------------------------------------------------------------- aTotal
+    #??---------------------------------------------------------------------- aTotal
     set_cat_total(company, 'analyst_data')
 
 #*******  ESG SCORING METHOD ************** 
