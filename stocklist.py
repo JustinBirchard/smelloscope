@@ -15,21 +15,68 @@ young_stocks = {'DDOG', 'CRWD', 'RIVN', 'LCID', 'NIO', 'LI', 'ONEM',
                 'PGNY',  'ONEM', 'GDRX', 'SGFY', 'TXG', 'PRVA', 'AGTI', 
                 'CERT', 'MPLN', 'SDGR', 'PHR'}
 
+#* Winners!
+stocks = ['GOOGL', 'QCOM', 'AMAT']
+# GOOGL 51, QCOM 45, AMAT 36
+
+#* Winners of the run-off for 100 heaviest
+# stocks = ['GOOGL', 'QCOM', 'MSFT', 'MPC', 'TJX', 'AMAT']
+# GOOGL 50, QCOM 48, AMAT 45, MSFT 43, TJX 41
+
+#* Winners of top 100 heaviest weighted stocks on S&P
+# stocks = ['MPC', 'EOG', 'AMAT', 'LRCX', 'TJX', 'DE', 'FISV', 'VRTX', 'PXD', 'NKE', 'REGN', 'GM',
+#           'GOOGL', 'COP', 'PFE', 'QCOM', 'MSFT', 'CSCO', 'UPS', 'CVX', 'ADBE', 'META', 'CAT', 'XOM']
+# GOOGL 51, QCOM 48, MSFT 48, MPC 45, TJX 45, AMAT 44
+
 #* 50 heaviest weighted stocks from S&P 500 minus Financials
-# stocks = ['AAPL', 'MSFT', 'AMZN', 'TSLA', 'GOOGL', 'UNH', 'XOM', 'JNJ', 'NVDA', 'CVX', 'V', 'PG', 'HD', 'MA', 'PFE', 'ABBV', 'PEP', 'KO', 'COST', 'META', 'MCD', 'WMT', 'TMO', 'AVGO', 'CSCO', 'DIS', 'ABT', 'COP', 'BMY', 'ACN', 'DHR', 'VZ', 'NEE', 'LIN', 'TXN', 'AMGN', 'RTX', 'HON', 'PM', 'CRM', 'CMCSA', 'ADBE', 'CVS', 'T', 'IBM', 'UPS', 'NKE', 'CAT', 'QCOM', 'LOW']
+# stocks = ['AAPL', 'MSFT', 'AMZN', 'TSLA', 'GOOGL', 
+#           'UNH', 'XOM', 'JNJ', 'NVDA', 'CVX', 
+#           'V', 'PG', 'HD', 'MA', 'PFE',
+#           'ABBV', 'PEP', 'KO', 'COST', 'META', 
+#           'MCD', 'WMT', 'TMO', 'AVGO', 'CSCO', 
+#           'DIS', 'ABT', 'COP', 'BMY', 'ACN', 
+#           'DHR', 'VZ', 'NEE', 'LIN', 'TXN', 
+#           'AMGN', 'RTX', 'HON', 'PM', 'CRM', 
+#           'CMCSA', 'ADBE', 'CVS', 'T', 'IBM', 
+#           'UPS', 'NKE', 'CAT', 'QCOM', 'LOW']
+
+# 11/8
+# GOOGL 60, COP 50, PFE 49, QCOM 49, MSFT 48, CSCO 47, UPS 47, CVX 45, ADBE 45, META 43, CAT 43, XOM 43
+
+
+
 # JPM, BAC, LLY, MRK, WFC
 #? UNP, GS, SCWB, ELV
+
+
+#* 2nd tier 50 heaviest weighted stocks from S&P 500 minus Financials
+# stocks = ['NKE', 'INTC', 'ORCL', 'NFLX', 'MDT',
+#           'DE', 'SPGI', 'INTU', 'SBUX', 'GILD',
+#           'AMD', 'PLD', 'ADP', 'APD', 'AMT', 
+#           'BA', 'GE', 'TMUS', 'PYPL', 'ITW',
+#           'BSX', 'MDLZ', 'MPC', 'ISRG', 'EOG',
+#           'TJX', 'AMAT', 'MO', 'MMC', 'REGN',
+#           'VRTX', 'NOC', 'ADI', 'SLB', 'LRCX',
+#           'TGT', 'NOW', 'SYK', 'WM', 'GM',
+#           'MMM', 'SO', 'ZTS', 'CSX', 'ETN',
+#           'BDX', 'MU', 'FISV', 'PXD', 'CL']
+
+# 11/8
+# MPC 52, EOG 52, AMAT 50, LRCX 48, TJX 48, DE 48, FISV 47, VRTX 45, PXD 44, NKE 43, REGN 43, GM 43
+
+# LMT, MS, BLK, BKNG, PNC, CI, CB, C, AXP, PGR, DUK, HUM
+
 
 #* Health & Hospital Winners:
 # stocks = ['PINC', 'OMCL', 'NXGN']
 # PINC 45, OMCL 38, NXGN 37
 
 # stocks = ['PINC', 'OMCL', 'NXGN', 'MDRX', 'VEEV', 'EVH']
-# PINC 49, OMCL 40, NXGN 40
+# PINC 47, OMCL 38, NXGN 40
 
 #* Health & Hospital Technology
 # stocks = ['VEEV', 'TDOC', 'EVH', 'MDRX', 'HQY', 'RCM', 'PINC', 'OMCL', 'NXGN']
-# PINC 50, OMCL 49, NXGN 48, MDRX 42, VEEV 37, EVH 37
+# PINC 48, OMCL 47, NXGN 46, MDRX 41, VEEV 35, EVH 35
 
 # stocks = ['ETSY', 'SHOP', 'EBAY']
 # ETSY 39, EBAY 38, SHOP 29
@@ -47,16 +94,16 @@ young_stocks = {'DDOG', 'CRWD', 'RIVN', 'LCID', 'NIO', 'LI', 'ONEM',
 # EXEL 47, REGN 46, VRTX 45, GSK 44, BIIB 42, CRSPR 31
 
 #* Winners for Financial services
-# stocks = ['FLT', 'MA']
-# MA 42, FLT 40
+# stocks = ['ACN', 'MA']
+# ACN 41, MA 36 
 
 # Winners of previous round
-# stocks = ['FLT', 'MA', 'ACN', 'FISV']
-# FLT 45, MA 44, FISV 41, ACN 40
+# stocks = ['ACN', 'FLT', 'MA', 'FISV']
+# ACN 47, MA 42, FLT 41, FISV 37 11/8
 
 #* Financial services
 # stocks = ['MA', 'WEX', 'EFX', 'WU', 'V', 'ACN', 'SPGI', 'ADP', 'FISV', 'FIS', 'GPN', 'BR', 'FLT', 'PYPL', 'INTU']
-# FLT 49, MA 42, ACN 42, FISV 42 on 11/7
+# ACN 49, FLT 45, MA 41, FISV 38 11/8
 
 # stocks = ['INTC', 'TSM', 'TXN']
 # TSM 39, TXN 38, INTC 35
@@ -65,19 +112,19 @@ young_stocks = {'DDOG', 'CRWD', 'RIVN', 'LCID', 'NIO', 'LI', 'ONEM',
 # TSM 46, AMD 44, TXN 39, INTC 37, NVDA 25
 
 #* Winners for Semiconducter and related
-# stocks = ['STM', 'ON', 'TSM']
-# STM 58, ON 40, TSM 40
+# stocks = ['STM', 'TSM']
+# STM 54, TSM 39 11/8
 
-# stocks = ['STM', 'ON']
-# STM 57, ON 41
+# stocks = ['STM', 'AMAT', 'TSM']
+# STM 53, TSM 39, AMAT 35 11/8
 
 # winners of previous round
-# stocks = ['STM', 'ON', 'TSM', 'AMAT', 'MCHP', 'AVGO']
-# STM 57, ON 44, TSM 42
+# stocks = ['STM', 'ON', 'AMAT', 'TSM', 'INTC']
+# STM 58, AMAT 44, TSM 41, INTC 40, ON 37 11/8
 
 #* Computer hardware & semiconductors
 # stocks = ['INTC', 'MCHP', 'ON', 'TSEM', 'MPWR', 'STM', 'AVGO', 'AMAT', 'ADI', 'MU', 'NXPI', 'ENPH', 'MRVL', 'TSM', 'AMD', 'IBM', 'NVDA', 'TXN']
-# STM 61, ON 55, TSM 50, AMAT 45, MCHP 41, AVGO 41
+# STM 59, ON 50, AMAT 50, TSM 48, INTC 41 11/8
 
 # stocks = ['EA', 'TTWO']
 # EA 33, TTWO 26
@@ -93,32 +140,32 @@ young_stocks = {'DDOG', 'CRWD', 'RIVN', 'LCID', 'NIO', 'LI', 'ONEM',
 # ATVI 34, EA 31, TTWO 29
 
 #* Winners for Computer Software
-# stocks = ['MSFT', 'SAP']
-# MSFT 42, SAP 41
+# stocks = ['MSFT', 'ADBE']
+# MSFT 37, SAP 35 11/8
 
 # Winners from previous round
-# stocks = ['MSFT', 'SAP', 'SNPS', 'ADBE', 'CRM']
-# MSFT 43, SAP 39, ADBE 38, CRM 38, SNPS 37
+# stocks = ['MSFT', 'SNPS', 'ADBE', 'CRM']
+# MSFT 42, ADBE 41, CRM 38, SNPS 37 11/8
 
 # Computer Software & Games
 # stocks = ['ATVI', 'EA', 'TTWO', 'MSFT', 'VEEV', 'ORCL', 'CRM', 'ADBE', 'SAP', 'VMW', 'ADSK', 'SNPS', 'CDNS', 'SHOP', 'SQ']
-# MSFT 46, SAP 42, SNPS 42, ADBE 41, CRM 40 on 11/6
+# MSFT 45, SNPS 45, ADBE 43, CRM 41 on 11/8
 
 #* Winners 11/6 for Internet, Data, Information, Software
 # stocks = ['GOOGL', 'META']
-# GOOGL 46, META 38 11/6
+# GOOGL 50, META 37 11/7
 
 # Winners of previous round
-# stocks = ['GOOGL', 'META', 'BIDU', 'ZD']
-# GOOGL 50, META 50, BIDU 39 on 11/6
+# stocks = ['GOOGL', 'META', 'BIDU', 'AKAM']
+# GOOGL 53, META 48, BIDU 41, AKAM 31 on 11/7
 
 #* Internet, Data, Information
 # stocks = ['GOOGL', 'FDS', 'SWCH', 'META', 'SHOP', 'BIDU', 'TTD', 'ZS', 'ETSY', 'AKAM', 'ZG']
-# GOOGL 63, META 54, BIDU 46, 
+# GOOGL 67, META 49, BIDU 44, AKAM 43 on 11/7
 
 #* Internet, Data, Information, Internet Software
 # stocks = ['GOOGL', 'LTRPB', 'MSFT', 'AAPL', 'CRM', 'ADBE', 'INTU', 'ORCL', 'SAP', 'VMW', 'ADSK', 'SNPS', 'CDNS', 'FDS', 'SWCH', 'META', 'SHOP', 'BIDU', 'TTD', 'ZS', 'ETSY', 'AKAM', 'ZG']
-# GOOGL 65, META 53, BIDU 49, MSFT 46, SNPS 45 on 11/6
+# GOOGL 62, MSFT 51, SNPS 50, META 48, ADBE 46, CRM 44 11/7
 
 #* Consumer Products - Misc Discretionary
 # stocks = ['SPB', 'PBH', 'CL', 'CHD', 'CLX', 'CENT', 'CENTA', 'FNKO', 'ALTO']
@@ -161,16 +208,17 @@ young_stocks = {'DDOG', 'CRWD', 'RIVN', 'LCID', 'NIO', 'LI', 'ONEM',
 
 
 #* Winners Oil & Fuel
-# stocks = ['EQNR', 'PBF', 'CVX']
-# EQNR 56, PBF 53, CVX 47
+# stocks = ['EQNR', 'PBF']
+# EQNR 52, PBF 49
 
 # Winners of previous round
-# stocks = ['EQNR', 'PBF', 'VLO', 'COP', 'XOM', 'CVX']
-# EQNR 60, PBF 52, CVX 48
+# stocks = ['EQNR', 'VLO', 'PBF']
+# EQNR 49, PBF 49, VLO 41
+
 
 #* Oil and Fuel
 # stocks = ['COP', 'XOM', 'CVX', 'MPC', 'HES', 'PSX', 'VLO', 'EQNR', 'BP', 'PBF']
-# EQNR 66, PBF 54, VLO 50, COP 49, XOM 49, CVX 49
+# EQNR 65, VLO 54, PBF 52
 
 
 #! stocks not available on Financial Modeling Prep API:

@@ -1,8 +1,8 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
 """
-#* Version 0.9.8.4
-#* last updated 11/7/22
+#* Version 0.9.8.5
+#* last updated 11/8/22
 
 from stocklist import stocks
 from copy import deepcopy
@@ -77,7 +77,12 @@ class Company:
                                                       'esg': deepcopy(scores_esg),
                                                       'grand_total': None}) # dict that hold score cards and grand_total
 
-
+    def show_news(self):
+        """Show title and link for company related news articles.
+        """
+        for title, link in zip(self.news_dfs[0].T.loc['title'], self.news_dfs[0].T.loc['link']):
+            print(title)
+            print(link + '\n')       
 
     def data_to_excel(self):
         """Combine selected data into a new dataframe and output to excel file.
