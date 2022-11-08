@@ -1,8 +1,8 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
 """
-#* Version 0.9.8.3
-#* last updated 11/6/22
+#* Version 0.9.8.4
+#* last updated 11/7/22
 
 from stocklist import stocks
 from copy import deepcopy
@@ -435,8 +435,8 @@ class PeerGroup(Company):
         for metric in self.companies[primary_stock].df_esg.index:
             for company in self.companies.values():
                 result_list.append(company.df_esg.loc[metric])
-            
-            result_list = [series for series in result_list if not isinstance(series[0], str)]
+
+            result_list = [series for series in result_list if isinstance(series[0], float)]
             sum = 0
             for value in result_list:
                 sum += value

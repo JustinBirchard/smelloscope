@@ -1,6 +1,6 @@
 # sniffer.py
-#* Version 0.9.8.3
-#* last updated 11/6/22
+#* Version 0.9.8.4
+#* last updated 11/7/22
 """A collection of functions used for analyzing the data in 
    Company objects.
 
@@ -414,7 +414,7 @@ def set_scores_mgmt(company, peer_group):
 
     #??---------------------------------------------------------------------- m04
 
-    if roe_ttm == 'n/a':
+    if roe_ttm == 'n/a' or roe_5yr_avg == 'n/a':
         company.score_card['mgmt'].loc['m04'][0] = 0
 
     elif roe_ttm > (roe_5yr_avg * 1.2):
@@ -1000,15 +1000,15 @@ def set_scores_esg(company, peer_group):
 
     # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
     if enviro == 'n/a':
-        company.score_card['esg'].loc['e01'][0] = 1
+        company.score_card['esg'].loc['e01'][0] = 0.5
 
-    elif enviro >= (peer_enviro * 1.3):
+    elif enviro <= (peer_enviro * 0.8):
         company.score_card['esg'].loc['e01'][0] = 2
 
-    elif enviro < (peer_enviro * 1.3) and enviro >= (peer_enviro * 0.95):
+    elif enviro > (peer_enviro * 0.8) and enviro <= (peer_enviro * 1.05):
         company.score_card['esg'].loc['e01'][0] = 1
 
-    elif enviro < (peer_enviro * 0.95):
+    elif enviro > (peer_enviro * 1.05):
         company.score_card['esg'].loc['e01'][0] = 0
 
     else:
@@ -1018,15 +1018,15 @@ def set_scores_esg(company, peer_group):
 
     # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
     if govern == 'n/a':
-        company.score_card['esg'].loc['e02'][0] = 1
+        company.score_card['esg'].loc['e02'][0] = 0.5
 
-    elif govern >= (peer_govern * 1.3):
+    elif govern <= (peer_govern * 0.8):
         company.score_card['esg'].loc['e02'][0] = 2
 
-    elif govern < (peer_govern * 1.3) and govern >= (peer_govern * 0.95):
+    elif govern > (peer_govern * 0.8) and govern <= (peer_govern * 1.05):
         company.score_card['esg'].loc['e02'][0] = 1
 
-    elif govern < (peer_govern * 0.95):
+    elif govern > (peer_govern * 1.05):
         company.score_card['esg'].loc['e02'][0] = 0
 
     else:
@@ -1036,15 +1036,15 @@ def set_scores_esg(company, peer_group):
 
     # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
     if social == 'n/a':
-        company.score_card['esg'].loc['e03'][0] = 1
+        company.score_card['esg'].loc['e03'][0] = 0.5
 
-    elif social >= (peer_social * 1.3):
+    elif social <= (peer_social * 0.8):
         company.score_card['esg'].loc['e03'][0] = 2
 
-    elif social < (peer_social * 1.3) and social >= (peer_social * 0.95):
+    elif social > (peer_social * 0.8) and social <= (peer_social * 1.05):
         company.score_card['esg'].loc['e03'][0] = 1
 
-    elif social < (peer_social * 0.95):
+    elif social > (peer_social * 1.05):
         company.score_card['esg'].loc['e03'][0] = 0
 
     else:
@@ -1054,15 +1054,15 @@ def set_scores_esg(company, peer_group):
 
     # Scoring 'n/a' as worth 1pt so as not to punish those who do not have ratings
     if total_esg == 'n/a':
-        company.score_card['esg'].loc['e04'][0] = 1
+        company.score_card['esg'].loc['e04'][0] = 0.5
 
-    elif total_esg >= (peer_total_esg * 1.2):
+    elif total_esg <= (peer_total_esg * 0.8):
         company.score_card['esg'].loc['e04'][0] = 2
 
-    elif total_esg < (peer_total_esg * 1.2) and total_esg >= peer_total_esg:
+    elif total_esg > (peer_total_esg * 0.8) and total_esg <= peer_total_esg:
         company.score_card['esg'].loc['e04'][0] = 1
 
-    elif total_esg < peer_total_esg:
+    elif total_esg > peer_total_esg:
         company.score_card['esg'].loc['e04'][0] = 0
 
     else:

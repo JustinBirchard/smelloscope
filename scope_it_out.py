@@ -1,7 +1,7 @@
 # scope_it_out.py
 # file previously called: smellogather.py
-#* Version 0.9.8.2
-#* last updated 11/5/22
+#* Version 0.9.8.4
+#* last updated 11/7/22
 
 """scope_it_out.py returns a list of Company objects and a PeerGroup 
    object, both of which are imported into the Smelloscope lab.
@@ -57,18 +57,33 @@ print('Angling the scope towards an interesting cluster...\n\n')
 
 from sniffer import big_phat_whiff
 from company import Company, PeerGroup
-from stocklist import stocks
+from stocklist import stocks, young_stocks
 
+partially_clean_stocks = []
+for stock in stocks:
+    if stock not in young_stocks:
+        partially_clean_stocks.append(stock)
 
+    elif stock in young_stocks:
+        print(f'Poop: \n{stock} is just a baby and too fresh for a proper sniffing.\n')
 
-# from openbb_terminal.api import openbb as obb
+clean_stocks = []
+for stock in partially_clean_stocks:
+    try:
+        fmp_test = obb.stocks.fa.fmp_metrics(stock)
+        logging.info(f.getvalue())
 
-from contextlib import redirect_stdout, redirect_stderr 
-import io, logging 
+    except ValueError:
+        fmp_test = 'n/a'
 
-# We'll suppress the output of some api calls, but we'll log suppressed output
-logging.basicConfig(filename='output_log.log', level=logging.INFO)
-f = io.StringIO() 
+    if isinstance(fmp_test, pd.DataFrame):
+        clean_stocks.append(stock)
+
+    else:
+        print(f'Dag nabbit: \nThe error above is because {stock} is not available via FMP api.')
+        print("Probably because it is not 5 years old.\nDon't worry though, we'll keep on sniffin the rest of the group.\n\n")
+
+stocks = clean_stocks
 
 # crating peers list based on user selected stocks from stocklist.py
 peers = []
@@ -116,7 +131,7 @@ def p2f(str_perc):
     return float(str_perc.strip('%'))/100
 
 # used for error handling when making calls to OpenBB
-def try_it(string, calltype, avg=False, p2f_bool=False):
+def try_it(string, calltype, avg=False, p2f_bool=False, perf=False):
     
     if calltype == 'data' and p2f_bool is False:
         try:
@@ -146,9 +161,27 @@ def try_it(string, calltype, avg=False, p2f_bool=False):
         except KeyError:
             return 'n/a'
 
-    elif calltype == 'esg':    
+    elif calltype == 'esg' and perf == False:    
         try:
-            return df_esg.loc[string][0]
+            if isinstance(df_esg.loc[string][0], float):
+                return df_esg.loc[string][0]
+
+            else:
+                return 'n/a'
+            
+        except KeyError:
+            return 'n/a'
+
+        except AttributeError:
+            return 'n/a'
+
+    elif calltype == 'esg' and perf == True:    
+        try:
+            if isinstance(df_esg.loc[string][0], str):
+                return df_esg.loc[string][0]
+
+            else:
+                return 'n/a'
             
         except KeyError:
             return 'n/a'
@@ -287,25 +320,38 @@ for company in peers:
         except AttributeError:
             print('Yahoo error. Trying again.')
 
+        except KeyError:
+            print('Yahoo error. Trying again.')
+
+    yahoo_success = 'no'
+
+    while yahoo_success == 'no':
     # Cases for if the company has no debt
-    try:
-        if math.isnan(obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]) is True:
-            tld_mrfy = 0 
-        
-        elif obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0] is None:
-            tld_mrfy = 0         
-        
-        else:  
-            tld_mrfy = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]
+        try:
+            if math.isnan(obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]) is True:
+                tld_mrfy = 0 
+                yahoo_success = 'yes'
+            
+            elif obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0] is None:
+                tld_mrfy = 0
+                yahoo_success = 'yes' 
+            
+            else:  
+                tld_mrfy = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]
+                yahoo_success = 'yes'
 
-        if tld_mrfy == 0:
+            if tld_mrfy == 0:
+                tca_div_tld = tca_mrfy
+            else:
+                tca_div_tld = tca_mrfy / tld_mrfy
+
+        except KeyError:
+            tld_mrfy = 0
             tca_div_tld = tca_mrfy
-        else:
-            tca_div_tld = tca_mrfy / tld_mrfy
+            yahoo_success = 'yes'
 
-    except KeyError:
-        tld_mrfy = 0
-        tca_div_tld = tca_mrfy
+        except AttributeError:
+            print('Yahoo is having issues, trying again...')
  
     ptb_mrq = try_it('P/B', 'data')
     ptb_mrfy = try_it('Ptb ratio', 'metrics')
@@ -346,12 +392,12 @@ for company in peers:
 ############## *** MANAGEMENT METRICS DATAFRAME *** ##############
 
     roa_ttm = try_it('ROA', 'data', p2f_bool=True)
-    roa_mrfy = df_metrics.loc['Return on tangible assets'][0]
-    roa_5yr_avg = df_metrics.loc['Return on tangible assets']['5yr Avg']
+    roa_mrfy = try_it('Return on tangible assets', 'metrics')
+    roa_5yr_avg = try_it('Return on tangible assets', 'metrics', avg=True)
 
     roe_ttm = try_it('ROE', 'data', p2f_bool=True)
-    roe_mrfy = df_metrics.loc['Roe'][0]
-    roe_5yr_avg = df_metrics.loc['Roe']['5yr Avg']
+    roe_mrfy = try_it('Roe', 'metrics')
+    roe_5yr_avg = try_it('Roe', 'metrics', avg=True)
 
     npm_mrfy = try_it('Net profit margin', 'ratios')
     npm_5yr_avg = try_it('Net profit margin', 'ratios', avg=True)
@@ -368,8 +414,8 @@ for company in peers:
     cr_5yr_avg = df_metrics.loc['Current ratio']['5yr Avg']
     
     dte_mrq = try_it('LT Debt/Eq', 'data')
-    dte_ttm = df_metrics.loc['Debt to equity'][0]
-    dte_5yr_avg = df_metrics.loc['Debt to equity']['5yr Avg']
+    dte_ttm = try_it('Debt to equity', 'metrics')
+    dte_5yr_avg = try_it('Debt to equity', 'metrics', avg=True)
     
     # DataFrame will be added to company object    
     df_mgmt = pd.DataFrame({'roa_ttm': roa_ttm, 'roa_mrfy': roa_mrfy, 'roa_5yr_avg': roa_5yr_avg,
@@ -488,7 +534,7 @@ for company in peers:
     govern = try_it('Governance score', 'esg')
     social = try_it('Social score', 'esg')
     total_esg = try_it('Total esg', 'esg')
-    esg_perf = try_it('Esg performance', 'esg')
+    esg_perf = try_it('Esg performance', 'esg', perf=True)
     
     df_esg = pd.DataFrame({'enviro': enviro, 'govern': govern, 'social': social,
                            'total_esg': total_esg, 'esg_perf': esg_perf}, index=['ESG'])
