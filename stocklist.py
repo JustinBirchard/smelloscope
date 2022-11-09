@@ -16,7 +16,7 @@ young_stocks = {'DDOG', 'CRWD', 'RIVN', 'LCID', 'NIO', 'LI', 'ONEM',
                 'CERT', 'MPLN', 'SDGR', 'PHR'}
 
 #* Winners!
-stocks = ['GOOGL', 'QCOM', 'AMAT']
+# stocks = ['GOOGL', 'QCOM', 'AMAT']
 # GOOGL 51, QCOM 45, AMAT 36
 
 #* Winners of the run-off for 100 heaviest
@@ -24,8 +24,8 @@ stocks = ['GOOGL', 'QCOM', 'AMAT']
 # GOOGL 50, QCOM 48, AMAT 45, MSFT 43, TJX 41
 
 #* Winners of top 100 heaviest weighted stocks on S&P
-# stocks = ['MPC', 'EOG', 'AMAT', 'LRCX', 'TJX', 'DE', 'FISV', 'VRTX', 'PXD', 'NKE', 'REGN', 'GM',
-#           'GOOGL', 'COP', 'PFE', 'QCOM', 'MSFT', 'CSCO', 'UPS', 'CVX', 'ADBE', 'META', 'CAT', 'XOM']
+stocks = ['MPC', 'EOG', 'AMAT', 'LRCX', 'TJX', 'DE', 'FISV', 'VRTX', 'PXD', 'NKE', 'REGN', 'GM',
+          'GOOGL', 'COP', 'PFE', 'QCOM', 'MSFT', 'CSCO', 'UPS', 'CVX', 'ADBE', 'META', 'CAT', 'XOM']
 # GOOGL 51, QCOM 48, MSFT 48, MPC 45, TJX 45, AMAT 44
 
 #* 50 heaviest weighted stocks from S&P 500 minus Financials

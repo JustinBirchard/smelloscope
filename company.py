@@ -1,7 +1,7 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
 """
-#* Version 0.9.8.5
+#* Version 0.9.8.7
 #* last updated 11/8/22
 
 from stocklist import stocks
@@ -68,6 +68,7 @@ class Company:
     news_dfs: list = field(default_factory=list, repr=False) # holds 3 DFs containing Company, Sector, & Industry news
     analyst_data: list = field(default_factory=list, repr=False) # holds 2 DataFrames containing Analyst ratingsmetrics
     df_esg: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(5,1), holds ESG data & metrics
+    sec_analysis: list = field(default_factory=list, repr=False) # will hold SEC sentiment analysis dataframe or 'n/a'
     score_card: dict = field(default_factory=lambda: {'value': deepcopy(scores_value), 
                                                       'mgmt': deepcopy(scores_mgmt),
                                                       'ins': deepcopy(scores_ins), 
@@ -76,6 +77,16 @@ class Company:
                                                       'analyst_data': deepcopy(scores_analyst_data),
                                                       'esg': deepcopy(scores_esg),
                                                       'grand_total': None}) # dict that hold score cards and grand_total
+
+    def show_sec_analysis(self):
+        if isinstance(self.sec_analysis[0], str):
+            print(f"SEC analysis was not available for {self.df_basic.loc['name'][0]} at this time.")
+
+        else:
+            for row in range(0, len(self.sec_analysis[0])):
+                print('Category: ' + self.sec_analysis[0].loc[row]['Group'])
+                print('Good News?  ' + str(self.sec_analysis[0].loc[row]['Good']) + '\n')
+                print('Sentence analyzed: \n' + self.sec_analysis[0].loc[row]['Sentence'] + ('\n' * 3))
 
     def show_news(self):
         """Show title and link for company related news articles.
@@ -215,6 +226,7 @@ class PeerGroup(Company):
         self.set_news_dfs()
         self.set_analyst_data()
         self.set_df_esg()
+        self.set_sec_analysis()
 
     def set_df_basic(self):
         """Set self.df_basic values"""
@@ -456,3 +468,6 @@ class PeerGroup(Company):
 
         self.df_esg = self.df_esg.round(4)
         self.df_esg = self.df_esg.T
+
+    def set_sec_analysis(self):
+        self.sec_analysis = 'n/a'
