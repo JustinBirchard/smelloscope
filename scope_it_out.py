@@ -285,6 +285,9 @@ for company in peers:
     df_metrics['5yr Avg'] = df_metrics.mean(axis=1)
 
 #&# END refining df_metrics ****************************************************
+
+    print(f'Getting a whiff of {obb.stocks.fa.profile(stock).loc["companyName"][0]}')
+
 #&# BEGIN refining df_ratios ***************************************************
 
     df_ratios = obb.stocks.fa.fmp_ratios(stock)
@@ -338,7 +341,6 @@ for company in peers:
 #&# BEGIN Creating variables for readability & grouping values into DataFrames & Sequences  
 ############## *** BASIC DETAILS DATAFRAME *** ##############
     name = obb.stocks.fa.profile(stock).loc['companyName'][0]
-    print(f'Getting a whiff of {name}')
     ticker = stock
     sector = obb.stocks.fa.profile(stock).loc['sector'][0]
     industry = obb.stocks.fa.profile(stock).loc['industry'][0]
@@ -525,7 +527,10 @@ for company in peers:
     else:
         news_sent = sum(sent_list)/len(sent_list)
         
-    shrt_int = p2f(obb.stocks.fa.data(stock).loc['Short Float'][0])
+    shrt_int = obb.stocks.fa.data(stock).loc['Short Float / Ratio'][0][:7]
+    shrt_int = shrt_int.strip('/')
+    shrt_int = shrt_int.strip()
+    shrt_int = p2f(shrt_int)
     
     # DataFrame will be added to company object
     df_pub_sent = pd.DataFrame({'twits_perc': twits_perc, 'shrt_int': shrt_int, 
