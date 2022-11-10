@@ -1,8 +1,8 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
 """
-#* Version 0.9.8.7
-#* last updated 11/8/22
+#* Version 0.9.9.1
+#* last updated 11/10/22
 
 from stocklist import stocks
 from copy import deepcopy
@@ -440,7 +440,45 @@ class PeerGroup(Company):
 
         peer_df_rot_3mo = peer_df_rot_3mo / len(self.companies.keys())
 
-        self.analyst_data = [df_rating_30d, peer_df_rot_3mo]
+        wb_score = ''
+        fwd_pe = ''
+
+        result_list = []
+        # calaculating avg wb_score
+        for company in self.companies.values():
+            result_list.append(company.analyst_data[2])         
+            result_list = [value for value in result_list if not isinstance(value, str)]
+            sum = 0
+            for value in result_list:
+                sum += value
+
+            if len(result_list) != 0:
+                wb_score = sum / len(result_list)
+
+            else:
+                wb_score = 'n/a'
+
+        result_list.clear()
+
+        # calaculating avg fwd_pe
+        for company in self.companies.values():
+            result_list.append(company.analyst_data[3])         
+            result_list = [value for value in result_list if not isinstance(value, str)]
+            sum = 0
+            for value in result_list:
+                sum += value
+
+            if len(result_list) != 0:
+                fwd_pe = sum / len(result_list)
+
+            else:
+                fwd_pe = 'n/a'
+
+        result_list.clear()
+
+        wb_score = round(wb_score, 2)
+        fwd_pe = round(fwd_pe, 2)
+        self.analyst_data = [df_rating_30d, peer_df_rot_3mo, wb_score, fwd_pe]
 
     def set_df_esg(self):
         """Set self.df_esg by calculating average value for each metric 

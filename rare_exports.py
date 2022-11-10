@@ -1,5 +1,5 @@
 # rare_exports.py
-#* Version 0.9.8.9
+#* Version 0.9.9.1
 #* last updated 11/9/22
 
 import datetime
@@ -36,10 +36,23 @@ def gs_report(tick, companies, peer_group):
     ws.update('B25', tick)
     ws.update('C25', 'Peer Avg')
 
-    ws.update('E25', 'Dividend')
-    ws.update('F25', tick)
-    ws.update('G25', 'Peer Avg')
-    sleep(10)
+    ws.update('E23', 'Dividend')
+    ws.update('F23', tick)
+    ws.update('G23', 'Peer Avg')
+
+    ws.update('A31', 'Pub Sent')
+    ws.update('B31', tick)
+    ws.update('C31', 'Peer Avg')
+
+    ws.update('E27', 'Analyst')
+    ws.update('F27', tick)
+    ws.update('G27', 'Peer Avg')
+
+    ws.update('E31', 'ESG')
+    ws.update('F31', tick)
+    ws.update('G31', 'Peer Avg')
+
+    sleep(20)
 
 
     for i, name in enumerate(companies[tick].df_value.index):
@@ -77,18 +90,47 @@ def gs_report(tick, companies, peer_group):
         
     for i, name in enumerate(companies[tick].div_dfs[0].index):
         value = companies[tick].div_dfs[0].loc[name][0]
-        ws.update(f'E{i + 26}', name)
-        ws.update(f'F{i + 26}', value)
+        ws.update(f'E{i + 24}', name)
+        ws.update(f'F{i + 24}', value)
         sleep(2)
 
     if not peer_group.div_dfs[0].empty:
         for i, name in enumerate(companies[tick].div_dfs[0].index):
             value = peer_group.div_dfs[0].loc[name]
-            ws.update(f'G{i + 26}', value[0])
+            ws.update(f'G{i + 24}', value[0])
             sleep(2)
             
     else:
-        ws.update('G26', 'n/a')
-        ws.update('G27', 'n/a')
+        ws.update('G24', 'n/a')
+        ws.update('G25', 'n/a')
         sleep(2)
-        
+
+    for i, name in enumerate(companies[tick].df_pub_sent.index):
+        value = companies[tick].df_pub_sent.loc[name][0]
+        ws.update(f'A{i + 32}', name)
+        ws.update(f'B{i + 32}', value)
+        sleep(2)
+
+    for i, name in enumerate(companies[tick].df_pub_sent.index):
+        value = peer_group.df_pub_sent.loc[name][0]
+        ws.update(f'C{i + 32}', value)
+        sleep(1)
+
+    ws.update('E28', 'wb_score')
+    ws.update('F28', companies[tick].analyst_data[2])
+    ws.update('E29', 'fwd_pe')
+    ws.update('F29', companies[tick].analyst_data[3])
+    ws.update('G28', peer_group.analyst_data[2])
+    ws.update('G29', peer_group.analyst_data[3])
+    sleep(6)
+
+    for i, name in enumerate(companies[tick].df_esg.index):
+        value = companies[tick].df_esg.loc[name][0]
+        ws.update(f'E{i + 32}', name)
+        ws.update(f'F{i + 32}', value)
+        sleep(2)
+
+    for i, name in enumerate(companies[tick].df_esg.index):
+        value = peer_group.df_esg.loc[name][0]
+        ws.update(f'G{i + 32}', value)
+        sleep(1)
