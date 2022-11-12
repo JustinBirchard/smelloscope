@@ -1,6 +1,6 @@
 # sniffer.py
-#* Version 0.9.8.4
-#* last updated 11/7/22
+#* Version 0.9.9.3
+#* last updated 11/11/22
 """A collection of functions used for analyzing the data in 
    Company objects.
 
@@ -154,7 +154,7 @@ def set_scores_value(company, peer_group):
         company.score_card['value'].loc['v03'][0] = 0
 
     elif ptb_mrq <= (peer_ptb_mrq * 0.9) and roe_ttm >= (peer_roe_ttm * 1.1):
-        company.score_card['value'].loc['v03'][0] = 2
+        company.score_card['value'].loc['v03'][0] = 3
 
     elif ptb_mrq <= (peer_ptb_mrq * 1.05) and roe_ttm >= (peer_roe_ttm * .95):
         company.score_card['value'].loc['v03'][0] = 1
@@ -315,7 +315,7 @@ def set_scores_value(company, peer_group):
         company.score_card['value'].loc['v13'][0] = 0
 
     elif peg <= 1 and peg > 0:
-        company.score_card['value'].loc['v13'][0] = 2
+        company.score_card['value'].loc['v13'][0] = 3
 
     elif peg > 1 and peg <= 1.8:
         company.score_card['value'].loc['v13'][0] = 1
@@ -524,13 +524,13 @@ def set_scores_mgmt(company, peer_group):
     if cr_mrq == 'n/a':
         company.score_card['mgmt'].loc['m11'][0] = 0
 
-    elif cr_mrq >= 1.1 and cr_mrq <= 2:
+    elif cr_mrq >= 1.2 and cr_mrq <= 2:
         company.score_card['mgmt'].loc['m11'][0] = 2
 
-    elif cr_mrq < 1.1 and cr_mrq >= 0.95 or cr_mrq > 2 and cr_mrq <= 3:
+    elif cr_mrq < 1.2 and cr_mrq >= 1 or cr_mrq > 2 and cr_mrq <= 3:
         company.score_card['mgmt'].loc['m11'][0] = 1
 
-    elif cr_mrq < 0.95 or cr_mrq > 3:
+    elif cr_mrq < 1 or cr_mrq > 3:
         company.score_card['mgmt'].loc['m11'][0] = 0
 
     else:

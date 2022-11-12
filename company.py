@@ -1,8 +1,8 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
 """
-#* Version 0.9.9.1
-#* last updated 11/10/22
+#* Version 0.9.9.3
+#* last updated 11/11/22
 
 from stocklist import stocks
 from copy import deepcopy
@@ -16,6 +16,39 @@ pd.set_option('display.float_format', lambda x: '%.4f' % x)
 
 # Retrieving the first stock in stocks and using as the primary stock
 primary_stock = stocks[0]
+
+def find_X_best_scores(list_of_tuples, X):
+    """Iterates thru given list of tuples X times. 
+       In every iteration, finds max of 2nd element, 
+       adds tuple to final_list_of_tuples, and removes 
+       it from list_of_tuples before iterating again. 
+
+    Args:
+        list_of_tuples (list): list of tuples, where tuple is ticker & score
+        X (int): How many top scores to retreive from each category
+
+    Returns:
+        list: list of tuples containing top scores for the category
+    """
+
+    final_list_of_tuples = [] # will hold final results
+
+    # looping through list X times
+    for i in range(0, X):
+        maximum = ('', 0)
+         
+        # finding the max score in current version of alist
+        for element in range(len(list_of_tuples)):    
+            if list_of_tuples[element][1] > maximum[1]:
+                maximum = list_of_tuples[element];
+                 
+        # Removing value that was the max score from alist before next iteration
+        list_of_tuples.remove(maximum);
+        
+        # Appending the tuple set that was the max score to final_list
+        final_list_of_tuples.append(maximum)
+         
+    return final_list_of_tuples
 
 # DataFrames below serve as templates for company score cards
 # They'll be deep-copied into Company objects
@@ -214,9 +247,66 @@ class PeerGroup(Company):
         Company (Object): Class Company Object
     """
     
-    companies: dict = field(default_factory=dict) # List of 1 or more Company objects
+    companies: dict = field(default_factory=dict) # 1 or more Company objects
+    peer_score_totals: dict = field(default_factory=lambda: {}) # company score totals for each category
+    category_totals: dict = field(default_factory=lambda: {'grand_total': [], 'vTotal': [], 'mTotal': [], 
+                                                           'iTotal': [], 'dTotal': [], 'pTotal': [], 
+                                                           'aTotal': [], 'eTotal': []}) # category totals by comapny
+    top_scores: dict = field(default_factory=lambda: {}) # top company scores for each category
 
-    def set_all_data(self):
+    def set_scoring_data(self):
+        """Populates scores for the three PeerGroup score dictionaries.
+        """
+        self.set_peer_score_totals()
+        self.set_cat_totals()
+        self.set_top_scores()
+
+    def set_peer_score_totals(self):
+        """Populates the peer_score_totals dictionary which contains
+           grand total and category totals for every company.
+        """
+        for tick in stocks:
+            grand_total = self.companies[tick].score_card['grand_total']
+            vTotal = self.companies[tick].score_card['value'].loc['vTotal'][0]
+            mTotal = self.companies[tick].score_card['mgmt'].loc['mTotal'][0]
+            iTotal = self.companies[tick].score_card['ins'].loc['iTotal'][0]
+            dTotal = self.companies[tick].score_card['div'].loc['dTotal'][0]
+            pTotal = self.companies[tick].score_card['pub_sent'].loc['pTotal'][0]
+            aTotal = self.companies[tick].score_card['analyst_data'].loc['aTotal'][0]
+            eTotal = self.companies[tick].score_card['esg'].loc['eTotal'][0]
+                     
+            self.peer_score_totals[tick] = {'grand_total': grand_total, 'vTotal': vTotal, 
+                                                 'mTotal': mTotal, 'iTotal': iTotal, 
+                                                 'dTotal': dTotal, 'pTotal': pTotal, 
+                                                 'aTotal': aTotal, 'eTotal': eTotal}
+                                                 
+    def set_cat_totals(self):
+        """Populates the category_totals dictionary which holds 
+           total scores for each company grouped by category.
+        """
+        for tick in self.companies.keys():
+            for cat in self.category_totals.keys():
+                self.category_totals[cat].append((tick, self.peer_score_totals[tick][cat]))
+
+    def set_top_scores(self):
+        """Finds the top X scores for every category and adds
+           them to the top_scores dictionary.
+           To accomplish this, the find_X_best_scores function
+           is used and arg X is determined programatically based 
+           on how many peers are in group.
+        """
+        cat_totals_copy = deepcopy(self.category_totals)
+        for cat in cat_totals_copy.keys():
+            if len(self.peer_score_totals.keys()) > 5:
+                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 5)
+                
+            elif len(self.peer_score_totals.keys()) > 3:
+                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 3)
+                
+            elif len(self.peer_score_totals.keys()) >= 2:
+                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 1)
+
+    def set_avg_values(self):
         self.set_df_basic()
         self.set_df_value()
         self.set_df_mgmt()

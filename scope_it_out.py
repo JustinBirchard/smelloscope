@@ -1,6 +1,6 @@
 # scope_it_out.py
-#* Version 0.9.8.7
-#* last updated 11/8/22
+#* Version 0.9.9.3
+#* last updated 11/11/22
 
 """scope_it_out.py returns a dict of Company objects and also a 
    PeerGroup object. Both are imported into the Smelloscope lab.
@@ -596,8 +596,8 @@ for company in peers:
 # Creating PeerGroup object
 peer_group = PeerGroup(companies=companies)
 
-# Pulling in the data for PeerGroup object
-peer_group.set_all_data()
+# Pulling in the data and calculating averages for PeerGroup object
+peer_group.set_avg_values()
 
 # Fixes improper calculation set by set_all_data() for peer_group tca_div_tld
 peer_group.df_value.loc['tca_div_tld'][0] = peer_group.df_value.loc['tca_mrfy'][0] / peer_group.df_value.loc['tld_mrfy'][0]
@@ -605,5 +605,8 @@ peer_group.df_value.loc['tca_div_tld'][0] = peer_group.df_value.loc['tca_mrfy'][
 # For each stock, calculates scores for each category using company history and peer averages
 for ticker in stocks:
         big_phat_whiff(companies[ticker], peer_group)
+
+# Pulls in data for the PeerGroup scoring dictionaries (total scores, category totals, etc)
+peer_group.set_scoring_data()
 
 print('STOCKS ARE SMELT AND SCORES ARE DEALT!')
