@@ -1,6 +1,6 @@
 # rare_exports.py
-#* Version 0.9.9.3
-#* last updated 11/11/22
+#* Version 0.9.9.4
+#* last updated 11/12/22
 
 import datetime
 import gspread
@@ -264,7 +264,7 @@ def gs_scores(tick, companies, peer_group, ws_scores):
         tick (str): company ticker
         companies (dict): dict of company objects
         peer_group (PeerGroup): PeerGroup object
-        ws_metrics (WorkSheet): gspread WorkSheet object
+        ws_scores (WorkSheet): gspread WorkSheet object
     """
     print('Now creating "Scores" sheet.')
     price = companies[tick].df_basic.loc['price'][0]
@@ -287,9 +287,12 @@ def gs_scores(tick, companies, peer_group, ws_scores):
     b2_b9 = [[total_score], [price], [today], [tick], [sector], 
                    [industry], [peer_str], [no_of_peers]]
 
-    a11_i11 = [['Stock', 'Total', 'V score', 'M score', 'I Score', 'D Score',
-                   'P Score', 'A Score', 'E Score']]
-     
+#* Begin Detailed Score Card section (rows 18 to 37)
+
+    # Each category requires 3 lists "questions" will hold the question IDs, 
+    # "outof" holds the available points for each question, scores will hold 
+    # the scores for each question
+
     v_questions = []
     v_outof = ['/2', '/3', '/3', '/1', '/2', '/2', 
                 '/2', '/2', '/1', '/4', '/2', '/2', '/3', '/29']
@@ -320,25 +323,71 @@ def gs_scores(tick, companies, peer_group, ws_scores):
     e_outof = ['/2', '/2', '/2', '/2', '/2', '/10']
     e_scores = []
 
+    # Grouping all lists into lists so that they can be iterated through and appended with data
     score_lists = [[v_questions, v_outof, v_scores], [m_questions, m_outof, m_scores], 
                    [i_questions, i_outof, i_scores], [d_questions, d_outof, d_scores], 
                    [p_questions, p_outof, p_scores], [a_questions, a_outof, a_scores], 
                    [e_questions, e_outof, e_scores]]
 
+    # putting score category names into list so we can zip together with groups of lists we careted above
     score_cards = ['value', 'mgmt', 'ins', 'div', 'pub_sent', 'analyst_data', 'esg' ]
 
     for lists, card in zip(score_lists, score_cards):
         for question, outof, score in zip(companies[tick].score_card[card].index, lists[1], companies[tick].score_card[card].values):
             lists[0].append(question)
-            score = ''.join((str(score[0]), outof))
-            lists[2].append(score)
+            score = ''.join((str(score[0]), outof)) # joining score with "outof" so will be eg: '1/2' or '0/3', etc
+            lists[2].append(score) # adding completed string to the category's score list
 
-        # Shifting last element to first in score lists
+        # Shifting last element to first in score lists (because that's how it is displayed in spreadsheet)
         for l in [lists[0], lists[2]]:
             l.insert(0, l.pop())
 
-    # for x in [v_questions, v_scores, m_questions, m_scores]:
-    #     print(x)
+#* End Detailed Score Card section (rows 18 to 37)
+
+#* Begin Top Scores in Group section (rows 11 to 16)
+    # Header for winners section
+    a11_i11 = [['Stock', 'Total', 'V score', 'M score', 'I Score', 'D Score',
+                   'P Score', 'A Score', 'E Score']]
+
+    # lists that will hold the ticker and total scores for each category
+    row12 = []
+    row13 = []
+    row14 = []
+    row15 = []
+    row16= []
+
+    # Getting index and tick for each winner, assigning to list based on index
+    for index, tick in enumerate(peer_group.winners.keys()):
+
+        if index == 0:
+            row12.append(tick)
+            for score in peer_group.winners[tick].values():
+                row12.append(score)
+
+        elif index == 1:
+            row13.append(tick)
+            for score in peer_group.winners[tick].values():
+                row13.append(score)
+
+        elif index == 2:
+            row14.append(tick)
+            for score in peer_group.winners[tick].values():
+                row14.append(score)
+
+        elif index == 3:
+            row15.append(tick)
+            for score in peer_group.winners[tick].values():
+                row15.append(score)
+
+        elif index == 4:
+            row15.append(tick)
+            for score in peer_group.winners[tick].values():
+                row15.append(score)
+
+        elif index == 5:
+            row16.append(tick)
+            for score in peer_group.winners[tick].values():
+                row16.append(score)
 
     ws_scores.batch_update([
         {'range': 'A1:A10',
@@ -383,6 +432,16 @@ def gs_scores(tick, companies, peer_group, ws_scores):
         {'range': 'A37:F37',
         'values': [e_scores]},
 
+        {'range': 'A12:I12',
+        'values': [row12]},
+        {'range': 'A13:I13',
+        'values': [row13]},
+        {'range': 'A14:I14',
+        'values': [row14]},
+        {'range': 'A15:I15',
+        'values': [row15]},
+        {'range': 'A16:I16',
+        'values': [row16]},
         ])
         
 

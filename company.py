@@ -1,8 +1,8 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
 """
-#* Version 0.9.9.3
-#* last updated 11/11/22
+#* Version 0.9.9.4
+#* last updated 11/12/22
 
 from stocklist import stocks
 from copy import deepcopy
@@ -253,17 +253,22 @@ class PeerGroup(Company):
                                                            'iTotal': [], 'dTotal': [], 'pTotal': [], 
                                                            'aTotal': [], 'eTotal': []}) # category totals by comapny
     top_scores: dict = field(default_factory=lambda: {}) # top company scores for each category
+    winners: dict = field(default_factory=lambda: {}) # the top scorers of the PeerGroup
 
     def set_scoring_data(self):
         """Populates scores for the three PeerGroup score dictionaries.
+           And also the winners dictionary.
         """
         self.set_peer_score_totals()
         self.set_cat_totals()
         self.set_top_scores()
+        self.set_winners()
 
     def set_peer_score_totals(self):
         """Populates the peer_score_totals dictionary which contains
            grand total and category totals for every company.
+           CAN ONLY RUN AFTER:
+           set_avg_values
         """
         for tick in stocks:
             grand_total = self.companies[tick].score_card['grand_total']
@@ -283,6 +288,8 @@ class PeerGroup(Company):
     def set_cat_totals(self):
         """Populates the category_totals dictionary which holds 
            total scores for each company grouped by category.
+           CAN ONLY RUN AFTER:
+           set_peer_score_totals
         """
         for tick in self.companies.keys():
             for cat in self.category_totals.keys():
@@ -294,6 +301,9 @@ class PeerGroup(Company):
            To accomplish this, the find_X_best_scores function
            is used and arg X is determined programatically based 
            on how many peers are in group.
+           CAN ONLY RUN AFTER:
+           set_peer_score_totals
+           set_cat_totals
         """
         cat_totals_copy = deepcopy(self.category_totals)
         for cat in cat_totals_copy.keys():
@@ -305,6 +315,17 @@ class PeerGroup(Company):
                 
             elif len(self.peer_score_totals.keys()) >= 2:
                 self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 1)
+
+    def set_winners(self):
+        """Creates dict out of the top 3-5 winners from the peer group.
+           Number of winners will depend on total tickers in stocks list.
+           CAN ONLY RUN AFTER:
+           set_peer_score_totals()
+           set_cat_totals()
+           set_top_scores()
+        """
+        for winner in self.top_scores['grand_total']:
+            self.winners[winner[0]] = self.peer_score_totals[winner[0]]
 
     def set_avg_values(self):
         self.set_df_basic()
