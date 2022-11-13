@@ -13,6 +13,9 @@ ws_metrics = None
 ws_scores = None
 
 # for column headers in Metrics
+
+left_align = CellFormat(horizontalAlignment='LEFT')
+
 fmt1 = CellFormat(
     backgroundColor=Color(0.7, 0.9, 1),
     textFormat=TextFormat(bold=True, foregroundColor=Color(0, 0, 0))
@@ -31,8 +34,16 @@ fmt_blue_background = CellFormat(
     backgroundColor=Color(0.7, 0.9, 1)
     )
 
+fmt_yellow_background = CellFormat(
+    backgroundColor=Color(255/255, 242/255, 204/255)
+    )
+
 fmt_grey_background = CellFormat(
-    backgroundColor=Color(0.97, 0.97, 0.97)
+    backgroundColor=Color(240/255, 240/255, 240/255)
+    )
+
+fmt_dkgrey_background = CellFormat(
+    backgroundColor=Color(150/255, 150/255, 150/255)
     )
 
 def gs_export(tick, companies, peer_group):
@@ -45,7 +56,7 @@ def gs_export(tick, companies, peer_group):
     """
     gs_create(tick)
     gs_scores(tick, companies, peer_group, ws_scores)
-# Uncomment when done with scores page:    gs_metrics(tick, companies, peer_group, ws_metrics)
+    gs_metrics(tick, companies, peer_group, ws_metrics)
 
 def gs_create(tick):
     """Creates Google Spreadsheet, initializes Worksheets,
@@ -62,7 +73,7 @@ def gs_create(tick):
     sh.share('ssrjustin@gmail.com', perm_type='user', role='writer')
 
     # Adding worksheets
-    ws_scores = sh.add_worksheet(title="Scores", rows=100, cols=14)
+    ws_scores = sh.add_worksheet(title="Scores", rows=37, cols=14)
     ws_metrics = sh.add_worksheet(title="Metrics", rows=36, cols=7)
 
     # deleting blank sheet that gets created when creating a spreadsheet
@@ -81,6 +92,7 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
         ws_metrics (WorkSheet): gspread WorkSheet object
     """
     print('Now creating "Metrics" sheet.')
+    sleep(5)
     price = companies[tick].df_basic.loc['price'][0]
     
     # Setting up header for the sheet which is just "price" & the value
@@ -284,6 +296,8 @@ def gs_scores(tick, companies, peer_group, ws_scores):
     a1_a10 = [[name], ['Score'], ['Price'], ['Date'], ['Ticker'], ['Sector'], ['Industry'], 
                    ['Peer Group'], ['# of Peers'], ['Top Scores in Group']]
 
+    a17 = [[f'{tick} Detailed Scorecard']]
+
     b2_b9 = [[total_score], [price], [today], [tick], [sector], 
                    [industry], [peer_str], [no_of_peers]]
 
@@ -380,14 +394,14 @@ def gs_scores(tick, companies, peer_group, ws_scores):
                 row15.append(score)
 
         elif index == 4:
-            row15.append(tick)
-            for score in peer_group.winners[tick].values():
-                row15.append(score)
-
-        elif index == 5:
             row16.append(tick)
             for score in peer_group.winners[tick].values():
                 row16.append(score)
+
+        # elif index == 5:
+        #     row16.append(tick)
+        #     for score in peer_group.winners[tick].values():
+        #         row16.append(score)
 
     ws_scores.batch_update([
         {'range': 'A1:A10',
@@ -396,6 +410,9 @@ def gs_scores(tick, companies, peer_group, ws_scores):
         'values': b2_b9},
         {'range': 'A11:I11',
         'values': a11_i11},
+
+        {'range': 'A17',
+        'values': a17},
 
         {'range': 'A18:N18',
         'values': [v_questions]},
@@ -444,178 +461,180 @@ def gs_scores(tick, companies, peer_group, ws_scores):
         'values': [row16]},
         ])
         
+    format_cell_range(ws_scores, 'A1:N1', fmt_blue_background)
+    format_cell_range(ws_scores, 'A10:N10', fmt_blue_background)
+    format_cell_range(ws_scores, 'A17:N17', fmt_blue_background)
+    format_cell_range(ws_scores, 'B2:B3', left_align)
+    format_cell_range(ws_scores, 'A2:N3', fmt_yellow_background)
+    format_cell_range(ws_scores, 'A11:N11', fmt_yellow_background)
+    sleep(5)
 
+    for row in [row for row in range(18, 37) if not row % 2]:
+        format_cell_range(ws_scores, f'A{row}:N{row}', fmt_yellow_background)
+        sleep(1)
 
+    for row in [row for row in range(4, 10) if row % 2]:
+        format_cell_range(ws_scores, f'A{row}:N{row}', fmt_grey_background)
+        sleep(1)
 
+    for row in [row for row in range(12, 17) if not row % 2]:
+        format_cell_range(ws_scores, f'A{row}:N{row}', fmt_grey_background)
+        sleep(1)
 
-    
-#     # Setting up header for the sheet which is just "price" & the value
-#     ws_metrics.update('A1', name)
-#     ws_metrics.update('B1', price)
+    for row in [20, 23, 26, 29, 32, 35]:
+        format_cell_range(ws_scores, f'A{row}:N{row}', fmt_dkgrey_background)
+        set_row_height(ws_scores, str(row), 10)
+        sleep(1)
 
-#     # Exporting Value header names, stat names, and values
-#     ws_metrics.update('A3', 'Value')
-#     ws_metrics.update('B3', tick)
-#     ws_metrics.update('C3', 'Peer Avg')
-#     sleep(5)
+    ws_scores.format('A1', {'textFormat': {"fontSize": 36, 'bold': True}})
+    ws_scores.format('A2:A3', {'textFormat': {"fontSize": 14, 'bold': True}})
 
-#     for i, name in enumerate(companies[tick].df_value.index):
-#         value = companies[tick].df_value.loc[name][0]
-#         ws_metrics.update(f'A{i + 4}', name)
-#         ws_metrics.update(f'B{i + 4}', value)
-#         sleep(2)
+    ws_scores.format('B2', {'textFormat': {"fontSize": 24, 'bold': True}})
+    ws_scores.format('B3', {'textFormat': {"fontSize": 18, 'bold': True}})
+    ws_scores.format('B4:B7', {'textFormat': {"fontSize": 12, 'bold': True}})
+    ws_scores.format('A10', {'textFormat': {"fontSize": 24, 'bold': True}})
+    ws_scores.format('A17', {'textFormat': {"fontSize": 24, 'bold': True}})
+    ws_scores.format('A11:I11', {'textFormat': {'bold': True}})
+    sleep(5)
 
-#     for i, name in enumerate(companies[tick].df_value.index):
-#         value = peer_group.df_value.loc[name][0]
-#         ws_metrics.update(f'C{i + 4}', value)
-#         sleep(1)
-#     print('Value stats exported to "Metrics" sheet.')
+    for row in [18, 21, 24, 27, 30, 33, 36]:
+        ws_scores.format(f'A{row}:I{row}', {'textFormat': {'bold': True}})
+        sleep(1)
 
-#     # Exporting Management header names, stat names, and values
-#     ws_metrics.update('E3', 'Management')
-#     ws_metrics.update('F3', tick)
-#     ws_metrics.update('G3', 'Peer Avg')
-#     sleep(3)
+    ws_scores.format('A1', {
+                           "borders": {
+                              "top": {"style": "SOLID_THICK"},
+                              "left": {"style": "SOLID_THICK"},
+                              }})
+    sleep(2)
+    ws_scores.format('B1:M1', {
+                              "borders": 
+                                  {
+                                  "top": {"style": "SOLID_THICK"},
+                                  }
+                              })
+    sleep(2)
+    ws_scores.format('N1', {
+                           "borders": 
+                              {
+                              "top": {"style": "SOLID_THICK"},
+                              "right": {"style": "SOLID_THICK"},
+                              }})
+    sleep(2)
+    ws_scores.format('A10', {
+                           "borders": 
+                              {
+                              "top": {"style": "SOLID_THICK"},
+                              "left": {"style": "SOLID_THICK"},
+                              }})
+    sleep(2)
+    ws_scores.format('B10:M10', {
+                                "borders": 
+                                    {
+                                    "top": {"style": "SOLID_THICK"},
+                                    }
+                                })
+    sleep(2)
+    ws_scores.format('N10', {
+                           "borders": 
+                              {
+                              "top": {"style": "SOLID_THICK"},
+                              "right": {"style": "SOLID_THICK"},
+                              }})
+    sleep(2)
+    ws_scores.format('A17', {
+                            "borders": 
+                                {
+                                "top": {"style": "SOLID_THICK"},
+                                "left": {"style": "SOLID_THICK"},
+                                }})
+    sleep(2)
+    ws_scores.format('B17:M17', {
+                                "borders": 
+                                    {
+                                    "top": {"style": "SOLID_THICK"},
+                                    }
+                                })
+    sleep(2)
+    ws_scores.format('N17', {
+                            "borders": 
+                                {
+                                "top": {"style": "SOLID_THICK"},
+                                "right": {"style": "SOLID_THICK"},
+                                }})
+    sleep(2)
+    ws_scores.format('A2:A9', {
+                               "borders": 
+                                   {
+                                   "left": {"style": "SOLID_THICK"},
+                                   }
+                                })
 
-#     for i, name in enumerate(companies[tick].df_mgmt.index):
-#         value = companies[tick].df_mgmt.loc[name][0]
-#         ws_metrics.update(f'E{i + 4}', name)
-#         ws_metrics.update(f'F{i + 4}', value)
-#         sleep(2)
+    sleep(2)
+    ws_scores.format('A11:A16', {
+                               "borders": 
+                                   {
+                                   "left": {"style": "SOLID_THICK"},
+                                   }
+                                })
 
-#     for i, name in enumerate(companies[tick].df_mgmt.index):
-#         value = peer_group.df_mgmt.loc[name][0]
-#         ws_metrics.update(f'G{i + 4}', value)
-#         sleep(1)  
-#     print('Management stats exported to "Metrics" sheet.')
+    sleep(2)
+    ws_scores.format('A18:A36', {
+                               "borders": 
+                                   {
+                                   "left": {"style": "SOLID_THICK"},
+                                   }
+                                })
 
-#     # Exporting Ins & Inst header names, stat names, and values
-#     ws_metrics.update('A25', 'Ins & Inst')
-#     ws_metrics.update('B25', tick)
-#     ws_metrics.update('C25', 'Peer Avg')
-#     sleep(3)
+    sleep(2)
+    ws_scores.format('N1', {
+                           "borders": 
+                              {
+                              "top": {"style": "SOLID_THICK"},
+                              "right": {"style": "SOLID_THICK"},
+                              }})
+    sleep(2)
+    ws_scores.format('N2:N9', {
+                               "borders": 
+                                   {
+                                   "right": {"style": "SOLID_THICK"},
+                                   }
+                                })
+    sleep(2)
 
-#     for i, name in enumerate(companies[tick].df_ins.index):
-#         value = companies[tick].df_ins.loc[name][0]
-#         ws_metrics.update(f'A{i + 26}', name)
-#         ws_metrics.update(f'B{i + 26}', value)
-#         sleep(2)
+    ws_scores.format('N11:N16', {
+                               "borders": 
+                                   {
+                                   "right": {"style": "SOLID_THICK"},
+                                   }
+                                })
+    sleep(2)
 
-#     for i, name in enumerate(companies[tick].df_ins.index):
-#         value = peer_group.df_ins.loc[name][0]
-#         ws_metrics.update(f'C{i + 26}', value)
-#         sleep(1)
-#     print('Ins & Inst stats exported to "Metrics" sheet.')
+    ws_scores.format('N18:N36', {
+                               "borders": 
+                                   {
+                                   "right": {"style": "SOLID_THICK"},
+                                   }
+                                })
+    sleep(2)
 
-#     # Exporting Dividend header names, stat names, and values
-#     ws_metrics.update('E23', 'Dividend')
-#     ws_metrics.update('F23', tick)
-#     ws_metrics.update('G23', 'Peer Avg')
-#     sleep(3)
-
-#     for i, name in enumerate(companies[tick].div_dfs[0].index):
-#         value = companies[tick].div_dfs[0].loc[name][0]
-#         ws_metrics.update(f'E{i + 24}', name)
-#         ws_metrics.update(f'F{i + 24}', value)
-#         sleep(2)
-
-#     if not peer_group.div_dfs[0].empty:
-#         for i, name in enumerate(companies[tick].div_dfs[0].index):
-#             value = peer_group.div_dfs[0].loc[name]
-#             ws_metrics.update(f'G{i + 24}', value[0])
-#             sleep(2)
-            
-#     else:
-#         ws_metrics.update('G24', 'n/a')
-#         ws_metrics.update('G25', 'n/a')
-#         sleep(2)
-#     print('Dividend stats exported to "Metrics" sheet.')
-    
-#     # Exporting Pub Sent header names, stat names, and values
-#     ws_metrics.update('A31', 'Pub Sent')
-#     ws_metrics.update('B31', tick)
-#     ws_metrics.update('C31', 'Peer Avg')
-#     sleep(3)
-
-#     for i, name in enumerate(companies[tick].df_pub_sent.index):
-#         value = companies[tick].df_pub_sent.loc[name][0]
-#         ws_metrics.update(f'A{i + 32}', name)
-#         ws_metrics.update(f'B{i + 32}', value)
-#         sleep(2)
-
-#     for i, name in enumerate(companies[tick].df_pub_sent.index):
-#         value = peer_group.df_pub_sent.loc[name][0]
-#         ws_metrics.update(f'C{i + 32}', value)
-#         sleep(1)
-#     print('Public Sentiment stats exported to "Metrics" sheet.')
-
-#     # Exporting Pub Sent header names, stat names, and values
-#     ws_metrics.update('E27', 'Analyst')
-#     ws_metrics.update('F27', tick)
-#     ws_metrics.update('G27', 'Peer Avg')
-#     sleep(3)
-#     ws_metrics.update('E28', 'wb_score')
-#     ws_metrics.update('F28', companies[tick].analyst_data[2])
-#     ws_metrics.update('E29', 'fwd_pe')
-#     ws_metrics.update('F29', companies[tick].analyst_data[3])
-#     ws_metrics.update('G28', peer_group.analyst_data[2])
-#     ws_metrics.update('G29', peer_group.analyst_data[3])
-#     sleep(6)
-#     print('Analyst stats exported to "Metrics" sheet.')
-
-#     # Exporting ESG header names, stat names, and values
-#     ws_metrics.update('E31', 'ESG')
-#     ws_metrics.update('F31', tick)
-#     ws_metrics.update('G31', 'Peer Avg')
-#     sleep(3)
-
-#     for i, name in enumerate(companies[tick].df_esg.index):
-#         value = companies[tick].df_esg.loc[name][0]
-#         ws_metrics.update(f'E{i + 32}', name)
-#         ws_metrics.update(f'F{i + 32}', value)
-#         sleep(2)
-
-#     for i, name in enumerate(companies[tick].df_esg.index):
-#         value = peer_group.df_esg.loc[name][0]
-#         ws_metrics.update(f'G{i + 32}', value)
-#         sleep(1)
-#     print('ESG stats exported to "Metrics" sheet.')
-
-#     format_cell_range(ws_metrics, 'A1:A36', fmt_bold_italic)
-#     format_cell_range(ws_metrics, 'E1:E36', fmt_bold_italic)
-#     sleep(2)
-#     print('Gussying up the "Metrics" sheet.')
-
-#     format_cell_range(ws_metrics, 'A3:G3', fmt1)
-#     set_column_width(ws_metrics, 'D', 20)
-#     sleep(2)
-#     format_cell_range(ws_metrics, 'D3:D36', fmt_blue_background)
-#     format_cell_range(ws_metrics, 'E23:G23', fmt1)
-#     sleep(2)
-#     format_cell_range(ws_metrics, 'E27:G27', fmt1)
-#     format_cell_range(ws_metrics, 'E31:G31', fmt1)
-#     sleep(2)
-#     format_cell_range(ws_metrics, 'A25:C25', fmt1)
-#     format_cell_range(ws_metrics, 'A31:C31', fmt1)
-#     sleep(2)
-
-#     for row in [x for x in range(4, 37) if not x % 2]:
-#         format_cell_range(ws_metrics, f'A{row}:C{row}', fmt_grey_background)
-#         sleep(1)
-
-#     for row in [x for x in range(4, 37) if not x % 2]:
-#         format_cell_range(ws_metrics, f'E{row}:G{row}', fmt_grey_background)
-#         sleep(1)
-
-#     ws_metrics.format('A1:B1', {'textFormat': {"fontSize": 18, 'bold': True}})
-#     ws_metrics.format('A3:G3', {'textFormat': {"fontSize": 11, 'bold': True}})
-#     ws_metrics.format('E23:G23', {'textFormat': {"fontSize": 11, 'bold': True}})
-#     sleep(2)
-#     ws_metrics.format('E27:G27', {'textFormat': {"fontSize": 11, 'bold': True}})
-#     ws_metrics.format('E31:G31', {'textFormat': {"fontSize": 11, 'bold': True}})
-#     sleep(2)
-#     ws_metrics.format('A25:C25', {'textFormat': {"fontSize": 11, 'bold': True}})
-#     ws_metrics.format('A31:C31', {'textFormat': {"fontSize": 11, 'bold': True}})
-
-#     print('"Metrics" sheet has been completed.')
-# #    ws_metrics.batch_format(metrics_formats)
+    ws_scores.format('A37', {
+                           "borders": 
+                              {
+                              "bottom": {"style": "SOLID_THICK"},
+                              "left": {"style": "SOLID_THICK"},
+                              }})
+    sleep(2)
+    ws_scores.format('B37:M37', {
+                                "borders": 
+                                    {
+                                    "bottom": {"style": "SOLID_THICK"},
+                                    }
+                                })
+    sleep(2)
+    ws_scores.format('N37', {
+                           "borders": 
+                              {
+                              "bottom": {"style": "SOLID_THICK"},
+                              "right": {"style": "SOLID_THICK"},
+                              }})
