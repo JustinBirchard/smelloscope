@@ -39,7 +39,7 @@ def find_X_best_scores(list_of_tuples, X):
          
         # finding the max score in current version of alist
         for element in range(len(list_of_tuples)):    
-            if list_of_tuples[element][1] > maximum[1]:
+            if list_of_tuples[element][1] >= maximum[1]:
                 maximum = list_of_tuples[element];
                  
         # Removing value that was the max score from alist before next iteration
@@ -155,7 +155,7 @@ class Company:
 
     def metric_names(self, data_type):
         """Prints the names of the metrics in Company
-           dataframes.  
+           dataframes. Used within access_data method.
 
         Args:
             data_type (str): nickname of the dataframe
@@ -185,6 +185,16 @@ class Company:
             print([x for x in self.df_esg.index])
 
     def access_data(self, data_type, value_name):
+        """Can be called in Lab to access specific value within 
+           Company dataframes. Can aso be used to compare same metric 
+           for all companies if used as part of for loop.
+           Alternate use in Lab to help find names of
+           metrics within Company dataframes.
+
+        Args:
+            data_type (str): nickname for dataframe
+            value_name (str): name of value in dataframe or 'options' to see names.
+        """
 
         if data_type == 'basic' and value_name == 'options':
             self.metric_names(data_type)

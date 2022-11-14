@@ -46,33 +46,43 @@ fmt_dkgrey_background = CellFormat(
     backgroundColor=Color(150/255, 150/255, 150/255)
     )
 
-def gs_export(tick, companies, peer_group):
+def gs_export(tick, companies, peer_group, custom='', e_to_j=False, e_to_m=False):
     """Calls all gs functions and creates the Google Sheet.
 
     Args:
         tick (str): company ticker
         companies (dict): dict of company objects
         peer_group (PeerGroup): PeerGroup object
+        custom OPTIONAL (str): str for Spreadsheet file name default is ''
+        e_to_j OPTIONAL (bool): True emails to Jeff7sr@gmail.com
+        e_to_m OPTIONAL (bool): True emails to mer.broadway@gmail.com
     """
-    gs_create(tick)
+    gs_create(tick, custom, e_to_j, e_to_m)
     gs_scores(tick, companies, peer_group, ws_scores)
     gs_metrics(tick, companies, peer_group, ws_metrics)
 
-def gs_create(tick):
+def gs_create(tick, custom, e_to_j, e_to_m):
     """Creates Google Spreadsheet, initializes Worksheets,
        and shares via email.
 
     Args:
         tick (str): ticker of company
+        custom (str): submitted by user in Lab when calling gs_export method
+        e_to_j (bool): False unless set to True in Lab when calling gs_export. Emails to Jeff.
+        e_to_m (bool): False unless set to True in Lab when calling gs_export. Emails to Mary.
     """
     global ws_scores, ws_metrics # need these vars to be global
-    sh = gc.create(f'{tick} {today}') # creating spreadsheet object
-    print(f'Creating Google Spreadsheet called: "{tick} {today}"')
+    sh = gc.create(f'{tick} {today}{custom}') # creating spreadsheet object
+    print(f'Creating Google Spreadsheet called: "{tick} {today}{custom}"')
 
     # sharing via email
     sh.share('ssrjustin@gmail.com', perm_type='user', role='writer')
-#    sh.share('Jeff7sr@gmail.com', perm_type='user', role='writer')
-#    sh.share('mer.broadway@gmail.com', perm_type='user', role='writer')
+
+    if e_to_j is True:
+        sh.share('Jeff7sr@gmail.com', perm_type='user', role='writer')
+
+    if e_to_m is True:
+        sh.share('mer.broadway@gmail.com', perm_type='user', role='writer')
 
     # Adding worksheets
     ws_scores = sh.add_worksheet(title="Scores", rows=37, cols=14)

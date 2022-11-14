@@ -13,10 +13,17 @@ young_stocks = {'DDOG', 'CRWD', 'RIVN', 'LCID', 'NIO', 'LI', 'ONEM',
                 'OGN', 'SNOW', 'DASH', 'ASAI', 'REYN', 'RLX', 'VZIO', 
                 'HNST', 'ZM', 'SRAD', 'DLO', 'MRNA', 'BNTX', 'GDRX', 
                 'PGNY',  'ONEM', 'GDRX', 'SGFY', 'TXG', 'PRVA', 'AGTI', 
-                'CERT', 'MPLN', 'SDGR', 'PHR'}
+                'CERT', 'MPLN', 'SDGR', 'PHR', 'CHWY', 'FIGS', 'CURV', 
+                'POSH', 'RVLV', 'AVTR'}
+
+# stocks = ['SFIX', 'QRTEA', 'GOOS', 'PLCE', 'BKE', 'VIPS', 'URBN', 'AEO']
+
+# stocks = ['RBA', 'EXLS', 'TNET']
+
+# stocks = ['RBA', 'CPRT', 'LQDT', 'WU', 'WEX', 'WNS', 'MMS', 'EXLS', 'TNET']
 
 #* Winners!
-# stocks = ['GOOGL', 'QCOM', 'AMAT']
+# stocks = ['QCOM', 'AMAT']
 # GOOGL 51, QCOM 45, AMAT 36
 
 #* Winners of the run-off for 100 heaviest
@@ -24,8 +31,8 @@ young_stocks = {'DDOG', 'CRWD', 'RIVN', 'LCID', 'NIO', 'LI', 'ONEM',
 # GOOGL 50, QCOM 48, AMAT 45, MSFT 43, TJX 41
 
 #* Winners of top 100 heaviest weighted stocks on S&P
-stocks = ['MPC', 'EOG', 'AMAT', 'LRCX', 'TJX', 'DE', 'FISV', 'VRTX', 'PXD', 'NKE', 'REGN', 'GM',
-          'GOOGL', 'COP', 'PFE', 'QCOM', 'MSFT', 'CSCO', 'UPS', 'CVX', 'ADBE', 'META', 'CAT', 'XOM']
+#stocks = ['MPC', 'EOG', 'AMAT', 'LRCX', 'TJX', 'DE', 'FISV', 'VRTX', 'PXD', 'NKE', 'REGN', 'GM',
+#          'GOOGL', 'COP', 'PFE', 'QCOM', 'MSFT', 'CSCO', 'UPS', 'CVX', 'ADBE', 'META', 'CAT', 'XOM']
 # GOOGL 51, QCOM 48, MSFT 48, MPC 45, TJX 45, AMAT 44
 
 #* 50 heaviest weighted stocks from S&P 500 minus Financials
@@ -68,14 +75,16 @@ stocks = ['MPC', 'EOG', 'AMAT', 'LRCX', 'TJX', 'DE', 'FISV', 'VRTX', 'PXD', 'NKE
 
 
 #* Health & Hospital Winners:
-# stocks = ['PINC', 'OMCL', 'NXGN']
+# stocks = ['PINC', 'OMCL', 'NXGN', 'AMN', 'RCM', 'VEEV']
 # PINC 45, OMCL 38, NXGN 37
 
 # stocks = ['PINC', 'OMCL', 'NXGN', 'MDRX', 'VEEV', 'EVH']
 # PINC 47, OMCL 38, NXGN 40
 
 #* Health & Hospital Technology
-# stocks = ['VEEV', 'TDOC', 'EVH', 'MDRX', 'HQY', 'RCM', 'PINC', 'OMCL', 'NXGN']
+#stocks = ['TDOC', 'VEEV', 'EVH', 'MDRX', 'RCM', 'PINC', 'OMCL', 'NXGN',
+#          'AMN', 'ICLR', 'VTRS', 'CRL', 'NVCR', 'HQY', 'ITCI', 'HAE', 'GRFS', 'NTRA']
+
 # PINC 48, OMCL 47, NXGN 46, MDRX 41, VEEV 35, EVH 35
 
 # stocks = ['ETSY', 'SHOP', 'EBAY']
@@ -148,8 +157,11 @@ stocks = ['MPC', 'EOG', 'AMAT', 'LRCX', 'TJX', 'DE', 'FISV', 'VRTX', 'PXD', 'NKE
 # MSFT 42, ADBE 41, CRM 38, SNPS 37 11/8
 
 # Computer Software & Games
-# stocks = ['ATVI', 'EA', 'TTWO', 'MSFT', 'VEEV', 'ORCL', 'CRM', 'ADBE', 'SAP', 'VMW', 'ADSK', 'SNPS', 'CDNS', 'SHOP', 'SQ']
+# stocks = ['MSFT', 'EA', 'TTWO', 'ATVI', 'VEEV', 'ORCL', 'CRM', 'ADBE', 'SAP', 'VMW', 'ADSK', 'SNPS', 'CDNS', 'SHOP', 'SQ']
 # MSFT 45, SNPS 45, ADBE 43, CRM 41 on 11/8
+
+#* Winners 11/13
+# stocks = ['GOOGL', 'META', 'MSFT', 'AAPL']
 
 #* Winners 11/6 for Internet, Data, Information, Software
 # stocks = ['GOOGL', 'META']
@@ -179,7 +191,7 @@ stocks = ['MPC', 'EOG', 'AMAT', 'LRCX', 'TJX', 'DE', 'FISV', 'VRTX', 'PXD', 'NKE
 # stocks = ['TDOC', 'AMN', 'ICLR', 'VTRS', 'CRL', 'NVCR', 'HQY', 'ITCI', 'HAE', 'GRFS', 'NTRA']
 
 #* Toys/Games/Hobbies
-# stocks = ['ATVI', 'EA', 'TTWO', 'HAS', 'MAT', 'JAKK']
+# stocks = ['ATVI', 'EA', 'TTWO', 'HAS', 'MAT', 'JAKK'] MNSO?
 
 
 #* Winners of Entertainment/Media conglomerate
@@ -217,7 +229,7 @@ stocks = ['MPC', 'EOG', 'AMAT', 'LRCX', 'TJX', 'DE', 'FISV', 'VRTX', 'PXD', 'NKE
 
 
 #* Oil and Fuel
-# stocks = ['COP', 'XOM', 'CVX', 'MPC', 'HES', 'PSX', 'VLO', 'EQNR', 'BP', 'PBF']
+stocks = ['COP', 'XOM', 'CVX', 'MPC', 'HES', 'PSX', 'VLO', 'EQNR', 'BP', 'PBF']
 # EQNR 65, VLO 54, PBF 52
 
 
