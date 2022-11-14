@@ -1,6 +1,6 @@
 # rare_exports.py
-#* Version 0.9.9.4
-#* last updated 11/12/22
+#* Version 0.9.9.5
+#* last updated 11/13/22
 
 import datetime
 import gspread
@@ -71,6 +71,8 @@ def gs_create(tick):
 
     # sharing via email
     sh.share('ssrjustin@gmail.com', perm_type='user', role='writer')
+#    sh.share('Jeff7sr@gmail.com', perm_type='user', role='writer')
+#    sh.share('mer.broadway@gmail.com', perm_type='user', role='writer')
 
     # Adding worksheets
     ws_scores = sh.add_worksheet(title="Scores", rows=37, cols=14)
@@ -222,9 +224,16 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
         sleep(2)
 
     for i, name in enumerate(companies[tick].df_esg.index):
-        value = peer_group.df_esg.loc[name][0]
-        ws_metrics.update(f'G{i + 32}', value)
-        sleep(1)
+        if not peer_group.df_esg.loc[name].empty:
+            value = peer_group.df_esg.loc[name][0]
+            ws_metrics.update(f'G{i + 32}', value)
+            sleep(1)
+        
+        elif peer_group.df_esg.loc[name].empty:
+            value = 'n/a'
+            ws_metrics.update(f'G{i + 32}', value)
+            sleep(1)
+
     print('ESG stats exported to "Metrics" sheet.')
 
     format_cell_range(ws_metrics, 'A1:A36', fmt_bold_italic)
@@ -465,11 +474,12 @@ def gs_scores(tick, companies, peer_group, ws_scores):
     format_cell_range(ws_scores, 'A10:N10', fmt_blue_background)
     format_cell_range(ws_scores, 'A17:N17', fmt_blue_background)
     format_cell_range(ws_scores, 'B2:B3', left_align)
+    format_cell_range(ws_scores, 'B9', left_align)
     format_cell_range(ws_scores, 'A2:N3', fmt_yellow_background)
     format_cell_range(ws_scores, 'A11:N11', fmt_yellow_background)
-    sleep(5)
+    sleep(6)
 
-    for row in [row for row in range(18, 37) if not row % 2]:
+    for row in [18, 21, 24, 27, 30, 33, 36]:
         format_cell_range(ws_scores, f'A{row}:N{row}', fmt_yellow_background)
         sleep(1)
 

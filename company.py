@@ -1,8 +1,8 @@
 # company.py
 """Company class and PeerGroup subclass definitions and methods.
 """
-#* Version 0.9.9.4
-#* last updated 11/12/22
+#* Version 0.9.9.5
+#* last updated 11/13/22
 
 from stocklist import stocks
 from copy import deepcopy
@@ -154,6 +154,12 @@ class Company:
             display(df)
 
     def metric_names(self, data_type):
+        """Prints the names of the metrics in Company
+           dataframes.  
+
+        Args:
+            data_type (str): nickname of the dataframe
+        """
         if data_type == 'basic':
             print([x for x in self.df_basic.index])
 
@@ -587,8 +593,11 @@ class PeerGroup(Company):
 
         result_list.clear()
 
-        wb_score = round(wb_score, 2)
+        if not isinstance(wb_score, str):
+            wb_score = round(wb_score, 2)
+
         fwd_pe = round(fwd_pe, 2)
+
         self.analyst_data = [df_rating_30d, peer_df_rot_3mo, wb_score, fwd_pe]
 
     def set_df_esg(self):
