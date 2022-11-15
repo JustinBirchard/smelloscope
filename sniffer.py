@@ -195,7 +195,7 @@ def set_scores_value(company, peer_group):
         print('v05 case slipped through')
 
     #??---------------------------------------------------------------------- v06
-    if pfcf_ttm == 'n/a':
+    if pfcf_ttm == 'n/a' or pfcf_ttm < 0 or pfcf_ttm > 50:
         company.score_card['value'].loc['v06'][0] = 0
 
     elif pfcf_ttm <= (peer_pfcf_ttm * .9):

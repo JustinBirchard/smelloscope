@@ -16,6 +16,15 @@ young_stocks = {'DDOG', 'CRWD', 'RIVN', 'LCID', 'NIO', 'LI', 'ONEM',
                 'CERT', 'MPLN', 'SDGR', 'PHR', 'CHWY', 'FIGS', 'CURV', 
                 'POSH', 'RVLV', 'AVTR'}
 
+stocks = ['PSA', 'EXR', 'CUBE', 'LSI']
+
+# stocks = ['VTR', 'PLD', 'AMT', 'CCI', 'PSA', 'WELL', 'SBAC', 'DLR', 'VICI', 'ARE', 'EXR',
+#           'WPC', 'IRM', 'PEAK', 'HST', 'GLPI', 'BXP', 'REXR', 'LAMR', 'CUBE', 'LSI',
+#           'COLD', 'OHI', 'MPW', 'EGP', 'FR', 'STAG', 'KRC', 'RHP', 'VNO', 'HR', 'TRNO',
+#           'CUZ', 'APLE', 'NSA', 'DOC', 'HIW', 'IIPR', 'OFC', 'DEI', 'SBRA', 'OUT']
+
+# stocks = ['VTR', 'OHI', 'MPW', 'HR', 'SUI', 'PEAK', 'DOC']
+
 # stocks = ['SFIX', 'QRTEA', 'GOOS', 'PLCE', 'BKE', 'VIPS', 'URBN', 'AEO']
 
 # stocks = ['RBA', 'EXLS', 'TNET']
@@ -229,7 +238,7 @@ young_stocks = {'DDOG', 'CRWD', 'RIVN', 'LCID', 'NIO', 'LI', 'ONEM',
 
 
 #* Oil and Fuel
-stocks = ['COP', 'XOM', 'CVX', 'MPC', 'HES', 'PSX', 'VLO', 'EQNR', 'BP', 'PBF']
+# stocks = ['COP', 'XOM', 'CVX', 'MPC', 'HES', 'PSX', 'VLO', 'EQNR', 'BP', 'PBF']
 # EQNR 65, VLO 54, PBF 52
 
 

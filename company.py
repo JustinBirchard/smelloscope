@@ -2,7 +2,7 @@
 """Company class and PeerGroup subclass definitions and methods.
 """
 #* Version 0.9.9.5
-#* last updated 11/13/22
+#* last updated 11/14/22
 
 from stocklist import stocks
 from copy import deepcopy
@@ -371,9 +371,12 @@ class PeerGroup(Company):
         """Set self.df_value by calculating average value for each metric in the 
            Value category and assigning it to PeerGroup object.
 
-           Metrics that are discarded from calculation if:
+           Metrics are discarded from calculation if:
            1) They are < 0 or > 50
            2) They have 'n/a' value
+
+           Note! The calculation for the PeerGroup value metric tca_div_tld 
+           is invalid here! It is fixed and calculated properly in scope_it_out.py
         """
 
         result_list = []
@@ -382,7 +385,7 @@ class PeerGroup(Company):
             for company in self.companies.values():
                 value = company.df_value.loc[metric][0]
 
-                if metric not in ['tca_mrfy', 'tld_mrfy', 'tca_div_tld'] and value != 'n/a':
+                if metric not in ['tca_mrfy', 'tld_mrfy'] and value != 'n/a':
                     if value >= 0 and value <= 50: 
                         result_list.append(company.df_value.loc[metric])
 
@@ -397,15 +400,13 @@ class PeerGroup(Company):
                 sum += value
             
             try:
-                self.df_value[metric] = sum / len(result_list)
+                self.df_value[metric] = (sum / len(result_list)).astype(float).round(4)
 
             except ZeroDivisionError:
                 self.df_value[metric] = 'n/a'
 
-
             result_list.clear()
 
-        self.df_value = self.df_value.round(4)
         self.df_value = self.df_value.T
 
     def set_df_mgmt(self):
@@ -441,14 +442,13 @@ class PeerGroup(Company):
                 sum += value
 
             if len(result_list) != 0:
-                self.df_mgmt[metric] = sum / len(result_list)
+                self.df_mgmt[metric] = (sum / len(result_list)).astype(float).round(4)
 
             else:
                 self.df_mgmt[metric] = 'n/a'
 
             result_list.clear()
 
-        self.df_mgmt = self.df_mgmt.round(4)
         self.df_mgmt = self.df_mgmt.T
 
     def set_df_ins(self):
@@ -469,14 +469,13 @@ class PeerGroup(Company):
                 sum += value
 
             if len(result_list) != 0:
-                self.df_ins[metric] = sum / len(result_list)
+                self.df_ins[metric] = (sum / len(result_list)).astype(float).round(4)
 
             else:
                 self.df_ins[metric] = 'n/a'
 
             result_list.clear()
 
-        self.df_ins = self.df_ins.round(4)
         self.df_ins = self.df_ins.T
 
     def set_div_dfs(self):
@@ -505,14 +504,13 @@ class PeerGroup(Company):
                 sum += value
 
             if len(result_list) != 0:
-                self.div_dfs[0][metric] = sum / len(result_list)
+                self.div_dfs[0][metric] = (sum / len(result_list)).astype(float).round(4)
 
             else:
                 self.div_dfs[0][metric] = 'n/a'
 
             result_list.clear()
 
-        self.div_dfs[0] = self.div_dfs[0].round(4)
         self.div_dfs[0] = self.div_dfs[0].T
 
     def set_df_pub_sent(self):
@@ -533,14 +531,13 @@ class PeerGroup(Company):
                 sum += value
 
             if len(result_list) != 0:
-                self.df_pub_sent[metric] = sum / len(result_list)
+                self.df_pub_sent[metric] = (sum / len(result_list)).astype(float).round(4)
 
             else:
                 self.df_pub_sent[metric] = 'n/a'
 
             result_list.clear()
 
-        self.df_pub_sent = self.df_pub_sent.round(4)
         self.df_pub_sent = self.df_pub_sent.T
 
     def set_news_dfs(self):
@@ -580,7 +577,7 @@ class PeerGroup(Company):
                 sum += value
 
             if len(result_list) != 0:
-                wb_score = sum / len(result_list)
+                wb_score = (sum / len(result_list)).astype(float).round(4)
 
             else:
                 wb_score = 'n/a'
@@ -604,9 +601,9 @@ class PeerGroup(Company):
         result_list.clear()
 
         if not isinstance(wb_score, str):
-            wb_score = round(wb_score, 2)
+            wb_score = round(wb_score, 4)
 
-        fwd_pe = round(fwd_pe, 2)
+        fwd_pe = round(fwd_pe, 4)
 
         self.analyst_data = [df_rating_30d, peer_df_rot_3mo, wb_score, fwd_pe]
 
@@ -627,14 +624,13 @@ class PeerGroup(Company):
                 sum += value
 
             if len(result_list) != 0:
-                self.df_esg[metric] = sum / len(result_list)
+                self.df_esg[metric] = (sum / len(result_list)).astype(float).round(4)
 
             else:
                 self.df_esg[metric] = 'n/a'
 
             result_list.clear()
 
-        self.df_esg = self.df_esg.round(4)
         self.df_esg = self.df_esg.T
 
     def set_sec_analysis(self):

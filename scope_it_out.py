@@ -1,6 +1,6 @@
 # scope_it_out.py
-#* Version 0.9.9.3
-#* last updated 11/11/22
+#* Version 0.9.9.5
+#* last updated 11/14/22
 
 """scope_it_out.py returns a dict of Company objects and also a 
    PeerGroup object. Both are imported into the Smelloscope lab.
@@ -386,7 +386,7 @@ for company in peers:
             if tld_mrfy == 0:
                 tca_div_tld = tca_mrfy
             else:
-                tca_div_tld = tca_mrfy / tld_mrfy
+                tca_div_tld = (tca_mrfy / tld_mrfy).round(4)
 
         except KeyError:
             tld_mrfy = 0
@@ -562,7 +562,10 @@ for company in peers:
     with redirect_stdout(f), redirect_stderr(f): 
         wb_score = obb.stocks.fa.score(stock)
         if wb_score is None:
-            wb_score = 'n/a'   
+            wb_score = 'n/a'
+        
+        if not isinstance(wb_score, str):
+            wb_score = wb_score.round(4)
         
     # Logging the API output in log.log    
     logging.info(f.getvalue())
@@ -600,7 +603,7 @@ peer_group = PeerGroup(companies=companies)
 peer_group.set_avg_values()
 
 # Fixes improper calculation set by set_all_data() for peer_group tca_div_tld
-peer_group.df_value.loc['tca_div_tld'][0] = peer_group.df_value.loc['tca_mrfy'][0] / peer_group.df_value.loc['tld_mrfy'][0]
+peer_group.df_value.loc['tca_div_tld'][0] = round((peer_group.df_value.loc['tca_mrfy'][0] / peer_group.df_value.loc['tld_mrfy'][0]), 4)
 
 # For each stock, calculates scores for each category using company history and peer averages
 for ticker in stocks:
