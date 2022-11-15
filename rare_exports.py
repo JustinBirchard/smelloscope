@@ -1,5 +1,5 @@
 # rare_exports.py
-#* Version 0.9.9.5
+#* Version 0.9.9.6
 #* last updated 11/15/22
 
 import datetime
@@ -12,39 +12,24 @@ today = str(datetime.date.today())
 ws_metrics = None
 ws_scores = None
 
-# for column headers in Metrics
 
 left_align = CellFormat(horizontalAlignment='LEFT')
 
-fmt1 = CellFormat(
-    backgroundColor=Color(0.7, 0.9, 1),
-    textFormat=TextFormat(bold=True, foregroundColor=Color(0, 0, 0))
-    #horizontalAlignment='CENTER'
-    )
+fmt1 = CellFormat(backgroundColor=Color(0.7, 0.9, 1),
+                  textFormat=TextFormat(bold=True, 
+                  foregroundColor=Color(0, 0, 0)))
 
-fmt_bold_italic = CellFormat(
-    textFormat=TextFormat(bold=True, italic=True)
-    )
+fmt_bold_italic = CellFormat(textFormat=TextFormat(bold=True, italic=True))
 
-fmt_black_background = CellFormat(
-    backgroundColor=Color(0, 0, 0)
-    )
+fmt_black_background = CellFormat(backgroundColor=Color(0, 0, 0))
 
-fmt_blue_background = CellFormat(
-    backgroundColor=Color(0.7, 0.9, 1)
-    )
+fmt_blue_background = CellFormat(backgroundColor=Color(0.7, 0.9, 1))
 
-fmt_yellow_background = CellFormat(
-    backgroundColor=Color(255/255, 242/255, 204/255)
-    )
+fmt_yellow_background = CellFormat(backgroundColor=Color(255/255, 242/255, 204/255))
 
-fmt_grey_background = CellFormat(
-    backgroundColor=Color(240/255, 240/255, 240/255)
-    )
+fmt_grey_background = CellFormat(backgroundColor=Color(240/255, 240/255, 240/255))
 
-fmt_dkgrey_background = CellFormat(
-    backgroundColor=Color(150/255, 150/255, 150/255)
-    )
+fmt_dkgrey_background = CellFormat(backgroundColor=Color(150/255, 150/255, 150/255))
 
 def gs_export(tick, companies, peer_group, custom='', e_to_j=False, e_to_m=False):
     """Calls all gs functions and creates the Google Sheet.
@@ -92,7 +77,6 @@ def gs_create(tick, custom, e_to_j, e_to_m):
     ws2 = sh.get_worksheet(0)
     sh.del_worksheet(ws2)
 
-
 def gs_metrics(tick, companies, peer_group, ws_metrics):
     """Pulls in data and formats the "Metrics" sheet.
        Google allows 1 call/sec
@@ -117,17 +101,138 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
     ws_metrics.update('C3', 'Peer Avg')
     sleep(5)
 
-    for i, name in enumerate(companies[tick].df_value.index):
-        value = companies[tick].df_value.loc[name][0]
-        ws_metrics.update(f'A{i + 4}', name)
-        ws_metrics.update(f'B{i + 4}', value)
-        sleep(2)
+    v_names = []
+    v_stats = []
+    v_peer = []
 
-    for i, name in enumerate(companies[tick].df_value.index):
-        value = peer_group.df_value.loc[name][0]
-        ws_metrics.update(f'C{i + 4}', value)
-        sleep(1)
-    print('Value stats exported to "Metrics" sheet.')
+    for name in companies[tick].df_value.index:
+        stat = companies[tick].df_value.loc[name][0]
+        peer_stat = peer_group.df_value.loc[name][0]
+        v_names.append([name])
+        v_stats.append([stat])
+        v_peer.append([peer_stat])
+
+    m_names = []
+    m_stats = []
+    m_peer = []
+
+    for name in companies[tick].df_mgmt.index:
+        stat = companies[tick].df_mgmt.loc[name][0]
+        peer_stat = peer_group.df_mgmt.loc[name][0]
+        m_names.append([name])
+        m_stats.append([stat])
+        m_peer.append([peer_stat])
+
+    i_names = []
+    i_stats = []
+    i_peer = []
+
+    for name in companies[tick].df_ins.index:
+        stat = companies[tick].df_ins.loc[name][0]
+        peer_stat = peer_group.df_ins.loc[name][0]
+        i_names.append([name])
+        i_stats.append([stat])
+        i_peer.append([peer_stat])
+
+    d_names = []
+    d_stats = []
+    d_peer = []
+
+    for name in companies[tick].div_dfs[0].index:
+        stat = companies[tick].div_dfs[0].loc[name][0]
+        d_names.append([name])
+        d_stats.append([stat])
+
+        if not peer_group.div_dfs[0].empty:
+            peer_stat = peer_group.div_dfs[0].loc[name][0]
+
+        else:
+            peer_stat = 'n/a'
+
+        d_peer.append([peer_stat])
+
+    p_names = []
+    p_stats = []
+    p_peer = []
+
+    for name in companies[tick].df_pub_sent.index:
+        stat = companies[tick].df_pub_sent.loc[name][0]
+        peer_stat = peer_group.df_pub_sent.loc[name][0]
+        p_names.append([name])
+        p_stats.append([stat])
+        p_peer.append([peer_stat])
+
+    a_names = [['wb_score'], ['fwd_pe']]
+    a_stats = [[companies[tick].analyst_data[2]], [companies[tick].analyst_data[3]]]
+    a_peer = [[peer_group.analyst_data[2]], [peer_group.analyst_data[3]]]
+
+    e_names = []
+    e_stats = []
+    e_peer = []
+
+    for name in companies[tick].df_esg.index:
+        stat = companies[tick].df_esg.loc[name][0]
+        e_names.append([name])
+        e_stats.append([stat])
+
+        if not peer_group.df_esg.empty:
+            peer_stat = peer_group.df_esg.loc[name][0]
+
+        else:
+            peer_stat = 'n/a'
+
+        e_peer.append([peer_stat])
+
+    ws_metrics.batch_update([
+            {'range': 'A4:A23',
+            'values': v_names},
+            {'range': 'B4:B23',
+            'values': v_stats},
+            {'range': 'C4:C23',
+            'values': v_peer},
+
+            {'range': 'E4:E21',
+            'values': m_names},
+            {'range': 'F4:F21',
+            'values': m_stats},
+            {'range': 'G4:G21',
+            'values': m_peer},
+
+            {'range': 'A26:A29',
+            'values': i_names},
+            {'range': 'B26:B29',
+            'values': i_stats},
+            {'range': 'C26:C29',
+            'values': i_peer},
+
+            {'range': 'E24:E25',
+            'values': d_names},
+            {'range': 'F24:F25',
+            'values': d_stats},
+            {'range': 'G24:G25',
+            'values': d_peer},
+
+            {'range': 'A32:A34',
+            'values': p_names},
+            {'range': 'B32:B34',
+            'values': p_stats},
+            {'range': 'C32:C34',
+            'values': p_peer},
+
+            {'range': 'E28:E29',
+            'values': a_names},
+            {'range': 'F28:F29',
+            'values': a_stats},
+            {'range': 'G28:G29',
+            'values': a_peer},
+
+            {'range': 'E32:E36',
+            'values': e_names},
+            {'range': 'F32:F36',
+            'values': e_stats},
+            {'range': 'G32:G36',
+            'values': e_peer},
+            ])
 
     # Exporting Management header names, stat names, and values
     ws_metrics.update('E3', 'Management')
@@ -135,59 +240,17 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
     ws_metrics.update('G3', 'Peer Avg')
     sleep(3)
 
-    for i, name in enumerate(companies[tick].df_mgmt.index):
-        value = companies[tick].df_mgmt.loc[name][0]
-        ws_metrics.update(f'E{i + 4}', name)
-        ws_metrics.update(f'F{i + 4}', value)
-        sleep(2)
-
-    for i, name in enumerate(companies[tick].df_mgmt.index):
-        value = peer_group.df_mgmt.loc[name][0]
-        ws_metrics.update(f'G{i + 4}', value)
-        sleep(1)  
-    print('Management stats exported to "Metrics" sheet.')
-
     # Exporting Ins & Inst header names, stat names, and values
     ws_metrics.update('A25', 'Ins & Inst')
     ws_metrics.update('B25', tick)
     ws_metrics.update('C25', 'Peer Avg')
     sleep(3)
 
-    for i, name in enumerate(companies[tick].df_ins.index):
-        value = companies[tick].df_ins.loc[name][0]
-        ws_metrics.update(f'A{i + 26}', name)
-        ws_metrics.update(f'B{i + 26}', value)
-        sleep(2)
-
-    for i, name in enumerate(companies[tick].df_ins.index):
-        value = peer_group.df_ins.loc[name][0]
-        ws_metrics.update(f'C{i + 26}', value)
-        sleep(1)
-    print('Ins & Inst stats exported to "Metrics" sheet.')
-
     # Exporting Dividend header names, stat names, and values
     ws_metrics.update('E23', 'Dividend')
     ws_metrics.update('F23', tick)
     ws_metrics.update('G23', 'Peer Avg')
     sleep(3)
-
-    for i, name in enumerate(companies[tick].div_dfs[0].index):
-        value = companies[tick].div_dfs[0].loc[name][0]
-        ws_metrics.update(f'E{i + 24}', name)
-        ws_metrics.update(f'F{i + 24}', value)
-        sleep(2)
-
-    if not peer_group.div_dfs[0].empty:
-        for i, name in enumerate(companies[tick].div_dfs[0].index):
-            value = peer_group.div_dfs[0].loc[name]
-            ws_metrics.update(f'G{i + 24}', value[0])
-            sleep(2)
-            
-    else:
-        ws_metrics.update('G24', 'n/a')
-        ws_metrics.update('G25', 'n/a')
-        sleep(2)
-    print('Dividend stats exported to "Metrics" sheet.')
     
     # Exporting Pub Sent header names, stat names, and values
     ws_metrics.update('A31', 'Pub Sent')
@@ -195,31 +258,11 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
     ws_metrics.update('C31', 'Peer Avg')
     sleep(3)
 
-    for i, name in enumerate(companies[tick].df_pub_sent.index):
-        value = companies[tick].df_pub_sent.loc[name][0]
-        ws_metrics.update(f'A{i + 32}', name)
-        ws_metrics.update(f'B{i + 32}', value)
-        sleep(2)
-
-    for i, name in enumerate(companies[tick].df_pub_sent.index):
-        value = peer_group.df_pub_sent.loc[name][0]
-        ws_metrics.update(f'C{i + 32}', value)
-        sleep(1)
-    print('Public Sentiment stats exported to "Metrics" sheet.')
-
-    # Exporting Pub Sent header names, stat names, and values
+    # Exporting Analyst Sent header names, stat names, and values
     ws_metrics.update('E27', 'Analyst')
     ws_metrics.update('F27', tick)
     ws_metrics.update('G27', 'Peer Avg')
     sleep(3)
-    ws_metrics.update('E28', 'wb_score')
-    ws_metrics.update('F28', companies[tick].analyst_data[2])
-    ws_metrics.update('E29', 'fwd_pe')
-    ws_metrics.update('F29', companies[tick].analyst_data[3])
-    ws_metrics.update('G28', peer_group.analyst_data[2])
-    ws_metrics.update('G29', peer_group.analyst_data[3])
-    sleep(6)
-    print('Analyst stats exported to "Metrics" sheet.')
 
     # Exporting ESG header names, stat names, and values
     ws_metrics.update('E31', 'ESG')
@@ -227,24 +270,6 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
     ws_metrics.update('G31', 'Peer Avg')
     sleep(3)
 
-    for i, name in enumerate(companies[tick].df_esg.index):
-        value = companies[tick].df_esg.loc[name][0]
-        ws_metrics.update(f'E{i + 32}', name)
-        ws_metrics.update(f'F{i + 32}', value)
-        sleep(2)
-
-    for i, name in enumerate(companies[tick].df_esg.index):
-        if not peer_group.df_esg.loc[name].empty:
-            value = peer_group.df_esg.loc[name][0]
-            ws_metrics.update(f'G{i + 32}', value)
-            sleep(1)
-        
-        elif peer_group.df_esg.loc[name].empty:
-            value = 'n/a'
-            ws_metrics.update(f'G{i + 32}', value)
-            sleep(1)
-
-    print('ESG stats exported to "Metrics" sheet.')
 
     format_cell_range(ws_metrics, 'A1:A36', fmt_bold_italic)
     format_cell_range(ws_metrics, 'E1:E36', fmt_bold_italic)
@@ -289,9 +314,6 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
 
     print('"Metrics" sheet has been completed.')
 
-#! *******************************************************************************
-#! gs_scores is unfinished but working properly so far!
-#! *******************************************************************************
 def gs_scores(tick, companies, peer_group, ws_scores):
     """Pulls in data and formats the "Scores" sheet.
        Google allows 1 call/sec
@@ -422,11 +444,6 @@ def gs_scores(tick, companies, peer_group, ws_scores):
             for score in peer_group.winners[tick].values():
                 row16.append(score)
 
-        # elif index == 5:
-        #     row16.append(tick)
-        #     for score in peer_group.winners[tick].values():
-        #         row16.append(score)
-
     ws_scores.batch_update([
         {'range': 'A1:A10',
          'values': a1_a10},
@@ -525,6 +542,7 @@ def gs_scores(tick, companies, peer_group, ws_scores):
     for row in [18, 21, 24, 27, 30, 33, 36]:
         ws_scores.format(f'A{row}:I{row}', {'textFormat': {'bold': True}})
         sleep(1)
+    sleep(3)
 
     for column in ['A', 'B', 'C', 'D', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N']:
         set_column_width(ws_scores, column, 77)
