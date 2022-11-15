@@ -1,6 +1,6 @@
 # rare_exports.py
 #* Version 0.9.9.5
-#* last updated 11/13/22
+#* last updated 11/15/22
 
 import datetime
 import gspread
@@ -254,6 +254,11 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
     format_cell_range(ws_metrics, 'A3:G3', fmt1)
     set_column_width(ws_metrics, 'D', 20)
     sleep(2)
+
+    for column in ['A', 'B', 'C', 'E', 'F', 'G']:
+        set_column_width(ws_metrics, column, 94)
+        sleep(1)
+
     format_cell_range(ws_metrics, 'D3:D36', fmt_blue_background)
     format_cell_range(ws_metrics, 'E23:G23', fmt1)
     sleep(2)
@@ -519,6 +524,10 @@ def gs_scores(tick, companies, peer_group, ws_scores):
 
     for row in [18, 21, 24, 27, 30, 33, 36]:
         ws_scores.format(f'A{row}:I{row}', {'textFormat': {'bold': True}})
+        sleep(1)
+
+    for column in ['A', 'B', 'C', 'D', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N']:
+        set_column_width(ws_scores, column, 77)
         sleep(1)
 
     ws_scores.format('A1', {
