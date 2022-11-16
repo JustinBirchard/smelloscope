@@ -1,6 +1,6 @@
 # rare_exports.py
-#* Version 0.9.9.7
-#* last updated 11/15/22
+#* Version 0.9.9.8
+#* last updated 11/16/22
 """Exports Smelloscope data to fancy spreadsheets.
 
    Currently compatible with Google Sheets.
@@ -25,13 +25,17 @@ ws_metrics = None
 ws_scores = None
 
 # Creating CellFormat objects used in funcs for custom formatting
-fmt1 = CellFormat(backgroundColor=Color(0.7, 0.9, 1),
+fmt_bold_blue = CellFormat(backgroundColor=Color(0.7, 0.9, 1),
                   textFormat=TextFormat(bold=True, 
                   foregroundColor=Color(0, 0, 0)))
 
+fmt_bold = CellFormat(textFormat=TextFormat(bold=True))
+
 left_align = CellFormat(horizontalAlignment='LEFT')
+right_align = CellFormat(horizontalAlignment='RIGHT')
 
 fmt_bold_italic = CellFormat(textFormat=TextFormat(bold=True, italic=True))
+fmt_italic = CellFormat(textFormat=TextFormat(italic=True))
 
 fmt_black_background = CellFormat(backgroundColor=Color(0, 0, 0))
 
@@ -57,10 +61,12 @@ def gs_export(tick, companies, peer_group, custom='', e_to_j=False, e_to_m=False
     gs_create(tick, custom, e_to_j, e_to_m)
     gs_scores(tick, companies, peer_group, ws_scores)
     gs_metrics(tick, companies, peer_group, ws_metrics)
+    gs_analyst(tick, companies, ws_analyst)
 
 def gs_create(tick, custom, e_to_j, e_to_m):
     """Creates Google Spreadsheet, initializes Worksheets,
        and shares via email.
+       Note that variables for WorkSheet objects must be set to global.
 
     Args:
         tick (str): ticker of company
@@ -68,9 +74,12 @@ def gs_create(tick, custom, e_to_j, e_to_m):
         e_to_j (bool): False unless set to True in Lab when calling gs_export. Emails to Jeff.
         e_to_m (bool): False unless set to True in Lab when calling gs_export. Emails to Mary.
     """
-    global ws_scores, ws_metrics # need these vars to be global
-    sh = gc.create(f'{tick} {today}{custom}') # creating spreadsheet object
+
+    global ws_scores, ws_metrics, ws_analyst # need these vars to be global
+    
     print(f'Creating Google Spreadsheet called: "{tick} {today}{custom}"')
+
+    sh = gc.create(f'{tick} {today}{custom}') # creating spreadsheet object
 
     # sharing via email
     sh.share('ssrjustin@gmail.com', perm_type='user', role='writer')
@@ -84,6 +93,7 @@ def gs_create(tick, custom, e_to_j, e_to_m):
     # Adding worksheets
     ws_scores = sh.add_worksheet(title="Scores", rows=37, cols=14)
     ws_metrics = sh.add_worksheet(title="Metrics", rows=36, cols=7)
+    ws_analyst = sh.add_worksheet(title="Analyst", rows=18, cols=7)
 
     # deleting blank sheet that gets created when creating a spreadsheet
     ws2 = sh.get_worksheet(0)
@@ -324,7 +334,7 @@ def gs_scores(tick, companies, peer_group, ws_scores):
         sleep(1)
 
     for column in ['A', 'B', 'C', 'D', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N']:
-        set_column_width(ws_scores, column, 74)
+        set_column_width(ws_scores, column, 72)
         sleep(1)
 
     # Begin borders section (which was HUGE pain in the ass!)
@@ -591,7 +601,7 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
     format_cell_range(ws_metrics, 'A1:A36', fmt_bold_italic)
     format_cell_range(ws_metrics, 'E1:E36', fmt_bold_italic)
     sleep(2)
-    format_cell_range(ws_metrics, 'A3:G3', fmt1)
+    format_cell_range(ws_metrics, 'A3:G3', fmt_bold_blue)
     set_column_width(ws_metrics, 'D', 20)
     sleep(2)
 
@@ -600,13 +610,13 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
         sleep(1)
 
     format_cell_range(ws_metrics, 'D3:D36', fmt_blue_background)
-    format_cell_range(ws_metrics, 'E23:G23', fmt1)
+    format_cell_range(ws_metrics, 'E23:G23', fmt_bold_blue)
     sleep(2)
-    format_cell_range(ws_metrics, 'E27:G27', fmt1)
-    format_cell_range(ws_metrics, 'E31:G31', fmt1)
+    format_cell_range(ws_metrics, 'E27:G27', fmt_bold_blue)
+    format_cell_range(ws_metrics, 'E31:G31', fmt_bold_blue)
     sleep(2)
-    format_cell_range(ws_metrics, 'A25:C25', fmt1)
-    format_cell_range(ws_metrics, 'A31:C31', fmt1)
+    format_cell_range(ws_metrics, 'A25:C25', fmt_bold_blue)
+    format_cell_range(ws_metrics, 'A31:C31', fmt_bold_blue)
     sleep(2)
 
     for row in [x for x in range(4, 37) if not x % 2]:
@@ -628,3 +638,99 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
     ws_metrics.format('A31:C31', {'textFormat': {"fontSize": 11, 'bold': True}})
 
     print('"Metrics" sheet has been completed.')
+
+def gs_analyst(tick, companies, ws_analyst):
+    """Pulls in data and formats the "Scores" sheet.
+
+    Args:
+        tick (str): company ticker
+        companies (dict): dict of company objects
+        ws_scores (WorkSheet): gspread WorkSheet object
+    """
+    print('Creating "Analyst" sheet.')
+
+    a1 = [['Ratings over last 3 months']]
+    d1 = [['Ratings over last 30 days']]
+    a3_b3 = [['Rating', 'Total']]
+    d3_g3 = [['Date', 'Rating', 'Date', 'Rating']]
+
+    # Loop adds "3mo ratings over time" data to lists. Lists will be part of batch update
+    call_type = []
+    rot_3mo = []
+    for call in companies[tick].analyst_data[1].index:
+        call_type.append([call])
+        rot_3mo.append([int(companies[tick].analyst_data[1].loc[call][0])]) # must convert to python int for Google API compatibility
+
+    # Analyst 30 day rating will be split into two sets of 15
+    # Loops will add data to lists and lists will be used as part of batch update
+    first_15_dates = []
+    first_15_calls = []
+    for date in companies[tick].analyst_data[0].index[:15]:
+        first_15_dates.append([date])
+        first_15_calls.append([companies[tick].analyst_data[0].loc[date][0]])
+
+    second_15_dates = []
+    second_15_calls = []
+    for date in companies[tick].analyst_data[0].index[15:]:
+        second_15_dates.append([date])
+        second_15_calls.append([companies[tick].analyst_data[0].loc[date][0]])
+
+    ws_analyst.batch_update([
+                            {'range': 'A1',
+                            'values': a1},
+                            {'range': 'D1',
+                            'values': d1},
+                            {'range': 'A3:B3',
+                            'values': a3_b3},
+                            {'range': 'D3:G3',
+                            'values': d3_g3},
+                            {'range': 'A4:A8',
+                            'values': call_type},
+                            {'range': 'B4:B8',
+                            'values': rot_3mo},
+                            {'range': 'D4:D18',
+                            'values': first_15_dates},
+                            {'range': 'E4:E18',
+                            'values': first_15_calls},
+                            {'range': 'F4:F18',
+                            'values': second_15_dates},
+                            {'range': 'G4:G18',
+                            'values': second_15_calls},
+                            ])
+
+    sleep(1)
+    print('Fancifying the "Analyst" sheet.')
+    format_cell_range(ws_analyst, 'B4:B8', left_align)
+    format_cell_range(ws_analyst, 'A4:A8', right_align)
+    format_cell_range(ws_analyst, 'A1:G1', fmt_bold_blue)
+    sleep(3)
+    ws_analyst.format('A3:G3', {'textFormat': {"fontSize": 11, 'bold': True}})
+    format_cell_range(ws_analyst, 'D4:D18', fmt_italic)
+    format_cell_range(ws_analyst, 'F4:F18', fmt_italic)
+    sleep(3)
+
+    for row in [row for row in range(4, 9) if row % 2]:
+        format_cell_range(ws_analyst, f'A{row}:B{row}', fmt_grey_background)
+        sleep(1)
+
+    for row in [row for row in range(4, 19) if row % 2]:
+        format_cell_range(ws_analyst, f'D{row}:G{row}', fmt_grey_background)
+        sleep(1)
+
+    format_cell_range(ws_analyst, 'A3:G3', fmt_yellow_background)
+    set_column_width(ws_analyst, 'A', 75)
+    set_column_width(ws_analyst, 'B', 174)
+    sleep(3)
+    set_column_width(ws_analyst, 'C', 20)
+    set_column_width(ws_analyst, 'D', 77)
+    set_column_width(ws_analyst, 'E', 78)
+    sleep(3)
+    set_column_width(ws_analyst, 'F', 77)
+    set_column_width(ws_analyst, 'G', 78)
+    sleep(2)
+
+    format_cell_range(ws_analyst, 'C1:C18', fmt_dkgrey_background)
+    ws_analyst.format('A1', {'textFormat': {"fontSize": 14, 'bold': True}})
+    ws_analyst.format('D1', {'textFormat': {"fontSize": 14, 'bold': True}})
+    sleep(3)
+    print('"Analyst" sheet complete.')
