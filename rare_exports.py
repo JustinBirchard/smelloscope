@@ -1,23 +1,35 @@
 # rare_exports.py
-#* Version 0.9.9.6
+#* Version 0.9.9.7
 #* last updated 11/15/22
+"""Exports Smelloscope data to fancy spreadsheets.
+
+   Currently compatible with Google Sheets.
+   Excel compatibility in future updates.
+   
+   Google API Notes:
+   One API call allowed per second, otherwise get ExhaustedResource error.
+   Specific format is required for batch importing rows vs columns
+   For columns (eg, A1:A3), the format is [['A1 value'], ['A2 value'], ['A3 value]]
+   For rows (eg, A1:C1), the format is [['A1', 'B1', 'C1']]
+"""
 
 import datetime
 import gspread
 from gspread_formatting import *
 from time import sleep
+
 gc = gspread.service_account(filename='smelloscope-bf9b919f41a7.json')
 today = str(datetime.date.today())
 
 ws_metrics = None
 ws_scores = None
 
-
-left_align = CellFormat(horizontalAlignment='LEFT')
-
+# Creating CellFormat objects used in funcs for custom formatting
 fmt1 = CellFormat(backgroundColor=Color(0.7, 0.9, 1),
                   textFormat=TextFormat(bold=True, 
                   foregroundColor=Color(0, 0, 0)))
+
+left_align = CellFormat(horizontalAlignment='LEFT')
 
 fmt_bold_italic = CellFormat(textFormat=TextFormat(bold=True, italic=True))
 
@@ -38,7 +50,7 @@ def gs_export(tick, companies, peer_group, custom='', e_to_j=False, e_to_m=False
         tick (str): company ticker
         companies (dict): dict of company objects
         peer_group (PeerGroup): PeerGroup object
-        custom OPTIONAL (str): str for Spreadsheet file name default is ''
+        custom OPTIONAL (str): str used to customize spreadsheet file name
         e_to_j OPTIONAL (bool): True emails to Jeff7sr@gmail.com
         e_to_m OPTIONAL (bool): True emails to mer.broadway@gmail.com
     """
@@ -77,246 +89,8 @@ def gs_create(tick, custom, e_to_j, e_to_m):
     ws2 = sh.get_worksheet(0)
     sh.del_worksheet(ws2)
 
-def gs_metrics(tick, companies, peer_group, ws_metrics):
-    """Pulls in data and formats the "Metrics" sheet.
-       Google allows 1 call/sec
-
-    Args:
-        tick (str): company ticker
-        companies (dict): dict of company objects
-        peer_group (PeerGroup): PeerGroup object
-        ws_metrics (WorkSheet): gspread WorkSheet object
-    """
-    print('Now creating "Metrics" sheet.')
-    sleep(5)
-    price = companies[tick].df_basic.loc['price'][0]
-    
-    # Setting up header for the sheet which is just "price" & the value
-    ws_metrics.update('A1', 'Price')
-    ws_metrics.update('B1', price)
-
-    # Exporting Value header names, stat names, and values
-    ws_metrics.update('A3', 'Value')
-    ws_metrics.update('B3', tick)
-    ws_metrics.update('C3', 'Peer Avg')
-    sleep(5)
-
-    v_names = []
-    v_stats = []
-    v_peer = []
-
-    for name in companies[tick].df_value.index:
-        stat = companies[tick].df_value.loc[name][0]
-        peer_stat = peer_group.df_value.loc[name][0]
-        v_names.append([name])
-        v_stats.append([stat])
-        v_peer.append([peer_stat])
-
-    m_names = []
-    m_stats = []
-    m_peer = []
-
-    for name in companies[tick].df_mgmt.index:
-        stat = companies[tick].df_mgmt.loc[name][0]
-        peer_stat = peer_group.df_mgmt.loc[name][0]
-        m_names.append([name])
-        m_stats.append([stat])
-        m_peer.append([peer_stat])
-
-    i_names = []
-    i_stats = []
-    i_peer = []
-
-    for name in companies[tick].df_ins.index:
-        stat = companies[tick].df_ins.loc[name][0]
-        peer_stat = peer_group.df_ins.loc[name][0]
-        i_names.append([name])
-        i_stats.append([stat])
-        i_peer.append([peer_stat])
-
-    d_names = []
-    d_stats = []
-    d_peer = []
-
-    for name in companies[tick].div_dfs[0].index:
-        stat = companies[tick].div_dfs[0].loc[name][0]
-        d_names.append([name])
-        d_stats.append([stat])
-
-        if not peer_group.div_dfs[0].empty:
-            peer_stat = peer_group.div_dfs[0].loc[name][0]
-
-        else:
-            peer_stat = 'n/a'
-
-        d_peer.append([peer_stat])
-
-    p_names = []
-    p_stats = []
-    p_peer = []
-
-    for name in companies[tick].df_pub_sent.index:
-        stat = companies[tick].df_pub_sent.loc[name][0]
-        peer_stat = peer_group.df_pub_sent.loc[name][0]
-        p_names.append([name])
-        p_stats.append([stat])
-        p_peer.append([peer_stat])
-
-    a_names = [['wb_score'], ['fwd_pe']]
-    a_stats = [[companies[tick].analyst_data[2]], [companies[tick].analyst_data[3]]]
-    a_peer = [[peer_group.analyst_data[2]], [peer_group.analyst_data[3]]]
-
-    e_names = []
-    e_stats = []
-    e_peer = []
-
-    for name in companies[tick].df_esg.index:
-        stat = companies[tick].df_esg.loc[name][0]
-        e_names.append([name])
-        e_stats.append([stat])
-
-        if not peer_group.df_esg.empty:
-            peer_stat = peer_group.df_esg.loc[name][0]
-
-        else:
-            peer_stat = 'n/a'
-
-        e_peer.append([peer_stat])
-
-    ws_metrics.batch_update([
-            {'range': 'A4:A23',
-            'values': v_names},
-            {'range': 'B4:B23',
-            'values': v_stats},
-            {'range': 'C4:C23',
-            'values': v_peer},
-
-            {'range': 'E4:E21',
-            'values': m_names},
-            {'range': 'F4:F21',
-            'values': m_stats},
-            {'range': 'G4:G21',
-            'values': m_peer},
-
-            {'range': 'A26:A29',
-            'values': i_names},
-            {'range': 'B26:B29',
-            'values': i_stats},
-            {'range': 'C26:C29',
-            'values': i_peer},
-
-            {'range': 'E24:E25',
-            'values': d_names},
-            {'range': 'F24:F25',
-            'values': d_stats},
-            {'range': 'G24:G25',
-            'values': d_peer},
-
-            {'range': 'A32:A34',
-            'values': p_names},
-            {'range': 'B32:B34',
-            'values': p_stats},
-            {'range': 'C32:C34',
-            'values': p_peer},
-
-            {'range': 'E28:E29',
-            'values': a_names},
-            {'range': 'F28:F29',
-            'values': a_stats},
-            {'range': 'G28:G29',
-            'values': a_peer},
-
-            {'range': 'E32:E36',
-            'values': e_names},
-            {'range': 'F32:F36',
-            'values': e_stats},
-            {'range': 'G32:G36',
-            'values': e_peer},
-            ])
-
-    # Exporting Management header names, stat names, and values
-    ws_metrics.update('E3', 'Management')
-    ws_metrics.update('F3', tick)
-    ws_metrics.update('G3', 'Peer Avg')
-    sleep(3)
-
-    # Exporting Ins & Inst header names, stat names, and values
-    ws_metrics.update('A25', 'Ins & Inst')
-    ws_metrics.update('B25', tick)
-    ws_metrics.update('C25', 'Peer Avg')
-    sleep(3)
-
-    # Exporting Dividend header names, stat names, and values
-    ws_metrics.update('E23', 'Dividend')
-    ws_metrics.update('F23', tick)
-    ws_metrics.update('G23', 'Peer Avg')
-    sleep(3)
-    
-    # Exporting Pub Sent header names, stat names, and values
-    ws_metrics.update('A31', 'Pub Sent')
-    ws_metrics.update('B31', tick)
-    ws_metrics.update('C31', 'Peer Avg')
-    sleep(3)
-
-    # Exporting Analyst Sent header names, stat names, and values
-    ws_metrics.update('E27', 'Analyst')
-    ws_metrics.update('F27', tick)
-    ws_metrics.update('G27', 'Peer Avg')
-    sleep(3)
-
-    # Exporting ESG header names, stat names, and values
-    ws_metrics.update('E31', 'ESG')
-    ws_metrics.update('F31', tick)
-    ws_metrics.update('G31', 'Peer Avg')
-    sleep(3)
-
-
-    format_cell_range(ws_metrics, 'A1:A36', fmt_bold_italic)
-    format_cell_range(ws_metrics, 'E1:E36', fmt_bold_italic)
-    sleep(2)
-    print('Gussying up the "Metrics" sheet.')
-
-    format_cell_range(ws_metrics, 'A3:G3', fmt1)
-    set_column_width(ws_metrics, 'D', 20)
-    sleep(2)
-
-    for column in ['A', 'B', 'C', 'E', 'F', 'G']:
-        set_column_width(ws_metrics, column, 94)
-        sleep(1)
-
-    format_cell_range(ws_metrics, 'D3:D36', fmt_blue_background)
-    format_cell_range(ws_metrics, 'E23:G23', fmt1)
-    sleep(2)
-    format_cell_range(ws_metrics, 'E27:G27', fmt1)
-    format_cell_range(ws_metrics, 'E31:G31', fmt1)
-    sleep(2)
-    format_cell_range(ws_metrics, 'A25:C25', fmt1)
-    format_cell_range(ws_metrics, 'A31:C31', fmt1)
-    sleep(2)
-
-    for row in [x for x in range(4, 37) if not x % 2]:
-        format_cell_range(ws_metrics, f'A{row}:C{row}', fmt_grey_background)
-        sleep(1)
-
-    for row in [x for x in range(4, 37) if not x % 2]:
-        format_cell_range(ws_metrics, f'E{row}:G{row}', fmt_grey_background)
-        sleep(1)
-
-    ws_metrics.format('A1:B1', {'textFormat': {"fontSize": 18, 'bold': True}})
-    ws_metrics.format('A3:G3', {'textFormat': {"fontSize": 11, 'bold': True}})
-    ws_metrics.format('E23:G23', {'textFormat': {"fontSize": 11, 'bold': True}})
-    sleep(2)
-    ws_metrics.format('E27:G27', {'textFormat': {"fontSize": 11, 'bold': True}})
-    ws_metrics.format('E31:G31', {'textFormat': {"fontSize": 11, 'bold': True}})
-    sleep(2)
-    ws_metrics.format('A25:C25', {'textFormat': {"fontSize": 11, 'bold': True}})
-    ws_metrics.format('A31:C31', {'textFormat': {"fontSize": 11, 'bold': True}})
-
-    print('"Metrics" sheet has been completed.')
-
 def gs_scores(tick, companies, peer_group, ws_scores):
     """Pulls in data and formats the "Scores" sheet.
-       Google allows 1 call/sec
 
     Args:
         tick (str): company ticker
@@ -324,14 +98,15 @@ def gs_scores(tick, companies, peer_group, ws_scores):
         peer_group (PeerGroup): PeerGroup object
         ws_scores (WorkSheet): gspread WorkSheet object
     """
-    print('Now creating "Scores" sheet.')
+    print('Creating "Scores" sheet.')
     price = companies[tick].df_basic.loc['price'][0]
     name = companies[tick].df_basic.loc['name'][0]
     sector = companies[tick].df_basic.loc['sector'][0]
     industry = companies[tick].df_basic.loc['industry'][0]
     total_score = companies[tick].score_card['grand_total']
     today = str(datetime.date.today())
-
+    
+    # One string to hold all peers (and in the darkness bind them)
     peer_str = ''
     for ticker in companies.keys():
         peer_str += f'{ticker} '
@@ -339,6 +114,7 @@ def gs_scores(tick, companies, peer_group, ws_scores):
     peer_str = peer_str.strip()
     no_of_peers = len(companies.keys())
 
+    # Lists that hold titles & values to be batch imported into columns
     a1_a10 = [[name], ['Score'], ['Price'], ['Date'], ['Ticker'], ['Sector'], ['Industry'], 
                    ['Peer Group'], ['# of Peers'], ['Top Scores in Group']]
 
@@ -347,11 +123,12 @@ def gs_scores(tick, companies, peer_group, ws_scores):
     b2_b9 = [[total_score], [price], [today], [tick], [sector], 
                    [industry], [peer_str], [no_of_peers]]
 
-#* Begin Detailed Score Card section (rows 18 to 37)
+#& Begin Detailed Score Card section (rows 18 to 37)
 
-    # Each category requires 3 lists "questions" will hold the question IDs, 
-    # "outof" holds the available points for each question, scores will hold 
-    # the scores for each question
+    # Each category requires 3 lists:
+    #           "questions" will hold the question IDs, 
+    #           "outof" holds the available points for each question, 
+    #           "scores" will hold the scores for each question
 
     v_questions = []
     v_outof = ['/2', '/3', '/3', '/1', '/2', '/2', 
@@ -389,7 +166,7 @@ def gs_scores(tick, companies, peer_group, ws_scores):
                    [p_questions, p_outof, p_scores], [a_questions, a_outof, a_scores], 
                    [e_questions, e_outof, e_scores]]
 
-    # putting score category names into list so we can zip together with groups of lists we careted above
+    # putting score category names into list so we can zip together with groups of lists created above
     score_cards = ['value', 'mgmt', 'ins', 'div', 'pub_sent', 'analyst_data', 'esg' ]
 
     for lists, card in zip(score_lists, score_cards):
@@ -402,14 +179,14 @@ def gs_scores(tick, companies, peer_group, ws_scores):
         for l in [lists[0], lists[2]]:
             l.insert(0, l.pop())
 
-#* End Detailed Score Card section (rows 18 to 37)
+#& End Detailed Score Card section (rows 18 to 37)
+#& Begin Top Scores in Group section (rows 11 to 16)
 
-#* Begin Top Scores in Group section (rows 11 to 16)
     # Header for winners section
     a11_i11 = [['Stock', 'Total', 'V score', 'M score', 'I Score', 'D Score',
                    'P Score', 'A Score', 'E Score']]
 
-    # lists that will hold the ticker and total scores for each category
+    # lists will hold the ticker and total scores for each category
     row12 = []
     row13 = []
     row14 = []
@@ -444,64 +221,67 @@ def gs_scores(tick, companies, peer_group, ws_scores):
             for score in peer_group.winners[tick].values():
                 row16.append(score)
 
+    # Batch updating using all lists above
     ws_scores.batch_update([
-        {'range': 'A1:A10',
-         'values': a1_a10},
-        {'range': 'B2:B9',
-        'values': b2_b9},
-        {'range': 'A11:I11',
-        'values': a11_i11},
+                            {'range': 'A1:A10',
+                            'values': a1_a10},
+                            {'range': 'B2:B9',
+                            'values': b2_b9},
+                            {'range': 'A11:I11',
+                            'values': a11_i11},
 
-        {'range': 'A17',
-        'values': a17},
+                            {'range': 'A17',
+                            'values': a17},
 
-        {'range': 'A18:N18',
-        'values': [v_questions]},
-        {'range': 'A19:N19',
-        'values': [v_scores]},
+                            {'range': 'A18:N18',
+                            'values': [v_questions]},
+                            {'range': 'A19:N19',
+                            'values': [v_scores]},
 
-        {'range': 'A21:N21',
-        'values': [m_questions]},
-        {'range': 'A22:N22',
-        'values': [m_scores]},
+                            {'range': 'A21:N21',
+                            'values': [m_questions]},
+                            {'range': 'A22:N22',
+                            'values': [m_scores]},
 
-        {'range': 'A24:E24',
-        'values': [i_questions]},
-        {'range': 'A25:E25',
-        'values': [i_scores]},
+                            {'range': 'A24:E24',
+                            'values': [i_questions]},
+                            {'range': 'A25:E25',
+                            'values': [i_scores]},
 
-        {'range': 'A27:E27',
-        'values': [d_questions]},
-        {'range': 'A28:E28',
-        'values': [d_scores]},
+                            {'range': 'A27:E27',
+                            'values': [d_questions]},
+                            {'range': 'A28:E28',
+                            'values': [d_scores]},
 
-        {'range': 'A30:G30',
-        'values': [p_questions]},
-        {'range': 'A31:G31',
-        'values': [p_scores]},
+                            {'range': 'A30:G30',
+                            'values': [p_questions]},
+                            {'range': 'A31:G31',
+                            'values': [p_scores]},
 
-        {'range': 'A33:G33',
-        'values': [a_questions]},
-        {'range': 'A34:G34',
-        'values': [a_scores]},
+                            {'range': 'A33:G33',
+                            'values': [a_questions]},
+                            {'range': 'A34:G34',
+                            'values': [a_scores]},
 
-        {'range': 'A36:F36',
-        'values': [e_questions]},
-        {'range': 'A37:F37',
-        'values': [e_scores]},
+                            {'range': 'A36:F36',
+                            'values': [e_questions]},
+                            {'range': 'A37:F37',
+                            'values': [e_scores]},
 
-        {'range': 'A12:I12',
-        'values': [row12]},
-        {'range': 'A13:I13',
-        'values': [row13]},
-        {'range': 'A14:I14',
-        'values': [row14]},
-        {'range': 'A15:I15',
-        'values': [row15]},
-        {'range': 'A16:I16',
-        'values': [row16]},
-        ])
-        
+                            {'range': 'A12:I12',
+                            'values': [row12]},
+                            {'range': 'A13:I13',
+                            'values': [row13]},
+                            {'range': 'A14:I14',
+                            'values': [row14]},
+                            {'range': 'A15:I15',
+                            'values': [row15]},
+                            {'range': 'A16:I16',
+                            'values': [row16]},
+                            ])
+    
+    print('Gussying up the "Scores" sheet.')
+    # Formatting section
     format_cell_range(ws_scores, 'A1:N1', fmt_blue_background)
     format_cell_range(ws_scores, 'A10:N10', fmt_blue_background)
     format_cell_range(ws_scores, 'A17:N17', fmt_blue_background)
@@ -530,158 +310,321 @@ def gs_scores(tick, companies, peer_group, ws_scores):
 
     ws_scores.format('A1', {'textFormat': {"fontSize": 36, 'bold': True}})
     ws_scores.format('A2:A3', {'textFormat': {"fontSize": 14, 'bold': True}})
-
+    sleep(2)
     ws_scores.format('B2', {'textFormat': {"fontSize": 24, 'bold': True}})
     ws_scores.format('B3', {'textFormat': {"fontSize": 18, 'bold': True}})
     ws_scores.format('B4:B7', {'textFormat': {"fontSize": 12, 'bold': True}})
     ws_scores.format('A10', {'textFormat': {"fontSize": 24, 'bold': True}})
     ws_scores.format('A17', {'textFormat': {"fontSize": 24, 'bold': True}})
     ws_scores.format('A11:I11', {'textFormat': {'bold': True}})
-    sleep(5)
+    sleep(6)
 
     for row in [18, 21, 24, 27, 30, 33, 36]:
         ws_scores.format(f'A{row}:I{row}', {'textFormat': {'bold': True}})
         sleep(1)
-    sleep(3)
 
     for column in ['A', 'B', 'C', 'D', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N']:
-        set_column_width(ws_scores, column, 77)
+        set_column_width(ws_scores, column, 74)
         sleep(1)
 
-    ws_scores.format('A1', {
-                           "borders": {
-                              "top": {"style": "SOLID_THICK"},
-                              "left": {"style": "SOLID_THICK"},
-                              }})
+    # Begin borders section (which was HUGE pain in the ass!)
+    ws_scores.format('A1', {"borders": 
+                              {"top": {"style": "SOLID_THICK"},
+                              "left": {"style": "SOLID_THICK"},}
+                           })
     sleep(2)
-    ws_scores.format('B1:M1', {
-                              "borders": 
-                                  {
-                                  "top": {"style": "SOLID_THICK"},
-                                  }
+    ws_scores.format('B1:M1', {"borders": 
+                                  {"top": {"style": "SOLID_THICK"},}
                               })
     sleep(2)
-    ws_scores.format('N1', {
-                           "borders": 
-                              {
-                              "top": {"style": "SOLID_THICK"},
-                              "right": {"style": "SOLID_THICK"},
-                              }})
+    ws_scores.format('N1', {"borders": 
+                              {"top": {"style": "SOLID_THICK"},
+                              "right": {"style": "SOLID_THICK"},}
+                           })
     sleep(2)
-    ws_scores.format('A10', {
-                           "borders": 
-                              {
-                              "top": {"style": "SOLID_THICK"},
-                              "left": {"style": "SOLID_THICK"},
-                              }})
+    ws_scores.format('A10', {"borders": 
+                              {"top": {"style": "SOLID_THICK"},
+                              "left": {"style": "SOLID_THICK"},}
+                            })
     sleep(2)
-    ws_scores.format('B10:M10', {
-                                "borders": 
-                                    {
-                                    "top": {"style": "SOLID_THICK"},
-                                    }
+    ws_scores.format('B10:M10', {"borders": 
+                                    {"top": {"style": "SOLID_THICK"},}
                                 })
     sleep(2)
-    ws_scores.format('N10', {
-                           "borders": 
-                              {
-                              "top": {"style": "SOLID_THICK"},
-                              "right": {"style": "SOLID_THICK"},
-                              }})
+    ws_scores.format('N10', {"borders": 
+                              {"top": {"style": "SOLID_THICK"},
+                              "right": {"style": "SOLID_THICK"},}
+                            })
     sleep(2)
-    ws_scores.format('A17', {
-                            "borders": 
-                                {
-                                "top": {"style": "SOLID_THICK"},
-                                "left": {"style": "SOLID_THICK"},
-                                }})
+    ws_scores.format('A17', {"borders": 
+                                {"top": {"style": "SOLID_THICK"},
+                                "left": {"style": "SOLID_THICK"},}
+                            })
     sleep(2)
-    ws_scores.format('B17:M17', {
-                                "borders": 
-                                    {
-                                    "top": {"style": "SOLID_THICK"},
-                                    }
+    ws_scores.format('B17:M17', {"borders": 
+                                    {"top": {"style": "SOLID_THICK"},}
                                 })
     sleep(2)
-    ws_scores.format('N17', {
-                            "borders": 
-                                {
-                                "top": {"style": "SOLID_THICK"},
-                                "right": {"style": "SOLID_THICK"},
-                                }})
+    ws_scores.format('N17', {"borders": 
+                                {"top": {"style": "SOLID_THICK"},
+                                "right": {"style": "SOLID_THICK"},}
+                            })
     sleep(2)
-    ws_scores.format('A2:A9', {
-                               "borders": 
-                                   {
-                                   "left": {"style": "SOLID_THICK"},
-                                   }
+    ws_scores.format('A2:A9', {"borders": 
+                                   {"left": {"style": "SOLID_THICK"},}
+                              })
+    sleep(2)
+    ws_scores.format('A11:A16', {"borders": 
+                                   {"left": {"style": "SOLID_THICK"},}
                                 })
+    sleep(2)
+    ws_scores.format('A18:A36', {"borders": 
+                                   {"left": {"style": "SOLID_THICK"},}
+                                })
+    sleep(2)
+    ws_scores.format('N1', {"borders": 
+                              {"top": {"style": "SOLID_THICK"},
+                              "right": {"style": "SOLID_THICK"},}
+                           })
+    sleep(2)
+    ws_scores.format('N2:N9', {"borders": 
+                                   {"right": {"style": "SOLID_THICK"},}
+                              })
+    sleep(2)
+    ws_scores.format('N11:N16', {"borders": 
+                                   {"right": {"style": "SOLID_THICK"},}
+                                })
+    sleep(2)
+    ws_scores.format('N18:N36', {"borders": 
+                                   {"right": {"style": "SOLID_THICK"},}
+                                })
+    sleep(2)
+    ws_scores.format('A37', {"borders": 
+                              {"bottom": {"style": "SOLID_THICK"},
+                              "left": {"style": "SOLID_THICK"},}
+                            })
+    sleep(2)
+    ws_scores.format('B37:M37', {"borders": 
+                                    {"bottom": {"style": "SOLID_THICK"},}
+                                })
+    sleep(2)
+    ws_scores.format('N37', {"borders": 
+                              {"bottom": {"style": "SOLID_THICK"},
+                              "right": {"style": "SOLID_THICK"},}
+                            })
 
-    sleep(2)
-    ws_scores.format('A11:A16', {
-                               "borders": 
-                                   {
-                                   "left": {"style": "SOLID_THICK"},
-                                   }
-                                })
+    print('"Scores" sheet complete.')
 
-    sleep(2)
-    ws_scores.format('A18:A36', {
-                               "borders": 
-                                   {
-                                   "left": {"style": "SOLID_THICK"},
-                                   }
-                                })
+def gs_metrics(tick, companies, peer_group, ws_metrics):
+    """Pulls in data and formats the "Metrics" sheet.
+       Google allows 1 call/sec
 
+    Args:
+        tick (str): company ticker
+        companies (dict): dict of company objects
+        peer_group (PeerGroup): PeerGroup object
+        ws_metrics (WorkSheet): gspread WorkSheet object
+    """
+    print('Now creating "Metrics" sheet.')
+    price = companies[tick].df_basic.loc['price'][0]
+
+    # Batch updating headers and stock price
+    ws_metrics.batch_update([
+                            {'range': 'A1:B1',
+                            'values': [['Price', price]]},
+                            {'range': 'A3:C3',
+                            'values': [['Value', tick, 'Peer Avg']]},
+                            {'range': 'E3:G3',
+                            'values': [['MGMT', tick, 'Peer Avg']]},
+                            {'range': 'A25:C25',
+                            'values': [['Ins & Inst', tick, 'Peer Avg']]},
+                            {'range': 'E23:G23',
+                            'values': [['Dividend', tick, 'Peer Avg']]},
+                            {'range': 'A31:C31',
+                            'values': [['Pub Sent', tick, 'Peer Avg']]},
+                            {'range': 'E27:G27',
+                            'values': [['Analyst', tick, 'Peer Avg']]},
+                            {'range': 'E31:G31',
+                            'values': [['ESG', tick, 'Peer Avg']]},
+                             ])
+
+# Loops below populate lists of stats that will be batch imported into the sheet.
+# All loops are similar in structure except for Dividend, Analyst, and ESG 
+# which require special handling.
+
+    # Each category will have 3 lists 
+    v_names = [] # name of stat
+    v_stats = [] # value of stat
+    v_peer = [] # value of peer stat
+    for name in companies[tick].df_value.index:
+        stat = companies[tick].df_value.loc[name][0]
+        peer_stat = peer_group.df_value.loc[name][0]
+        v_names.append([name]) # enclosing in list due to API batch requirement
+        v_stats.append([stat])
+        v_peer.append([peer_stat])
+
+    m_names = []
+    m_stats = []
+    m_peer = []
+    for name in companies[tick].df_mgmt.index:
+        stat = companies[tick].df_mgmt.loc[name][0]
+        peer_stat = peer_group.df_mgmt.loc[name][0]
+        m_names.append([name])
+        m_stats.append([stat])
+        m_peer.append([peer_stat])
+
+    i_names = []
+    i_stats = []
+    i_peer = []
+    for name in companies[tick].df_ins.index:
+        stat = companies[tick].df_ins.loc[name][0]
+        peer_stat = peer_group.df_ins.loc[name][0]
+        i_names.append([name])
+        i_stats.append([stat])
+        i_peer.append([peer_stat])
+    
+    # Special handling for Dividend loop
+    d_names = []
+    d_stats = []
+    d_peer = []
+    for name in companies[tick].div_dfs[0].index:
+        stat = companies[tick].div_dfs[0].loc[name][0]
+        d_names.append([name])
+        d_stats.append([stat])
+
+        if not peer_group.div_dfs[0].empty:
+            peer_stat = peer_group.div_dfs[0].loc[name][0]
+
+        else:
+            peer_stat = 'n/a'
+
+        d_peer.append([peer_stat])
+
+    p_names = []
+    p_stats = []
+    p_peer = []
+    for name in companies[tick].df_pub_sent.index:
+        stat = companies[tick].df_pub_sent.loc[name][0]
+        peer_stat = peer_group.df_pub_sent.loc[name][0]
+        p_names.append([name])
+        p_stats.append([stat])
+        p_peer.append([peer_stat])
+
+    # Special handling for Analyst stats (No loop needed)
+    a_names = [['wb_score'], ['fwd_pe']]
+    a_stats = [[companies[tick].analyst_data[2]], [companies[tick].analyst_data[3]]]
+    a_peer = [[peer_group.analyst_data[2]], [peer_group.analyst_data[3]]]
+
+    # Special handling for ESG loop
+    e_names = []
+    e_stats = []
+    e_peer = []
+    for name in companies[tick].df_esg.index:
+        stat = companies[tick].df_esg.loc[name][0]
+        e_names.append([name])
+        e_stats.append([stat])
+
+        if not peer_group.df_esg.empty:
+            peer_stat = peer_group.df_esg.loc[name][0]
+
+        else:
+            peer_stat = 'n/a'
+
+        e_peer.append([peer_stat])
+
+    # Batch updating all stats and stat names to metrics sheet using lists from above
+    ws_metrics.batch_update([
+                            {'range': 'A4:A23',
+                            'values': v_names},
+                            {'range': 'B4:B23',
+                            'values': v_stats},
+                            {'range': 'C4:C23',
+                            'values': v_peer},
+
+                            {'range': 'E4:E21',
+                            'values': m_names},
+                            {'range': 'F4:F21',
+                            'values': m_stats},
+                            {'range': 'G4:G21',
+                            'values': m_peer},
+
+                            {'range': 'A26:A29',
+                            'values': i_names},
+                            {'range': 'B26:B29',
+                            'values': i_stats},
+                            {'range': 'C26:C29',
+                            'values': i_peer},
+
+                            {'range': 'E24:E25',
+                            'values': d_names},
+                            {'range': 'F24:F25',
+                            'values': d_stats},
+                            {'range': 'G24:G25',
+                            'values': d_peer},
+
+                            {'range': 'A32:A34',
+                            'values': p_names},
+                            {'range': 'B32:B34',
+                            'values': p_stats},
+                            {'range': 'C32:C34',
+                            'values': p_peer},
+
+                            {'range': 'E28:E29',
+                            'values': a_names},
+                            {'range': 'F28:F29',
+                            'values': a_stats},
+                            {'range': 'G28:G29',
+                            'values': a_peer},
+
+                            {'range': 'E32:E36',
+                            'values': e_names},
+                            {'range': 'F32:F36',
+                            'values': e_stats},
+                            {'range': 'G32:G36',
+                            'values': e_peer},
+                            ])
+#& END: preperation for batch import of stats and stat names******************
+
+    print('Beautifying the "Metrics" sheet.')
+    
+    # Formatting cells
+    format_cell_range(ws_metrics, 'A1:A36', fmt_bold_italic)
+    format_cell_range(ws_metrics, 'E1:E36', fmt_bold_italic)
     sleep(2)
-    ws_scores.format('N1', {
-                           "borders": 
-                              {
-                              "top": {"style": "SOLID_THICK"},
-                              "right": {"style": "SOLID_THICK"},
-                              }})
-    sleep(2)
-    ws_scores.format('N2:N9', {
-                               "borders": 
-                                   {
-                                   "right": {"style": "SOLID_THICK"},
-                                   }
-                                })
+    format_cell_range(ws_metrics, 'A3:G3', fmt1)
+    set_column_width(ws_metrics, 'D', 20)
     sleep(2)
 
-    ws_scores.format('N11:N16', {
-                               "borders": 
-                                   {
-                                   "right": {"style": "SOLID_THICK"},
-                                   }
-                                })
+    for column in ['A', 'B', 'C', 'E', 'F', 'G']:
+        set_column_width(ws_metrics, column, 93)
+        sleep(1)
+
+    format_cell_range(ws_metrics, 'D3:D36', fmt_blue_background)
+    format_cell_range(ws_metrics, 'E23:G23', fmt1)
+    sleep(2)
+    format_cell_range(ws_metrics, 'E27:G27', fmt1)
+    format_cell_range(ws_metrics, 'E31:G31', fmt1)
+    sleep(2)
+    format_cell_range(ws_metrics, 'A25:C25', fmt1)
+    format_cell_range(ws_metrics, 'A31:C31', fmt1)
     sleep(2)
 
-    ws_scores.format('N18:N36', {
-                               "borders": 
-                                   {
-                                   "right": {"style": "SOLID_THICK"},
-                                   }
-                                })
-    sleep(2)
+    for row in [x for x in range(4, 37) if not x % 2]:
+        format_cell_range(ws_metrics, f'A{row}:C{row}', fmt_grey_background)
+        sleep(1)
 
-    ws_scores.format('A37', {
-                           "borders": 
-                              {
-                              "bottom": {"style": "SOLID_THICK"},
-                              "left": {"style": "SOLID_THICK"},
-                              }})
+    for row in [x for x in range(4, 37) if not x % 2]:
+        format_cell_range(ws_metrics, f'E{row}:G{row}', fmt_grey_background)
+        sleep(1)
+
+    ws_metrics.format('A1:B1', {'textFormat': {"fontSize": 18, 'bold': True}})
+    ws_metrics.format('A3:G3', {'textFormat': {"fontSize": 11, 'bold': True}})
+    ws_metrics.format('E23:G23', {'textFormat': {"fontSize": 11, 'bold': True}})
     sleep(2)
-    ws_scores.format('B37:M37', {
-                                "borders": 
-                                    {
-                                    "bottom": {"style": "SOLID_THICK"},
-                                    }
-                                })
+    ws_metrics.format('E27:G27', {'textFormat': {"fontSize": 11, 'bold': True}})
+    ws_metrics.format('E31:G31', {'textFormat': {"fontSize": 11, 'bold': True}})
     sleep(2)
-    ws_scores.format('N37', {
-                           "borders": 
-                              {
-                              "bottom": {"style": "SOLID_THICK"},
-                              "right": {"style": "SOLID_THICK"},
-                              }})
+    ws_metrics.format('A25:C25', {'textFormat': {"fontSize": 11, 'bold': True}})
+    ws_metrics.format('A31:C31', {'textFormat': {"fontSize": 11, 'bold': True}})
+
+    print('"Metrics" sheet has been completed.')
