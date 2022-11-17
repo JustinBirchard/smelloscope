@@ -546,8 +546,8 @@ class PeerGroup(Company):
         """
 
         df_com_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Company News'])
-        df_sec_news = obb.common.news(self.companies[primary_stock].df_basic.loc['sector'][0] + 'Sector News Stock Market', sort='published').head(50)
-        df_ind_news = obb.common.news(self.companies[primary_stock].df_basic.loc['industry'][0] + 'Industry News Stock Market', sort='published').head(50)
+        df_sec_news = obb.common.news(self.companies[primary_stock].df_basic.loc['sector'][0] + ' Sector Stock Market', sort='published').head(50)
+        df_ind_news = obb.common.news(self.companies[primary_stock].df_basic.loc['industry'][0] + ' Industry Stock Market', sort='published').head(50)
 
         self.news_dfs = [df_com_news, df_sec_news, df_ind_news]
 

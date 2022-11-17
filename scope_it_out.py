@@ -541,7 +541,7 @@ for company in peers:
 
 ############## *** COMPANY, SECTOR, & INDUSTRY NEWS *** ##############
     
-    df_com_news = obb.common.news(name, sort='published').head(20)
+    df_com_news = obb.common.news(f"{name} {ticker}", sort='published').head(20)
     df_sec_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Sector News'])
     df_ind_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Industry News'])
 

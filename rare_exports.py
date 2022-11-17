@@ -59,9 +59,10 @@ def gs_export(tick, companies, peer_group, custom='', e_to_j=False, e_to_m=False
         e_to_m OPTIONAL (bool): True emails to mer.broadway@gmail.com
     """
     gs_create(tick, custom, e_to_j, e_to_m)
-    gs_scores(tick, companies, peer_group, ws_scores)
-    gs_metrics(tick, companies, peer_group, ws_metrics)
-    gs_analyst(tick, companies, ws_analyst)
+#    gs_scores(tick, companies, peer_group, ws_scores)
+#    gs_metrics(tick, companies, peer_group, ws_metrics)
+#    gs_analyst(tick, companies, ws_analyst)
+    gs_news(tick, companies, peer_group, ws_news)
 
 def gs_create(tick, custom, e_to_j, e_to_m):
     """Creates Google Spreadsheet, initializes Worksheets,
@@ -75,7 +76,7 @@ def gs_create(tick, custom, e_to_j, e_to_m):
         e_to_m (bool): False unless set to True in Lab when calling gs_export. Emails to Mary.
     """
 
-    global ws_scores, ws_metrics, ws_analyst # need these vars to be global
+    global ws_scores, ws_metrics, ws_analyst, ws_news # need these vars to be global
     
     print(f'Creating Google Spreadsheet called: "{tick} {today}{custom}"')
 
@@ -94,6 +95,7 @@ def gs_create(tick, custom, e_to_j, e_to_m):
     ws_scores = sh.add_worksheet(title="Scores", rows=37, cols=14)
     ws_metrics = sh.add_worksheet(title="Metrics", rows=36, cols=7)
     ws_analyst = sh.add_worksheet(title="Analyst", rows=18, cols=7)
+    ws_news = sh.add_worksheet(title="News", rows=46, cols=2)
 
     # deleting blank sheet that gets created when creating a spreadsheet
     ws2 = sh.get_worksheet(0)
@@ -734,3 +736,101 @@ def gs_analyst(tick, companies, ws_analyst):
     ws_analyst.format('D1', {'textFormat': {"fontSize": 14, 'bold': True}})
     sleep(3)
     print('"Analyst" sheet complete.')
+
+def gs_news(tick, companies, peer_group, ws_news):
+    """Pulls in data and formats the "News" sheet.
+
+    Args:
+        tick (str): company ticker
+        companies (dict): dict of company objects
+        peer_group (PeerGroup): PeerGroup object
+        ws_news (WorkSheet): gspread WorkSheet object
+    """
+    print('Creating "News" sheet.')
+
+    industry = companies[tick].df_basic.loc['industry'][0]
+    sector = companies[tick].df_basic.loc['sector'][0]
+
+    c_titles = []
+    c_links = []
+    for index in companies[tick].news_dfs[0].index:
+        c_titles.append([companies[tick].news_dfs[0].loc[index]['title']])
+        c_links.append([companies[tick].news_dfs[0].loc[index]['link']])
+
+    i_titles = []
+    i_links = []
+    for index in peer_group.news_dfs[2].index:
+        i_titles.append([peer_group.news_dfs[2].loc[index]['title']])
+        i_links.append([peer_group.news_dfs[2].loc[index]['link']])
+        
+    i_titles = i_titles[:10] # getting rid of all but 10 most recent titles & links
+    i_links = i_links[:10]
+
+    s_titles = []
+    s_links = []
+    for index in peer_group.news_dfs[1].index:
+        s_titles.append([peer_group.news_dfs[1].loc[index]['title']])
+        s_links.append([peer_group.news_dfs[1].loc[index]['link']])
+        
+    s_titles = s_titles[:10] # getting rid of all but 10 most recent titles & links
+    s_links = s_links[:10]
+
+    ws_news.batch_update([
+                          {'range': 'A1',
+                           'values': [[f"{tick}: Today's Company News"]]},
+                          {'range': 'A2:B2',
+                           'values': [["Headline", "Link"]]},
+                          {'range': 'A3:A22',
+                           'values': c_titles},
+                          {'range': 'B3:B22',
+                           'values': c_links},
+
+                          {'range': 'A23',
+                           'values': [[f"{industry}: Today's News"]]},
+                          {'range': 'A24:B24',
+                           'values': [["Headline", "Link"]]},
+                          {'range': 'A25:A34',
+                           'values': i_titles},
+                          {'range': 'B25:B34',
+                           'values': i_links},
+
+                          {'range': 'A35',
+                           'values': [[f"{sector}: Today's News"]]},
+                          {'range': 'A36:B36',
+                           'values': [["Headline", "Link"]]},
+                          {'range': 'A37:A46',
+                           'values': s_titles},
+                          {'range': 'B37:B46',
+                           'values': s_links},
+                         ])
+                    
+    set_column_width(ws_news, 'A', 900)
+    set_column_width(ws_news, 'B', 150)
+    ws_news.format('A1', {'textFormat': {"fontSize": 16, 'bold': True}})
+    ws_news.format('A2:B2', {'textFormat': {"fontSize": 12, 'bold': True}})
+
+    ws_news.format('A23', {'textFormat': {"fontSize": 16, 'bold': True}})
+    ws_news.format('A24:B24', {'textFormat': {"fontSize": 12, 'bold': True}})
+
+    ws_news.format('A35', {'textFormat': {"fontSize": 16, 'bold': True}})
+    ws_news.format('A36:B36', {'textFormat': {"fontSize": 12, 'bold': True}})
+    
+    for row in [row for row in range(3, 23) if row % 2]:
+        format_cell_range(ws_news, f'A{row}:B{row}', fmt_grey_background)
+        sleep(1)
+
+    for row in [row for row in range(25, 35) if row % 2]:
+        format_cell_range(ws_news, f'A{row}:B{row}', fmt_grey_background)
+        sleep(1)
+
+    for row in [row for row in range(37, 47) if row % 2]:
+        format_cell_range(ws_news, f'A{row}:B{row}', fmt_grey_background)
+        sleep(1)
+
+    for blue_set in ['A1:B1', 'A23:B23', 'A35:B35']:
+        format_cell_range(ws_news, blue_set, fmt_blue_background)
+        sleep(1)
+
+    for yellow_set in ['A2:B2', 'A24:B24', 'A36:B36']:
+        format_cell_range(ws_news, yellow_set, fmt_yellow_background)
+        sleep(1)
