@@ -1,18 +1,16 @@
 # rare_exports.py
-#* Version 0.9.9.9
-#* file last updated 11/17/22
-"""Exports Smelloscope data to fancy spreadsheets.
-
-   Currently compatible with Google Sheets.
-   Excel compatibility in future updates.
+#* Version 1.0
+#* file last updated 11/18/22
+"""Exports Smelloscope data to a fancy Google Sheet.
+   Use  gs_export within Smelloscope lab to initiate
+   all other rare_exports functions.
    
-   Google API Notes:
-   One API call allowed per second, otherwise get ExhaustedResource error.
+   Google Sheets API Notes:
+   One call allowed per second, otherwise get ExhaustedResource error.
    Specific format is required for batch importing rows vs columns
    For columns (eg, A1:A3), the format is [['A1 value'], ['A2 value'], ['A3 value]]
    For rows (eg, A1:C1), the format is [['A1', 'B1', 'C1']]
 """
-
 import datetime
 import gspread
 from gspread_formatting import *
@@ -21,18 +19,13 @@ from time import sleep
 gc = gspread.service_account(filename='smelloscope-bf9b919f41a7.json')
 today = str(datetime.date.today())
 
-ws_metrics = None
-ws_scores = None
-
 # gspread_formatting objects
 left_align = CellFormat(horizontalAlignment='LEFT')
 right_align = CellFormat(horizontalAlignment='RIGHT')
 center_align = CellFormat(horizontalAlignment='CENTER')
-
 fmt_bold_italic = CellFormat(textFormat=TextFormat(bold=True, italic=True))
 fmt_italic = CellFormat(textFormat=TextFormat(italic=True))
 fmt_bold = CellFormat(textFormat=TextFormat(bold=True))
-
 fmt_blue_background = CellFormat(backgroundColor=Color(0.7, 0.9, 1))
 fmt_yellow_background = CellFormat(backgroundColor=Color(255/255, 242/255, 204/255))
 fmt_grey_background = CellFormat(backgroundColor=Color(240/255, 240/255, 240/255))
@@ -43,13 +36,14 @@ fmt_bold_blue = CellFormat(backgroundColor=Color(0.7, 0.9, 1),
                   foregroundColor=Color(0, 0, 0)))
 
 def gs_export(tick, companies, peer_group, custom='', e_to_j=False, e_to_m=False):
-    """Calls all gs functions to create and populate Google spreadsheet.
+    """Calls all gs functions to export data. 
+       Creates, populate, and formats the Google Sheet.
 
     Args:
         tick (str): company ticker
         companies (dict): dict of company objects
         peer_group (PeerGroup): PeerGroup object
-        custom OPTIONAL (str): str used to customize spreadsheet file name
+        custom OPTIONAL (str): str used to customize Google Sheet file name
         e_to_j OPTIONAL (bool): True emails to Jeff7sr@gmail.com
         e_to_m OPTIONAL (bool): True emails to mer.broadway@gmail.com
     """
@@ -64,7 +58,6 @@ def gs_export(tick, companies, peer_group, custom='', e_to_j=False, e_to_m=False
 def gs_create(tick, custom, e_to_j, e_to_m):
     """Creates Google Spreadsheet, initializes Worksheets,
        and shares via email.
-       Note that variables for WorkSheet objects must be set to global.
 
     Args:
         tick (str): ticker of company
@@ -72,10 +65,16 @@ def gs_create(tick, custom, e_to_j, e_to_m):
         e_to_j (bool): False unless set to True in Lab when calling gs_export. Emails to Jeff.
         e_to_m (bool): False unless set to True in Lab when calling gs_export. Emails to Mary.
     """
+    global spreadsheet_name # making global so can be accessed by other functions
 
-    global ws_scores, ws_metrics, ws_analyst, ws_news, ws_esg, ws_sec # need these vars to be global
+    spreadsheet_name = f"{tick} {today}{custom}"
+
+    #! Note that variables for WorkSheet objects must be set to global.
+    global ws_scores, ws_metrics, ws_analyst, ws_news, ws_esg, ws_sec 
     
-    print(f'Creating Google Spreadsheet called: "{tick} {today}{custom}"')
+    print(f'Creating Google Sheet called: "{spreadsheet_name}"')
+    sleep(1)
+    print('Grab a cup of coffee, find a snack, or smoke a doob. This will take about 5min.\n')
 
     sh = gc.create(f'{tick} {today}{custom}') # creating spreadsheet object
 
@@ -109,7 +108,7 @@ def gs_scores(tick, companies, peer_group, ws_scores):
         peer_group (PeerGroup): PeerGroup object
         ws_scores (WorkSheet): gspread WorkSheet object
     """
-    print('Creating "Scores" sheet.')
+    print('Creating "Scores" sheet...')
     price = companies[tick].df_basic.loc['price'][0]
     name = companies[tick].df_basic.loc['name'][0]
     sector = companies[tick].df_basic.loc['sector'][0]
@@ -125,7 +124,7 @@ def gs_scores(tick, companies, peer_group, ws_scores):
     peer_str = peer_str.strip()
     no_of_peers = len(companies.keys())
 
-    # Lists that hold titles & values to be batch imported into columns
+    # titles & values to be batch imported into columns
     a1_a10 = [[name], ['Score'], ['Price'], ['Date'], ['Ticker'], ['Sector'], ['Industry'], 
                    ['Peer Group'], ['# of Peers'], ['Top Scores in Group']]
 
@@ -134,13 +133,11 @@ def gs_scores(tick, companies, peer_group, ws_scores):
     b2_b9 = [[total_score], [price], [today], [tick], [sector], 
                    [industry], [peer_str], [no_of_peers]]
 
-#& Begin Detailed Score Card section (rows 18 to 37)
-
-    # Each category requires 3 lists:
-    #           "questions" will hold the question IDs, 
-    #           "outof" holds the available points for each question, 
-    #           "scores" will hold the scores for each question
-
+#* Begin Detailed Score Card section (rows 18 to 37)
+#& Each scoring category requires 3 lists:
+#&                                     "questions" will hold the question IDs, 
+#&                                     "outof" holds the available points for each question, 
+#&                                     "scores" will hold the scores for each question
     v_questions = []
     v_outof = ['/2', '/3', '/3', '/1', '/2', '/2', 
                 '/2', '/2', '/1', '/4', '/2', '/2', '/3', '/29']
@@ -186,12 +183,12 @@ def gs_scores(tick, companies, peer_group, ws_scores):
             score = ''.join((str(score[0]), outof)) # joining score with "outof" so will be eg: '1/2' or '0/3', etc
             lists[2].append(score) # adding completed string to the category's score list
 
-        # Shifting last element to first in score lists (because that's how it is displayed in spreadsheet)
+        # Shifting the "category total" value from last element to first in score lists
         for l in [lists[0], lists[2]]:
             l.insert(0, l.pop())
 
-#& End Detailed Score Card section (rows 18 to 37)
-#& Begin Top Scores in Group section (rows 11 to 16)
+    #* End Detailed Score Card section (rows 18 to 37)
+    #* Begin Top Scores in Group section (rows 11 to 16)
 
     # Header for winners section
     a11_i11 = [['Stock', 'Total', 'V score', 'M score', 'I Score', 'D Score',
@@ -291,7 +288,8 @@ def gs_scores(tick, companies, peer_group, ws_scores):
                             'values': [row16]},
                             ])
     sleep(1)
-    print('Gussying up the "Scores" sheet.')
+    print('Gussying up the "Scores" sheet...')
+
     # Formatting section
     format_cell_range(ws_scores, 'A1:N1', fmt_blue_background)
     format_cell_range(ws_scores, 'A10:N10', fmt_blue_background)
@@ -425,11 +423,10 @@ def gs_scores(tick, companies, peer_group, ws_scores):
                               "right": {"style": "SOLID_THICK"},}
                             })
 
-    print('"Scores" sheet complete.')
+    print('"Scores" sheet complete!\n')
 
 def gs_metrics(tick, companies, peer_group, ws_metrics):
     """Pulls in data and formats the "Metrics" sheet.
-       Google allows 1 call/sec
 
     Args:
         tick (str): company ticker
@@ -437,7 +434,7 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
         peer_group (PeerGroup): PeerGroup object
         ws_metrics (WorkSheet): gspread WorkSheet object
     """
-    print('Now creating "Metrics" sheet.')
+    print('Now creating "Metrics" sheet...')
     price = companies[tick].df_basic.loc['price'][0]
 
     # Batch updating headers and stock price
@@ -460,9 +457,9 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
                             'values': [['ESG', tick, 'Peer Avg']]},
                              ])
 
-# Loops below populate lists of stats that will be batch imported into the sheet.
-# All loops are similar in structure except for Dividend, Analyst, and ESG 
-# which require special handling.
+#* Loops below populate lists of stats that will be batch imported into the sheet.
+#* All loops are similar in structure except for Dividend, Analyst, and ESG 
+#* which require special handling.
 
     # Each category will have 3 lists 
     v_names = [] # name of stat
@@ -471,7 +468,7 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
     for name in companies[tick].df_value.index:
         stat = companies[tick].df_value.loc[name][0]
         peer_stat = peer_group.df_value.loc[name][0]
-        v_names.append([name]) # enclosing in list due to API batch requirement
+        v_names.append([name]) # enclosing in list to satisfy API batch requirement
         v_stats.append([stat])
         v_peer.append([peer_stat])
 
@@ -595,9 +592,8 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
                             {'range': 'G32:G36',
                             'values': e_peer},
                             ])
-#& END: preperation for batch import of stats and stat names******************
-
-    print('Beautifying the "Metrics" sheet.')
+    sleep(1)
+    print('Beautifying the "Metrics" sheet...')
     
     # Formatting cells
     format_cell_range(ws_metrics, 'A1:A36', fmt_bold_italic)
@@ -639,17 +635,18 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
     ws_metrics.format('A25:C25', {'textFormat': {"fontSize": 11, 'bold': True}})
     ws_metrics.format('A31:C31', {'textFormat': {"fontSize": 11, 'bold': True}})
 
-    print('"Metrics" sheet has been completed.')
+    print('"Metrics" sheet has been completed!\n')
+    sleep(1)
 
 def gs_analyst(tick, companies, ws_analyst):
-    """Pulls in data and formats the "Scores" sheet.
+    """Pulls in data and formats the "Analyst" sheet.
 
     Args:
         tick (str): company ticker
         companies (dict): dict of company objects
-        ws_scores (WorkSheet): gspread WorkSheet object
+        ws_analyst (WorkSheet): gspread WorkSheet object
     """
-    print('Creating "Analyst" sheet.')
+    print('Now creating "Analyst" sheet...')
 
     a1 = [['Ratings over last 3 months']]
     d1 = [['Ratings over last 30 days']]
@@ -699,9 +696,10 @@ def gs_analyst(tick, companies, ws_analyst):
                             {'range': 'G4:G18',
                             'values': second_15_calls},
                             ])
-
     sleep(1)
-    print('Fancifying the "Analyst" sheet.')
+
+    # Formatting the cells
+    print('Fancifying the "Analyst" sheet...')
     format_cell_range(ws_analyst, 'B4:B8', left_align)
     format_cell_range(ws_analyst, 'A4:A8', right_align)
     format_cell_range(ws_analyst, 'A1:G1', fmt_bold_blue)
@@ -730,29 +728,31 @@ def gs_analyst(tick, companies, ws_analyst):
     set_column_width(ws_analyst, 'F', 77)
     set_column_width(ws_analyst, 'G', 78)
     sleep(2)
-
     format_cell_range(ws_analyst, 'C1:C18', fmt_dkgrey_background)
     ws_analyst.format('A1', {'textFormat': {"fontSize": 14, 'bold': True}})
     ws_analyst.format('D1', {'textFormat': {"fontSize": 14, 'bold': True}})
     sleep(3)
-    print('"Analyst" sheet complete.')
+    print('"Analyst" sheet complete!\n')
 
 def gs_esg(tick, companies, ws_esg):
-    """Pulls in data and formats the "News" sheet.
+    """Pulls in data and formats the "ESG" sheet.
 
     Args:
         tick (str): company ticker
         companies (dict): dict of company objects
-        ws_news (WorkSheet): gspread WorkSheet object
+        ws_esg (WorkSheet): gspread WorkSheet object
     """
-    print('Creating "ESG" sheet.')
+    print('Onto the "ESG" sheet....')
 
+    # Special condition for if ESG is not available for a company
     if isinstance(companies[tick].df_full_esg, str):
         ws_esg.update_cell(1, 1, f'Sorry, ESG data is not available for {tick}')
         set_column_width(ws_esg, 'A', 200)
         sleep(2)
+        print('Sorry, ESG data was not available. Moving on...')
 
     else:
+        # Iterating thru values in df_full_esg and adding them to list for batch update
         esg_name = []
         esg_value = []
         for name in companies[tick].df_full_esg.index:
@@ -769,7 +769,10 @@ def gs_esg(tick, companies, ws_esg):
                             {'range': 'B3:B29',
                             'values': esg_value},
                             ])
+        sleep(1) 
 
+        print('Giving the "ESG" sheet some love...')
+        # Formatting the cells
         for row in [row for row in range(3, 30) if row % 2]:
             format_cell_range(ws_esg, f'A{row}:B{row}', fmt_grey_background)
             sleep(1)
@@ -785,6 +788,7 @@ def gs_esg(tick, companies, ws_esg):
         sleep(2)
         format_cell_range(ws_esg, 'A3:A29', right_align)
         format_cell_range(ws_esg, 'B3:B29', center_align)
+        print('All done with the "ESG" sheet!\n')
         sleep(2)
 
 def gs_news(tick, companies, peer_group, ws_news):
@@ -796,11 +800,12 @@ def gs_news(tick, companies, peer_group, ws_news):
         peer_group (PeerGroup): PeerGroup object
         ws_news (WorkSheet): gspread WorkSheet object
     """
-    print('Creating "News" sheet.')
+    print(""""Now we're onto the "News" sheet...""")
 
     industry = companies[tick].df_basic.loc['industry'][0]
     sector = companies[tick].df_basic.loc['sector'][0]
 
+    # Lists are populated with Company, Industry, and Sector headlines and links
     c_titles = []
     c_links = []
     for index in companies[tick].news_dfs[0].index:
@@ -853,7 +858,9 @@ def gs_news(tick, companies, peer_group, ws_news):
                           {'range': 'B37:B46',
                            'values': s_links},
                          ])
-                    
+    sleep(1)
+    print('Freshening up the "News" sheet...')
+    # Formatting the cells
     set_column_width(ws_news, 'A', 900)
     set_column_width(ws_news, 'B', 150)
     ws_news.format('A1', {'textFormat': {"fontSize": 16, 'bold': True}})
@@ -887,6 +894,7 @@ def gs_news(tick, companies, peer_group, ws_news):
     for yellow_set in ['A2:B2', 'A24:B24', 'A36:B36']:
         format_cell_range(ws_news, yellow_set, fmt_yellow_background)
         sleep(1)
+    print('"News" sheet is complete!\n')
 
 def gs_sec(tick, companies, ws_sec):
     """Pulls in data and formats the "SEC" sheet.
@@ -896,14 +904,17 @@ def gs_sec(tick, companies, ws_sec):
         companies (dict): dict of company objects
         ws_sec (WorkSheet): gspread WorkSheet object
     """
-    print('Creating "SEC" sheet.')
+    print('Just one more! Now creating the "SEC" sheet...')
 
+    # Special case for if SEC data is not available
     if isinstance(companies[tick].sec_analysis[0], str):
         ws_sec.update_cell(1, 1, f'Sorry, SEC data is not available for {tick}')
         set_column_width(ws_sec, 'A', 275)
         sleep(2)
 
     else:
+        # All SEC info will be displayed in one column
+        # So itereating through values sec_analysis and values and titles to one list
         sec_all_one_column = []
 
         for index in companies[tick].sec_analysis[0].index:
@@ -912,7 +923,7 @@ def gs_sec(tick, companies, ws_sec):
             sec_all_one_column.append(["Sentence Analyzed:"])
             sec_all_one_column.append([companies[tick].sec_analysis[0].loc[index][2]])
 
-        number_of_columns = len(sec_all_one_column)
+        number_of_columns = len(sec_all_one_column) # used to dynamically set range for formatting
 
         ws_sec.batch_update([
                             {'range': 'A1',
@@ -921,6 +932,7 @@ def gs_sec(tick, companies, ws_sec):
                             'values': sec_all_one_column},
                              ])
 
+        print('Making the "SEC" sheet look nice...')
         ws_sec.format('A1', {'textFormat': {"fontSize": 24, 'bold': True}})
         set_column_width(ws_sec, 'A', 1875)
         set_row_height(ws_sec, '2', 11)
@@ -932,7 +944,6 @@ def gs_sec(tick, companies, ws_sec):
 
         format_cell_range(ws_sec, 'A1', fmt_blue_background)
         sleep(1)
-
         format_cell_range(ws_sec, 'A2', fmt_dkgrey_background)
         sleep(1)
 
@@ -946,4 +957,6 @@ def gs_sec(tick, companies, ws_sec):
 
         for row in range(5, number_of_columns + 2, 4):
             format_cell_range(ws_sec, f'A{row}', fmt_grey_background)
-            sleep(1)
+
+        print(f'"SEC" Sheet complete!\n')
+        print(f'Your shiny new spreadsheet "{spreadsheet_name}" has been assembled!')
