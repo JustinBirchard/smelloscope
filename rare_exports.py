@@ -911,6 +911,8 @@ def gs_sec(tick, companies, ws_sec):
         ws_sec.update_cell(1, 1, f'Sorry, SEC data is not available for {tick}')
         set_column_width(ws_sec, 'A', 275)
         sleep(2)
+        print(f'"SEC" Sheet complete!\n')
+        print(f'Your shiny new spreadsheet "{spreadsheet_name}" has been assembled!')
 
     else:
         # All SEC info will be displayed in one column

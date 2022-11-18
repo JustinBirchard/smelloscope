@@ -1,34 +1,25 @@
 # scope_it_out.py
-#* Version 0.9.9.9
-#* file last updated 11/14/22
-
-"""scope_it_out.py returns a dict of Company objects and also a 
-   PeerGroup object. Both are imported into the Smelloscope lab.
+#* Version 1.0
+#* file last updated 11/18/22
+"""scope_it_out.py returns a dict of Company objects and a 
+   PeerGroup object. These are pulled into the Smelloscope lab
+   by importing * from scope_it_out
 
    This script takes the user supplied list from stocklist.py 
    and pulls in a variety of data via OpenBB.
 
-   Each stock in the list will become a Company object and will be 
-   populated with data. Data can be examined via Company methods in 
-   TheSmelloscope lab.
+   Each stock becomes a Company object and is populated with data. 
 
    A PeerGroup object will also be created. PeerGroup is a subclass 
    of Company and its methods will be used to pull in every metric 
-   from every Company and then calculate an average value for 
+   from every stock and then calculate an average value for 
    each metric.
 
-   After all data has been gathered and assembled, the sniffer.py
-   will give each Company object a big_phat_whiff. 
+   After all data has been gathered, the sniffer.py gives each Company 
+   object a big_phat_whiff. 
    
-   Once the whiff is complete, the Company's score card will be 
-   accessable via the TheSmelloscope lab.
-
-   Reasons for existance:
-   1) Instantiate a Company object for each stock in stocklist.py
-   2) Instantiate a PeerGroup object
-   3) Create companies which holds one or more Company objects.
-   4) Analyze the data in the PeerGroup object and each Company object 
-   5) Populate the score_card of each Company object
+   After all companies are sniffed, each Company's score card and all 
+   other features will be accessable via the TheSmelloscope lab.
 
 Returns:
     list: companies containing Company class objects
@@ -57,47 +48,30 @@ from sniffer import big_phat_whiff
 from company import Company, PeerGroup
 from stocklist import stocks, young_stocks
 
-#&# BEGIN: cleaning stock list and removing problem stocks ***********
-partially_clean_stocks = []
-for stock in stocks:
-    if stock not in young_stocks:
-        partially_clean_stocks.append(stock)
-    elif stock in young_stocks:
-        print(f'Poop: \n{stock} is just a baby and too fresh for a proper sniffing.\n')
-
+# Using young_stocks from stocklist.py to remove stocks 
+# that are not available via FMP api
 clean_stocks = []
-for stock in partially_clean_stocks:
-    try:
-        fmp_test = obb.stocks.fa.fmp_metrics(stock)
-        logging.info(f.getvalue())
+for stock in stocks:
 
-    except ValueError:
-        fmp_test = 'n/a'
-
-    if isinstance(fmp_test, pd.DataFrame):
+    if stock not in young_stocks:
         clean_stocks.append(stock)
 
-    else:
-        print(f'Dag nabbit: \n{stock} is not available via FMP api.')
-        print("(probably because it is not 5 years old")
-        print("Don't worry though, we'll keep on sniffin the rest of the group.\n\n")
+    elif stock in young_stocks and stock == stocks[0]:
+        error_msg1 = f'Bummer! {stock} is too young for sniffing. ' 
+        error_msg2 = 'Please remove it from stocklist.py and try again.'
+        raise ValueError(error_msg1 + error_msg2)
 
-stocks = clean_stocks
-#&# END: cleaning stock list and removing problem stocks **************
-
-# crating peers list based on user selected stocks from stocklist.py
-peers = []
-for index, stock in enumerate(stocks):
-    peers.append((stock, index + 1))
+    elif stock in young_stocks:
+        print(f'Poop: \n{stock} is too fresh for a proper sniffing.')
+        print("We'll keep smelling the rest of the stocks in your list.\n")
 
 #&# BEGIN: FUNCTION DEFINITIONS ***************************************
 def show_total_scores(companies):
     """Show total scores for all Company objects.
-
     Args:
         companies (dict): dictionary of Company objects
     """
-    for ticker in stocks:
+    for ticker in clean_stocks:
         print(companies[ticker].df_basic.loc['name'][0])
         print(str(companies[ticker].score_card['grand_total']))
         print('')
@@ -105,11 +79,10 @@ def show_total_scores(companies):
 
 def show_scorecards(companies):
     """Show detailed scorecards for each Company object.
-
     Args:
         companies (dict): dictionary of Company objects
     """
-    for ticker in stocks:
+    for ticker in clean_stocks:
         print(companies[ticker].df_basic.loc['name'][0])
         print('TOTAL SCORE=  ' + str(companies[ticker].score_card['grand_total']))
         print('')
@@ -126,18 +99,16 @@ def show_scorecards(companies):
 
 def show_metrics(companies):
     """Show detailed metrics for each Company object.
-
     Args:
         companies (dict): dictionary of Company objects
     """
-    for ticker in stocks:
+    for ticker in clean_stocks:
         companies[ticker].display_dfs()
 
 def export_metrics(companies):
-    """Export Company metrics into an Excel file.
+    """Export Company metrics into a primitive Excel file.
        One file is created per Company.
-       File is saved in root folder.
-
+       Files are saved in root folder.
     Args:
         companies (dict): dictionary of Company objects
     """
@@ -149,7 +120,6 @@ def export_metrics(companies):
 def p2f(str_perc):
     """Converts str representing percentage to a float. 
        Example: '10%' becomes 0.1
-
     Args:
         str_perc (str): str representation of a percentage
 
@@ -158,16 +128,14 @@ def p2f(str_perc):
     """
     return float(str_perc.strip('%'))/100
 
-
 def try_it(string, calltype, avg=False, p2f_bool=False, perf=False):
     """For error handling when making calls to OpenBB.
-
     Args:
         string (str): Key to call the desired metric
         calltype (str): One of- 'data', 'metrics', 'esg', or 'ratios'
         avg (bool, optional): True returns 5yr_avg metrics. Defaults to False.
-        p2f_bool (bool, optional): True converts str percentage to float. Defaults to False.
-        perf (bool, optional): True returns str value for ESG metric. Defaults to False.
+        p2f_bool (bool, optional): True converts str percentage to float. Default False.
+        perf (bool, optional): True returns str value for ESG metric. Default False.
 
     Returns:
         str or float: depending on args and conditions
@@ -176,28 +144,24 @@ def try_it(string, calltype, avg=False, p2f_bool=False, perf=False):
     if calltype == 'data' and p2f_bool is False:
         try:
             return float(obb.stocks.fa.data(stock).loc[string][0])
-
         except KeyError:
             return 'n/a'
         
     elif calltype == 'data' and p2f_bool is True:
         try:
             return p2f(obb.stocks.fa.data(stock).loc[string][0])
-        
         except KeyError:
             return 'n/a'
         
     elif calltype == 'metrics' and avg is False:    
         try:            
-            return df_metrics.loc[string][0]
-                    
+            return df_metrics.loc[string][0]                 
         except KeyError:
             return 'n/a'
         
     elif calltype == 'metrics' and avg is True:    
         try:
-            return df_metrics.loc[string]['5yr Avg']
-            
+            return df_metrics.loc[string]['5yr Avg']     
         except KeyError:
             return 'n/a'
 
@@ -205,7 +169,6 @@ def try_it(string, calltype, avg=False, p2f_bool=False, perf=False):
         try:
             if isinstance(df_full_esg.loc[string][0], float):
                 return df_full_esg.loc[string][0]
-
             else:
                 return 'n/a'
             
@@ -219,13 +182,11 @@ def try_it(string, calltype, avg=False, p2f_bool=False, perf=False):
         try:
             if isinstance(df_full_esg.loc[string][0], str):
                 return df_full_esg.loc[string][0]
-
             else:
                 return 'n/a'
             
         except KeyError:
             return 'n/a'
-
         except AttributeError:
             return 'n/a'
 
@@ -235,7 +196,6 @@ def try_it(string, calltype, avg=False, p2f_bool=False, perf=False):
             
         except KeyError:
             return 'n/a'
-
         except AttributeError:
             return 'n/a'       
 
@@ -245,25 +205,36 @@ def try_it(string, calltype, avg=False, p2f_bool=False, perf=False):
             
         except KeyError:
             return 'n/a'
-
         except AttributeError:
             return 'n/a'   
 #&# END: Function definitions *****************************************
 
+#! BEGIN MAIN LOOP ***************************************************
+
 # Company objects will be added to this dict later
 companies = {}
 
-#! BEGIN MAIN LOOP ***************************************************
-for company in peers:
-    stock = company[0]
-    slot = company[1]
+for stock in clean_stocks:
 
-#&# BEGIN refining df_metrics ****************************************************
-    # rare case for when fmp's api throws error and return an empty list
-    df_metrics = obb.stocks.fa.fmp_metrics(stock)                                                                                    
+    # Running test because stocks that are younger than 5 years old 
+    # are currently not available via FMP api
+    fmp_msg1 = f'Dag nabbit! {stock} is not available via FMP api.'
+    fmp_msg2 = ' Probably because it is not 5 years old. '
+    fmp_msg3 = 'Please remove it from stocklist.py and try again. '
+    fmp_msg4 = f'You can add {stock} to young_stocks set'
+    fmp_msg5 = ' in stocklist.py to avoid this error in the future.'
+
+    try:
+        df_metrics = obb.stocks.fa.fmp_metrics(stock)
+
+    except ValueError:
+        print(fmp_msg1 + fmp_msg2 + fmp_msg3 + fmp_msg4 + fmp_msg5)
+
+    # rare case for when fmp's api returns an empty list                                                                          
     if not isinstance(df_metrics, pd.DataFrame):
-        raise TypeError('Dag nabbit!' + ' ' + stock + ' is not available via FMP api. Failed to build df_metrics')
-      
+        raise TypeError(fmp_msg1 + fmp_msg2 + fmp_msg3 + fmp_msg4 + fmp_msg5)
+
+#& BEGIN cleaning & refining df_metrics ************************************
     # Where possible, converting strings to floats in df_metrics    
     float_error_set = set() 
     for column in df_metrics.columns:       
@@ -271,24 +242,25 @@ for company in peers:
             try:
                 df_metrics[column][row] = float(df_metrics[column][row])
                 
-            except ValueError: # catching row names of those that cannot convert to float
-                try: # rare case for if FMP returns value that incorrectly has "K" listed at end of str
+            except ValueError: # catching row names of those that cannot convert
+                
+                try: # for if FMP returns value that has "K" listed at end of str
                     get_rid_of_k = df_metrics[column][row].strip('K')
                     df_metrics[column][row] = float(get_rid_of_k.strip())
 
                 except ValueError:
                     float_error_set.add(row)
-                
+
+    # Dropping all metrics that cannot be converted to float   
     df_metrics = df_metrics.drop(index= float_error_set)
     
-    # Creating new column that will hold the average of each row
+    # Creating new column and calculating 5 year average for each metric
     df_metrics['5yr Avg'] = df_metrics.mean(axis=1)
-
-#&# END refining df_metrics ****************************************************
 
     print(f'Getting a whiff of {obb.stocks.fa.profile(stock).loc["companyName"][0]}')
 
-#&# BEGIN refining df_ratios ***************************************************
+#&# END cleaning/refining df_metrics ************************************************
+#&# BEGIN cleaning/refining df_ratios ***********************************************
 
     df_ratios = obb.stocks.fa.fmp_ratios(stock)
 
@@ -309,8 +281,8 @@ for company in peers:
     df_ratios['5yr Avg'] = df_ratios.mean(axis=1)
 
 #&# END refining df_ratios ****************************************************
-#&# BEGIN refining sec_analysis ***********************************************
 
+    # Testing to see if SEC data is available
     sec_analysis = ['temp']
     try:
         sec_analysis[0] = obb.stocks.fa.analysis(stock)
@@ -325,8 +297,6 @@ for company in peers:
         print(f"SEC data was not available for {stock}. No big deal, moving on.\n\n")
         sec_analysis[0] = 'n/a'
 
-#&# END refining sec_analysis ***********************************************
-
     # getting Stock Twits sentiment data as a tuple:
     tuple_twits = obb.stocks.ba.bullbear(stock)
     
@@ -339,7 +309,7 @@ for company in peers:
         df_esg = 'n/a'   
         df_full_esg = 'n/a'
 
-#&# BEGIN Creating variables for readability & grouping values into DataFrames & Sequences  
+#& BEGIN Creating variables for readability & grouping values into DataFrames & Sequences
 ############## *** BASIC DETAILS DATAFRAME *** ##############
     name = obb.stocks.fa.profile(stock).loc['companyName'][0]
     ticker = stock
@@ -354,7 +324,7 @@ for company in peers:
                               index=['Basic Details']).T
     
 ############## *** VALUE METRICS DATAFRAME *** ##############    
-    # Keep knocking on Yahoo's door if they don't give what we need
+    # We'll keep knocking on Yahoo's door if they don't give what we need
     yahoo_success = 'no'
     while yahoo_success == 'no':
         try:
@@ -368,7 +338,6 @@ for company in peers:
             print('Yahoo error. Trying again.')
 
     yahoo_success = 'no'
-
     while yahoo_success == 'no':
     # Cases for if the company has no debt
         try:
@@ -552,12 +521,16 @@ for company in peers:
 ############## *** ANALYST RATINGS *** ##############
 # Note there are 2 DataFrames and one variable here: df_rating_30d, df_rot_3mo, wb_score
   
-    # Pairing df_rating down to last 30 days and converting returned Series object back into DataFrame
+    # Pairing df_rating down to last 30 days and converting returned Series back to DataFrame
     df_rating_30d = obb.stocks.dd.rating(stock).T.loc['Rating'].head(30).to_frame()
     
     # DataFrame will be added to company object
-    df_rot_3mo = pd.DataFrame({'Strong Buy': df_rot['strongBuy'], 'Buy': df_rot['buy'], 'Hold': df_rot['hold'], 
-                               'Sell': df_rot['sell'], 'Strong Sell': df_rot['strongSell']}, index=['Last 3mo']).T
+    df_rot_3mo = pd.DataFrame({'Strong Buy': df_rot['strongBuy'], 
+                               'Buy': df_rot['buy'], 
+                               'Hold': df_rot['hold'], 
+                               'Sell': df_rot['sell'], 
+                               'Strong Sell': df_rot['strongSell']
+                               }, index=['Last 3mo']).T
 
     # Warren Buffet Investing Score. Suppressing API output
     with redirect_stdout(f), redirect_stderr(f): 
@@ -583,16 +556,19 @@ for company in peers:
     total_esg = try_it('Total esg', 'esg')
     esg_perf = try_it('Esg performance', 'esg', perf=True)
     
-    df_esg = pd.DataFrame({'enviro': enviro, 'govern': govern, 'social': social,
-                           'total_esg': total_esg, 'esg_perf': esg_perf}, index=['ESG'])
+    df_esg = pd.DataFrame({'enviro': enviro, 'govern': govern, 
+                           'social': social, 'total_esg': total_esg, 
+                           'esg_perf': esg_perf}, index=['ESG'])
 
     df_esg = df_esg.round(4)
     df_esg = df_esg.T
-#&# END Creating variables for readability & grouping values into DataFrames & Sequences  
+#&# END Creating variables for readability & grouping values into DataFrames & Sequences
 
     # Adding new key (stock ticker) and value (Company object) to companies
-    companies[ticker] = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, 
-                                        df_pub_sent, news_dfs, analyst_data, df_esg, df_full_esg, sec_analysis)
+    companies[ticker] = Company(df_basic, df_value, df_mgmt, 
+                                df_ins, div_dfs, df_pub_sent,
+                                news_dfs, analyst_data, df_esg,
+                                df_full_esg, sec_analysis)
 
     print(f'{ticker} has been sniffed.\n')
 #! END MAIN LOOP ***************************************************
@@ -604,13 +580,13 @@ peer_group = PeerGroup(companies=companies)
 peer_group.set_avg_values()
 
 # Fixes improper calculation set by set_all_data() for peer_group tca_div_tld
-peer_group.df_value.loc['tca_div_tld'][0] = round((peer_group.df_value.loc['tca_mrfy'][0] / peer_group.df_value.loc['tld_mrfy'][0]), 4)
+peer_group.df_value.loc['tca_div_tld'][0] = round((tca_mrfy / tld_mrfy), 4)
 
-# For each stock, calculates scores for each category using company history and peer averages
-for ticker in stocks:
+# For each stock, calculates scores for each category
+for ticker in clean_stocks:
         big_phat_whiff(companies[ticker], peer_group)
 
-# Pulls in data for the PeerGroup scoring dictionaries (total scores, category totals, etc)
+# Pulls in data for the PeerGroup scoring dictionaries
 peer_group.set_scoring_data()
 
 print('STOCKS ARE SMELT AND SCORES ARE DEALT!')

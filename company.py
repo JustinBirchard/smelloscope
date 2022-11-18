@@ -1,21 +1,27 @@
 # company.py
-#* Version 0.9.9.9
-#* file last updated 11/14/22
+#* Version 0.9.10
+#* file last updated 11/18/22
 """Company class and PeerGroup subclass definitions and methods.
 """
 
-from stocklist import stocks
+from stocklist import stocks, young_stocks
 from copy import deepcopy
 from openbb_terminal.api import openbb as obb
 import pandas as pd
 from dataclasses import dataclass, field
 from IPython.display import display
 
+# Using young_stocks from stocklist.py to remove stocks that are not available via FMP api
+clean_stocks = []
+for stock in stocks:
+    if stock not in young_stocks:
+        clean_stocks.append(stock)
+
 # Setting display options for viewing dataframes in Lab
 pd.set_option('display.float_format', lambda x: '%.4f' % x)
 
 # Retrieving the first stock in stocks and using as the primary stock
-primary_stock = stocks[0]
+primary_stock = clean_stocks[0]
 
 def find_X_best_scores(list_of_tuples, X):
     """Iterates thru given list of tuples X times. 
@@ -287,7 +293,7 @@ class PeerGroup(Company):
            CAN ONLY RUN AFTER:
            set_avg_values
         """
-        for tick in stocks:
+        for tick in clean_stocks:
             grand_total = self.companies[tick].score_card['grand_total']
             vTotal = self.companies[tick].score_card['value'].loc['vTotal'][0]
             mTotal = self.companies[tick].score_card['mgmt'].loc['mTotal'][0]
@@ -335,7 +341,7 @@ class PeerGroup(Company):
 
     def set_winners(self):
         """Creates dict out of the top 3-5 winners from the peer group.
-           Number of winners will depend on total tickers in stocks list.
+           Number of winners will depend on total tickers in clean_stocks list.
            CAN ONLY RUN AFTER:
            set_peer_score_totals()
            set_cat_totals()
