@@ -1,6 +1,6 @@
 # sniffer.py
-#* Version 0.9.9.5
-#* last updated 11/13/22
+#* Version 0.9.9.9
+#* file last updated 11/13/22
 """A collection of functions used for analyzing the data in 
    Company objects.
 

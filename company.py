@@ -1,8 +1,8 @@
 # company.py
+#* Version 0.9.9.9
+#* file last updated 11/14/22
 """Company class and PeerGroup subclass definitions and methods.
 """
-#* Version 0.9.9.5
-#* last updated 11/14/22
 
 from stocklist import stocks
 from copy import deepcopy
@@ -100,7 +100,8 @@ class Company:
     df_pub_sent: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(3,1), public sentiment data
     news_dfs: list = field(default_factory=list, repr=False) # holds 3 DFs containing Company, Sector, & Industry news
     analyst_data: list = field(default_factory=list, repr=False) # holds 2 DataFrames containing Analyst ratingsmetrics
-    df_esg: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(5,1), holds ESG data & metrics
+    df_esg: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(5,1), holds ESG data & metrics used for scoring
+    df_full_esg: pd.DataFrame = field(default_factory=pd.DataFrame) # holds all available ESG data
     sec_analysis: list = field(default_factory=list, repr=False) # will hold SEC sentiment analysis dataframe or 'n/a'
     score_card: dict = field(default_factory=lambda: {'value': deepcopy(scores_value), 
                                                       'mgmt': deepcopy(scores_mgmt),
@@ -612,6 +613,8 @@ class PeerGroup(Company):
            in the ESG category and assigning it to PeerGroup object.
            'n/a' values are discarded
         """
+        self.df_full_esg = 'n/a'
+
         result_list = []
 
         for metric in self.companies[primary_stock].df_esg.index:

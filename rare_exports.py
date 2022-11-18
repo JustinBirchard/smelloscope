@@ -1,6 +1,6 @@
 # rare_exports.py
-#* Version 0.9.9.8
-#* last updated 11/16/22
+#* Version 0.9.9.9
+#* file last updated 11/17/22
 """Exports Smelloscope data to fancy spreadsheets.
 
    Currently compatible with Google Sheets.
@@ -24,31 +24,26 @@ today = str(datetime.date.today())
 ws_metrics = None
 ws_scores = None
 
-# Creating CellFormat objects used in funcs for custom formatting
+# gspread_formatting objects
+left_align = CellFormat(horizontalAlignment='LEFT')
+right_align = CellFormat(horizontalAlignment='RIGHT')
+center_align = CellFormat(horizontalAlignment='CENTER')
+
+fmt_bold_italic = CellFormat(textFormat=TextFormat(bold=True, italic=True))
+fmt_italic = CellFormat(textFormat=TextFormat(italic=True))
+fmt_bold = CellFormat(textFormat=TextFormat(bold=True))
+
+fmt_blue_background = CellFormat(backgroundColor=Color(0.7, 0.9, 1))
+fmt_yellow_background = CellFormat(backgroundColor=Color(255/255, 242/255, 204/255))
+fmt_grey_background = CellFormat(backgroundColor=Color(240/255, 240/255, 240/255))
+fmt_dkgrey_background = CellFormat(backgroundColor=Color(150/255, 150/255, 150/255))
+
 fmt_bold_blue = CellFormat(backgroundColor=Color(0.7, 0.9, 1),
                   textFormat=TextFormat(bold=True, 
                   foregroundColor=Color(0, 0, 0)))
 
-fmt_bold = CellFormat(textFormat=TextFormat(bold=True))
-
-left_align = CellFormat(horizontalAlignment='LEFT')
-right_align = CellFormat(horizontalAlignment='RIGHT')
-
-fmt_bold_italic = CellFormat(textFormat=TextFormat(bold=True, italic=True))
-fmt_italic = CellFormat(textFormat=TextFormat(italic=True))
-
-fmt_black_background = CellFormat(backgroundColor=Color(0, 0, 0))
-
-fmt_blue_background = CellFormat(backgroundColor=Color(0.7, 0.9, 1))
-
-fmt_yellow_background = CellFormat(backgroundColor=Color(255/255, 242/255, 204/255))
-
-fmt_grey_background = CellFormat(backgroundColor=Color(240/255, 240/255, 240/255))
-
-fmt_dkgrey_background = CellFormat(backgroundColor=Color(150/255, 150/255, 150/255))
-
 def gs_export(tick, companies, peer_group, custom='', e_to_j=False, e_to_m=False):
-    """Calls all gs functions and creates the Google Sheet.
+    """Calls all gs functions to create and populate Google spreadsheet.
 
     Args:
         tick (str): company ticker
@@ -59,10 +54,12 @@ def gs_export(tick, companies, peer_group, custom='', e_to_j=False, e_to_m=False
         e_to_m OPTIONAL (bool): True emails to mer.broadway@gmail.com
     """
     gs_create(tick, custom, e_to_j, e_to_m)
-#    gs_scores(tick, companies, peer_group, ws_scores)
-#    gs_metrics(tick, companies, peer_group, ws_metrics)
-#    gs_analyst(tick, companies, ws_analyst)
+    gs_scores(tick, companies, peer_group, ws_scores)
+    gs_metrics(tick, companies, peer_group, ws_metrics)
+    gs_analyst(tick, companies, ws_analyst)
+    gs_esg(tick, companies, ws_esg)
     gs_news(tick, companies, peer_group, ws_news)
+    gs_sec(tick, companies, ws_sec)
 
 def gs_create(tick, custom, e_to_j, e_to_m):
     """Creates Google Spreadsheet, initializes Worksheets,
@@ -76,7 +73,7 @@ def gs_create(tick, custom, e_to_j, e_to_m):
         e_to_m (bool): False unless set to True in Lab when calling gs_export. Emails to Mary.
     """
 
-    global ws_scores, ws_metrics, ws_analyst, ws_news # need these vars to be global
+    global ws_scores, ws_metrics, ws_analyst, ws_news, ws_esg, ws_sec # need these vars to be global
     
     print(f'Creating Google Spreadsheet called: "{tick} {today}{custom}"')
 
@@ -95,7 +92,9 @@ def gs_create(tick, custom, e_to_j, e_to_m):
     ws_scores = sh.add_worksheet(title="Scores", rows=37, cols=14)
     ws_metrics = sh.add_worksheet(title="Metrics", rows=36, cols=7)
     ws_analyst = sh.add_worksheet(title="Analyst", rows=18, cols=7)
+    ws_esg = sh.add_worksheet(title="ESG", rows=29, cols=2)
     ws_news = sh.add_worksheet(title="News", rows=46, cols=2)
+    ws_sec = sh.add_worksheet(title="SEC", rows=200, cols=1)
 
     # deleting blank sheet that gets created when creating a spreadsheet
     ws2 = sh.get_worksheet(0)
@@ -291,17 +290,18 @@ def gs_scores(tick, companies, peer_group, ws_scores):
                             {'range': 'A16:I16',
                             'values': [row16]},
                             ])
-    
+    sleep(1)
     print('Gussying up the "Scores" sheet.')
     # Formatting section
     format_cell_range(ws_scores, 'A1:N1', fmt_blue_background)
     format_cell_range(ws_scores, 'A10:N10', fmt_blue_background)
     format_cell_range(ws_scores, 'A17:N17', fmt_blue_background)
+    sleep(3)
     format_cell_range(ws_scores, 'B2:B3', left_align)
     format_cell_range(ws_scores, 'B9', left_align)
     format_cell_range(ws_scores, 'A2:N3', fmt_yellow_background)
     format_cell_range(ws_scores, 'A11:N11', fmt_yellow_background)
-    sleep(6)
+    sleep(4)
 
     for row in [18, 21, 24, 27, 30, 33, 36]:
         format_cell_range(ws_scores, f'A{row}:N{row}', fmt_yellow_background)
@@ -737,6 +737,56 @@ def gs_analyst(tick, companies, ws_analyst):
     sleep(3)
     print('"Analyst" sheet complete.')
 
+def gs_esg(tick, companies, ws_esg):
+    """Pulls in data and formats the "News" sheet.
+
+    Args:
+        tick (str): company ticker
+        companies (dict): dict of company objects
+        ws_news (WorkSheet): gspread WorkSheet object
+    """
+    print('Creating "ESG" sheet.')
+
+    if isinstance(companies[tick].df_full_esg, str):
+        ws_esg.update_cell(1, 1, f'Sorry, ESG data is not available for {tick}')
+        set_column_width(ws_esg, 'A', 200)
+        sleep(2)
+
+    else:
+        esg_name = []
+        esg_value = []
+        for name in companies[tick].df_full_esg.index:
+            esg_name.append([name])
+            esg_value.append([companies[tick].df_full_esg.loc[name][0]])
+
+        ws_esg.batch_update([
+                            {'range': 'A1',
+                            'values': [[f"{tick}: Full ESG Report"]]},
+                            {'range': 'A2:B2',
+                            'values': [["ESG Category", "Value"]]},
+                            {'range': 'A3:A29',
+                            'values': esg_name},
+                            {'range': 'B3:B29',
+                            'values': esg_value},
+                            ])
+
+        for row in [row for row in range(3, 30) if row % 2]:
+            format_cell_range(ws_esg, f'A{row}:B{row}', fmt_grey_background)
+            sleep(1)
+
+        ws_esg.format('A1', {'textFormat': {"fontSize": 17, 'bold': True}})
+        ws_esg.format('A2:B2', {'textFormat': {"fontSize": 12, 'bold': True}})
+        sleep(2)
+        format_cell_range(ws_esg, 'A1:B1', fmt_blue_background)
+        format_cell_range(ws_esg, 'A2:B2', fmt_yellow_background)
+        sleep(2)
+        set_column_width(ws_esg, 'A', 155)
+        set_column_width(ws_esg, 'B', 155)
+        sleep(2)
+        format_cell_range(ws_esg, 'A3:A29', right_align)
+        format_cell_range(ws_esg, 'B3:B29', center_align)
+        sleep(2)
+
 def gs_news(tick, companies, peer_group, ws_news):
     """Pulls in data and formats the "News" sheet.
 
@@ -808,12 +858,15 @@ def gs_news(tick, companies, peer_group, ws_news):
     set_column_width(ws_news, 'B', 150)
     ws_news.format('A1', {'textFormat': {"fontSize": 16, 'bold': True}})
     ws_news.format('A2:B2', {'textFormat': {"fontSize": 12, 'bold': True}})
+    sleep(4)
 
     ws_news.format('A23', {'textFormat': {"fontSize": 16, 'bold': True}})
     ws_news.format('A24:B24', {'textFormat': {"fontSize": 12, 'bold': True}})
+    sleep(2)
 
     ws_news.format('A35', {'textFormat': {"fontSize": 16, 'bold': True}})
     ws_news.format('A36:B36', {'textFormat': {"fontSize": 12, 'bold': True}})
+    sleep(2)
     
     for row in [row for row in range(3, 23) if row % 2]:
         format_cell_range(ws_news, f'A{row}:B{row}', fmt_grey_background)
@@ -834,3 +887,63 @@ def gs_news(tick, companies, peer_group, ws_news):
     for yellow_set in ['A2:B2', 'A24:B24', 'A36:B36']:
         format_cell_range(ws_news, yellow_set, fmt_yellow_background)
         sleep(1)
+
+def gs_sec(tick, companies, ws_sec):
+    """Pulls in data and formats the "SEC" sheet.
+
+    Args:
+        tick (str): company ticker
+        companies (dict): dict of company objects
+        ws_sec (WorkSheet): gspread WorkSheet object
+    """
+    print('Creating "SEC" sheet.')
+
+    if isinstance(companies[tick].sec_analysis[0], str):
+        ws_sec.update_cell(1, 1, f'Sorry, SEC data is not available for {tick}')
+        set_column_width(ws_sec, 'A', 275)
+        sleep(2)
+
+    else:
+        sec_all_one_column = []
+
+        for index in companies[tick].sec_analysis[0].index:
+            sec_all_one_column.append([f"Category: {companies[tick].sec_analysis[0].loc[index][0]}"])
+            sec_all_one_column.append([f"Good news? {companies[tick].sec_analysis[0].loc[index][1]}"])
+            sec_all_one_column.append(["Sentence Analyzed:"])
+            sec_all_one_column.append([companies[tick].sec_analysis[0].loc[index][2]])
+
+        number_of_columns = len(sec_all_one_column)
+
+        ws_sec.batch_update([
+                            {'range': 'A1',
+                            'values': [[f"{tick}: SEC Analysis with the help of machine learning"]]},
+                            {'range': f'A3:A{number_of_columns + 2}',
+                            'values': sec_all_one_column},
+                             ])
+
+        ws_sec.format('A1', {'textFormat': {"fontSize": 24, 'bold': True}})
+        set_column_width(ws_sec, 'A', 1875)
+        set_row_height(ws_sec, '2', 11)
+        sleep(3)
+
+        for row in range(3, number_of_columns + 2, 4):
+            ws_sec.format(f'A{row}', {'textFormat': {"fontSize": 12, 'bold': True, 'underline': True}})
+            sleep(1)
+
+        format_cell_range(ws_sec, 'A1', fmt_blue_background)
+        sleep(1)
+
+        format_cell_range(ws_sec, 'A2', fmt_dkgrey_background)
+        sleep(1)
+
+        for row in range(3, number_of_columns + 2, 4):
+            format_cell_range(ws_sec, f'A{row}', fmt_yellow_background)
+            sleep(1)
+
+        for row in range(4, number_of_columns + 2, 4):
+            format_cell_range(ws_sec, f'A{row}', fmt_yellow_background)
+            sleep(1)
+
+        for row in range(5, number_of_columns + 2, 4):
+            format_cell_range(ws_sec, f'A{row}', fmt_grey_background)
+            sleep(1)

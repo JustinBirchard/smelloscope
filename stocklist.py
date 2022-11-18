@@ -16,7 +16,9 @@ young_stocks = {'DDOG', 'CRWD', 'RIVN', 'LCID', 'NIO', 'LI', 'ONEM',
                 'CERT', 'MPLN', 'SDGR', 'PHR', 'CHWY', 'FIGS', 'CURV', 
                 'POSH', 'RVLV', 'AVTR'}
 
-stocks = ['PSA', 'EXR', 'CUBE', 'LSI']
+# stocks = ['GOOGL', 'MSFT', 'AAPL']
+
+# stocks = ['PSA', 'EXR', 'CUBE', 'LSI']
 
 # stocks = ['VTR', 'PLD', 'AMT', 'CCI', 'PSA', 'WELL', 'SBAC', 'DLR', 'VICI', 'ARE', 'EXR',
 #           'WPC', 'IRM', 'PEAK', 'HST', 'GLPI', 'BXP', 'REXR', 'LAMR', 'CUBE', 'LSI',
@@ -91,12 +93,12 @@ stocks = ['PSA', 'EXR', 'CUBE', 'LSI']
 # PINC 47, OMCL 38, NXGN 40
 
 #* Health & Hospital Technology
-#stocks = ['TDOC', 'VEEV', 'EVH', 'MDRX', 'RCM', 'PINC', 'OMCL', 'NXGN',
+# stocks = ['TDOC', 'VEEV', 'EVH', 'MDRX', 'RCM', 'PINC', 'OMCL', 'NXGN',
 #          'AMN', 'ICLR', 'VTRS', 'CRL', 'NVCR', 'HQY', 'ITCI', 'HAE', 'GRFS', 'NTRA']
 
 # PINC 48, OMCL 47, NXGN 46, MDRX 41, VEEV 35, EVH 35
 
-# stocks = ['ETSY', 'SHOP', 'EBAY']
+# stocks = ['ETSY', 'SHOP', 'EBAY', 'AMZN', 'W', 'OSTK', 'BABA', 'ZS']
 # ETSY 39, EBAY 38, SHOP 29
 
 #* Biomedial Winners:
@@ -120,9 +122,11 @@ stocks = ['PSA', 'EXR', 'CUBE', 'LSI']
 # ACN 47, MA 42, FLT 41, FISV 37 11/8
 
 #* Financial services
-# stocks = ['MA', 'WEX', 'EFX', 'WU', 'V', 'ACN', 'SPGI', 'ADP', 'FISV', 'FIS', 'GPN', 'BR', 'FLT', 'PYPL', 'INTU']
+stocks = ['MA', 'WEX', 'EFX', 'WU', 'V', 'ACN', 'SPGI', 'ADP', 'FISV', 'FIS', 'GPN', 'BR', 'FLT', 'PYPL', 'INTU']
 # ACN 49, FLT 45, MA 41, FISV 38 11/8
 
+# stocks = ['STM', 'ON', 'NXPI', 'TXN', 'MCHP', 'ST', 'TEL', 'MRVL', 'ENPH']
+# NO: 'IFNNY', 'RNECY', 'FELTY
 # stocks = ['INTC', 'TSM', 'TXN']
 # TSM 39, TXN 38, INTC 35
 
@@ -141,7 +145,7 @@ stocks = ['PSA', 'EXR', 'CUBE', 'LSI']
 # STM 58, AMAT 44, TSM 41, INTC 40, ON 37 11/8
 
 #* Computer hardware & semiconductors
-# stocks = ['INTC', 'MCHP', 'ON', 'TSEM', 'MPWR', 'STM', 'AVGO', 'AMAT', 'ADI', 'MU', 'NXPI', 'ENPH', 'MRVL', 'TSM', 'AMD', 'IBM', 'NVDA', 'TXN']
+# stocks = ['STM', 'MCHP', 'ON', 'TSEM', 'MPWR', 'INTC', 'AVGO', 'AMAT', 'ADI', 'MU', 'NXPI', 'ENPH', 'MRVL', 'TSM', 'AMD', 'IBM', 'NVDA', 'TXN']
 # STM 59, ON 50, AMAT 50, TSM 48, INTC 41 11/8
 
 # stocks = ['EA', 'TTWO']
@@ -193,7 +197,7 @@ stocks = ['PSA', 'EXR', 'CUBE', 'LSI']
 # SPB 27 on 11/6
 
 #* DRUG MANUFACTURERS
-#stocks = ['ZTS', 'HZNP', 'ABT', 'GSK', 'VRTX', 'REGN', 'SNY', 'BMY', 'TAK', 'NBIX', 'UTHR', 'JAZZ', 'CTLT', 'IONS']
+# stocks = ['ZTS', 'HZNP', 'ABT', 'GSK', 'VRTX', 'REGN', 'SNY', 'BMY', 'TAK', 'NBIX', 'UTHR', 'JAZZ', 'CTLT', 'IONS']
 # ZTS 29, ABT 48, SNY 47, GSK 45, HZNP 44  on 11/6
 
 #* Medical Services
@@ -208,7 +212,7 @@ stocks = ['PSA', 'EXR', 'CUBE', 'LSI']
 # IGT 46, DIS 38, SEAS 37
 
 #* Entertainment/Media conglomerate
-# stocks = ['DIS', 'FUN', 'FWONK', 'FWONA', 'PAR', 'PSO', 'MTN', 'IGT', 'SEAS', 'MSGS']
+# stocks = ['DIS', 'FUN', 'FWONK', 'FWONA', 'PAR', 'PSO', 'MTN', 'IGT', 'SEAS', 'MSGS', 'RCL', 'CCL', 'CMCSA', 'NFLX']
 # IGT 46, PAR 41, FWONA 38, SEAS 37, MTN 37, DIS 36
 
 #* Computer software/information

@@ -1,6 +1,6 @@
 # scope_it_out.py
-#* Version 0.9.9.5
-#* last updated 11/14/22
+#* Version 0.9.9.9
+#* file last updated 11/14/22
 
 """scope_it_out.py returns a dict of Company objects and also a 
    PeerGroup object. Both are imported into the Smelloscope lab.
@@ -203,8 +203,8 @@ def try_it(string, calltype, avg=False, p2f_bool=False, perf=False):
 
     elif calltype == 'esg' and perf == False:    
         try:
-            if isinstance(df_esg.loc[string][0], float):
-                return df_esg.loc[string][0]
+            if isinstance(df_full_esg.loc[string][0], float):
+                return df_full_esg.loc[string][0]
 
             else:
                 return 'n/a'
@@ -217,8 +217,8 @@ def try_it(string, calltype, avg=False, p2f_bool=False, perf=False):
 
     elif calltype == 'esg' and perf == True:    
         try:
-            if isinstance(df_esg.loc[string][0], str):
-                return df_esg.loc[string][0]
+            if isinstance(df_full_esg.loc[string][0], str):
+                return df_full_esg.loc[string][0]
 
             else:
                 return 'n/a'
@@ -334,9 +334,10 @@ for company in peers:
     df_rot = obb.stocks.dd.rot(stock).T[0]
 
     # getting ESG data
-    df_esg = obb.stocks.fa.sust(stock)
-    if df_esg.empty:
+    df_full_esg = obb.stocks.fa.sust(stock)
+    if df_full_esg.empty:
         df_esg = 'n/a'   
+        df_full_esg = 'n/a'
 
 #&# BEGIN Creating variables for readability & grouping values into DataFrames & Sequences  
 ############## *** BASIC DETAILS DATAFRAME *** ##############
@@ -591,7 +592,7 @@ for company in peers:
 
     # Adding new key (stock ticker) and value (Company object) to companies
     companies[ticker] = Company(df_basic, df_value, df_mgmt, df_ins, div_dfs, 
-                                        df_pub_sent, news_dfs, analyst_data, df_esg, sec_analysis)
+                                        df_pub_sent, news_dfs, analyst_data, df_esg, df_full_esg, sec_analysis)
 
     print(f'{ticker} has been sniffed.\n')
 #! END MAIN LOOP ***************************************************
