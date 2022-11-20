@@ -1,6 +1,6 @@
 # rare_exports.py
-#* Version 1.0
-#* file last updated 11/18/22
+#* Version 1.0.1
+#* file last updated 11/19/22
 """Exports Smelloscope data to a fancy Google Sheet.
    Use  gs_export within Smelloscope lab to initiate
    all other rare_exports functions.
@@ -290,138 +290,112 @@ def gs_scores(tick, companies, peer_group, ws_scores):
     sleep(1)
     print('Gussying up the "Scores" sheet...')
 
-    # Formatting section
-    format_cell_range(ws_scores, 'A1:N1', fmt_blue_background)
-    format_cell_range(ws_scores, 'A10:N10', fmt_blue_background)
-    format_cell_range(ws_scores, 'A17:N17', fmt_blue_background)
-    sleep(3)
-    format_cell_range(ws_scores, 'B2:B3', left_align)
-    format_cell_range(ws_scores, 'B9', left_align)
-    format_cell_range(ws_scores, 'A2:N3', fmt_yellow_background)
-    format_cell_range(ws_scores, 'A11:N11', fmt_yellow_background)
-    sleep(4)
+    blue = {"red": 0.7, "green": 0.9, "blue": 1,}
+    yellow = {"red": 1, "green": 0.95, "blue": 0.8,}
+    grey = {"red": 0.94, "green": 0.94, "blue": 0.94,}
+    dkgrey = {"red": 0.59, "green": 0.59, "blue": 0.59,}
+
+    formats = [{"range": "A1:N1",
+                "format": {
+                "textFormat": {"bold": True, "fontSize": 36,},
+                "backgroundColor": blue,
+                "borders": {"top": {"style": "SOLID_THICK"},}
+                        },},
+                {"range": "A10:N10",        
+                "format": {
+                "textFormat": {"bold": True, "fontSize": 24,},
+                "backgroundColor": blue,
+                "borders": {"top": {"style": "SOLID_THICK"},},
+                        },},
+                {"range": "A17:N17",        
+                "format": {
+                "textFormat": {"bold": True, "fontSize": 24,},
+                "backgroundColor": blue,
+                "borders": {"top": {"style": "SOLID_THICK"},},
+                        },},
+                {"range": "A2:N3",
+                "format": {
+                "textFormat": {"bold": True, "fontSize": 16,},
+                "backgroundColor": yellow,
+                        },},
+                {"range": "A11:N11",
+                "format": {
+                "textFormat": {"bold": True,},
+                "backgroundColor": yellow,
+                        },},
+                {"range": "B2",
+                "format": {
+                "textFormat": {"bold": True, "fontSize": 30,},
+                        },},        
+            ]
 
     for row in [18, 21, 24, 27, 30, 33, 36]:
-        format_cell_range(ws_scores, f'A{row}:N{row}', fmt_yellow_background)
-        sleep(1)
+        formats.append({"range": f"A{row}:N{row}",
+                    "format": {
+                    "textFormat": {"bold": True},
+                    "backgroundColor": yellow,
+                            },})
 
     for row in [row for row in range(4, 10) if row % 2]:
-        format_cell_range(ws_scores, f'A{row}:N{row}', fmt_grey_background)
-        sleep(1)
+        formats.append({"range": f"A{row}:N{row}",
+                    "format": {
+                    "backgroundColor": grey,
+                            },})
 
     for row in [row for row in range(12, 17) if not row % 2]:
-        format_cell_range(ws_scores, f'A{row}:N{row}', fmt_grey_background)
-        sleep(1)
+        formats.append({"range": f"A{row}:N{row}",
+                    "format": {
+                    "backgroundColor": grey,
+                            },})
 
+    for border_range, position in zip(["A1:A37", "N1:N37", "A37:N37"], ["left", "right", "bottom"]):
+        formats.append({"range": border_range,
+                    "format": {
+                    "borders": {position: {"style": "SOLID_THICK"},}
+                            },})
+
+    ws_scores.batch_format(formats)
+    sleep(1)   
+
+#! BEGIN DO NOT APPEND
     for row in [20, 23, 26, 29, 32, 35]:
-        format_cell_range(ws_scores, f'A{row}:N{row}', fmt_dkgrey_background)
+        formats = [{"range": f"A{row}:N{row}",
+                    "format": {
+                    "backgroundColor": dkgrey,
+                            },},]
+        ws_scores.batch_format(formats)
         set_row_height(ws_scores, str(row), 10)
         sleep(1)
 
-    ws_scores.format('A1', {'textFormat': {"fontSize": 36, 'bold': True}})
     ws_scores.format('A2:A3', {'textFormat': {"fontSize": 14, 'bold': True}})
-    sleep(2)
-    ws_scores.format('B2', {'textFormat': {"fontSize": 24, 'bold': True}})
-    ws_scores.format('B3', {'textFormat': {"fontSize": 18, 'bold': True}})
     ws_scores.format('B4:B7', {'textFormat': {"fontSize": 12, 'bold': True}})
-    ws_scores.format('A10', {'textFormat': {"fontSize": 24, 'bold': True}})
-    ws_scores.format('A17', {'textFormat': {"fontSize": 24, 'bold': True}})
-    ws_scores.format('A11:I11', {'textFormat': {'bold': True}})
-    sleep(6)
+    sleep(2)
 
-    for row in [18, 21, 24, 27, 30, 33, 36]:
-        ws_scores.format(f'A{row}:I{row}', {'textFormat': {'bold': True}})
-        sleep(1)
-
-    for column in ['A', 'B', 'C', 'D', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N']:
+    for column in ['A', 'B', 'C', 'D', 'D', 
+                   'E', 'F', 'G', 'H', 'I', 
+                   'J', 'K', 'L', 'M', 'N']:
         set_column_width(ws_scores, column, 72)
         sleep(1)
 
-    # Begin borders section (which was HUGE pain in the ass!)
-    ws_scores.format('A1', {"borders": 
-                              {"top": {"style": "SOLID_THICK"},
-                              "left": {"style": "SOLID_THICK"},}
-                           })
+    format_cell_range(ws_scores, 'B2:B3', left_align)
+    format_cell_range(ws_scores, 'B9', left_align)
     sleep(2)
-    ws_scores.format('B1:M1', {"borders": 
-                                  {"top": {"style": "SOLID_THICK"},}
-                              })
-    sleep(2)
-    ws_scores.format('N1', {"borders": 
-                              {"top": {"style": "SOLID_THICK"},
-                              "right": {"style": "SOLID_THICK"},}
-                           })
-    sleep(2)
-    ws_scores.format('A10', {"borders": 
-                              {"top": {"style": "SOLID_THICK"},
-                              "left": {"style": "SOLID_THICK"},}
-                            })
-    sleep(2)
-    ws_scores.format('B10:M10', {"borders": 
-                                    {"top": {"style": "SOLID_THICK"},}
-                                })
-    sleep(2)
-    ws_scores.format('N10', {"borders": 
-                              {"top": {"style": "SOLID_THICK"},
-                              "right": {"style": "SOLID_THICK"},}
-                            })
-    sleep(2)
-    ws_scores.format('A17', {"borders": 
+
+    for corner, side in zip(['A1', 'A10', 'A17', 'N1', 'N10', 'N17'], 
+                          ["left", "left", "left", "right", "right", "right"]):
+        ws_scores.format(corner, {"borders": 
                                 {"top": {"style": "SOLID_THICK"},
-                                "left": {"style": "SOLID_THICK"},}
+                                side: {"style": "SOLID_THICK"},}
                             })
-    sleep(2)
-    ws_scores.format('B17:M17', {"borders": 
-                                    {"top": {"style": "SOLID_THICK"},}
+        sleep(1)
+
+    for bottomcorner, side in zip(['A37', 'N37'], ["left", "right"]):
+        ws_scores.format(bottomcorner, {"borders": 
+                                {"bottom": {"style": "SOLID_THICK"},
+                                side: {"style": "SOLID_THICK"},}
                                 })
-    sleep(2)
-    ws_scores.format('N17', {"borders": 
-                                {"top": {"style": "SOLID_THICK"},
-                                "right": {"style": "SOLID_THICK"},}
-                            })
-    sleep(2)
-    ws_scores.format('A2:A9', {"borders": 
-                                   {"left": {"style": "SOLID_THICK"},}
-                              })
-    sleep(2)
-    ws_scores.format('A11:A16', {"borders": 
-                                   {"left": {"style": "SOLID_THICK"},}
-                                })
-    sleep(2)
-    ws_scores.format('A18:A36', {"borders": 
-                                   {"left": {"style": "SOLID_THICK"},}
-                                })
-    sleep(2)
-    ws_scores.format('N1', {"borders": 
-                              {"top": {"style": "SOLID_THICK"},
-                              "right": {"style": "SOLID_THICK"},}
-                           })
-    sleep(2)
-    ws_scores.format('N2:N9', {"borders": 
-                                   {"right": {"style": "SOLID_THICK"},}
-                              })
-    sleep(2)
-    ws_scores.format('N11:N16', {"borders": 
-                                   {"right": {"style": "SOLID_THICK"},}
-                                })
-    sleep(2)
-    ws_scores.format('N18:N36', {"borders": 
-                                   {"right": {"style": "SOLID_THICK"},}
-                                })
-    sleep(2)
-    ws_scores.format('A37', {"borders": 
-                              {"bottom": {"style": "SOLID_THICK"},
-                              "left": {"style": "SOLID_THICK"},}
-                            })
-    sleep(2)
-    ws_scores.format('B37:M37', {"borders": 
-                                    {"bottom": {"style": "SOLID_THICK"},}
-                                })
-    sleep(2)
-    ws_scores.format('N37', {"borders": 
-                              {"bottom": {"style": "SOLID_THICK"},
-                              "right": {"style": "SOLID_THICK"},}
-                            })
+        sleep(1)
+#! END DO NOT APPEND
 
     print('"Scores" sheet complete!\n')
 
@@ -749,7 +723,7 @@ def gs_esg(tick, companies, ws_esg):
         ws_esg.update_cell(1, 1, f'Sorry, ESG data is not available for {tick}')
         set_column_width(ws_esg, 'A', 200)
         sleep(2)
-        print('Sorry, ESG data was not available. Moving on...')
+        print('Sorry, ESG data was not available. Moving on...\n')
 
     else:
         # Iterating thru values in df_full_esg and adding them to list for batch update
