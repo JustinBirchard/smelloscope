@@ -1,13 +1,13 @@
 # rare_exports.py
-#* Version 1.0.1
-#* file last updated 11/19/22
+#* Version 1.0.5
+#* file last updated 11/20/22
 """Exports Smelloscope data to a fancy Google Sheet.
    Use  gs_export within Smelloscope lab to initiate
    all other rare_exports functions.
    
    Google Sheets API Notes:
    One call allowed per second, otherwise get ExhaustedResource error.
-   Specific format is required for batch importing rows vs columns
+   Specific format is required for batch updating rows vs columns
    For columns (eg, A1:A3), the format is [['A1 value'], ['A2 value'], ['A3 value]]
    For rows (eg, A1:C1), the format is [['A1', 'B1', 'C1']]
 """
@@ -19,21 +19,16 @@ from time import sleep
 gc = gspread.service_account(filename='smelloscope-bf9b919f41a7.json')
 today = str(datetime.date.today())
 
-# gspread_formatting objects
+# color dicts for batch_format
+blue = {"red": 0.7, "green": 0.9, "blue": 1,}
+yellow = {"red": 1, "green": 0.95, "blue": 0.8,}
+grey = {"red": 0.94, "green": 0.94, "blue": 0.94,}
+dkgrey = {"red": 0.59, "green": 0.59, "blue": 0.59,}
+
+# gspread_formatting objects for text alignment
 left_align = CellFormat(horizontalAlignment='LEFT')
 right_align = CellFormat(horizontalAlignment='RIGHT')
 center_align = CellFormat(horizontalAlignment='CENTER')
-fmt_bold_italic = CellFormat(textFormat=TextFormat(bold=True, italic=True))
-fmt_italic = CellFormat(textFormat=TextFormat(italic=True))
-fmt_bold = CellFormat(textFormat=TextFormat(bold=True))
-fmt_blue_background = CellFormat(backgroundColor=Color(0.7, 0.9, 1))
-fmt_yellow_background = CellFormat(backgroundColor=Color(255/255, 242/255, 204/255))
-fmt_grey_background = CellFormat(backgroundColor=Color(240/255, 240/255, 240/255))
-fmt_dkgrey_background = CellFormat(backgroundColor=Color(150/255, 150/255, 150/255))
-
-fmt_bold_blue = CellFormat(backgroundColor=Color(0.7, 0.9, 1),
-                  textFormat=TextFormat(bold=True, 
-                  foregroundColor=Color(0, 0, 0)))
 
 def gs_export(tick, companies, peer_group, custom='', e_to_j=False, e_to_m=False):
     """Calls all gs functions to export data. 
@@ -74,7 +69,7 @@ def gs_create(tick, custom, e_to_j, e_to_m):
     
     print(f'Creating Google Sheet called: "{spreadsheet_name}"')
     sleep(1)
-    print('Grab a cup of coffee, find a snack, or smoke a doob. This will take about 5min.\n')
+    print('Grab a cup of coffee, find a snack, or smoke a doob. This will take about 90 seconds.\n')
 
     sh = gc.create(f'{tick} {today}{custom}') # creating spreadsheet object
 
@@ -90,7 +85,7 @@ def gs_create(tick, custom, e_to_j, e_to_m):
     # Adding worksheets
     ws_scores = sh.add_worksheet(title="Scores", rows=37, cols=14)
     ws_metrics = sh.add_worksheet(title="Metrics", rows=36, cols=7)
-    ws_analyst = sh.add_worksheet(title="Analyst", rows=18, cols=7)
+    ws_analyst = sh.add_worksheet(title="Analyst", rows=17, cols=7)
     ws_esg = sh.add_worksheet(title="ESG", rows=29, cols=2)
     ws_news = sh.add_worksheet(title="News", rows=46, cols=2)
     ws_sec = sh.add_worksheet(title="SEC", rows=200, cols=1)
@@ -285,16 +280,11 @@ def gs_scores(tick, companies, peer_group, ws_scores):
                             {'range': 'A15:I15',
                             'values': [row15]},
                             {'range': 'A16:I16',
-                            'values': [row16]},
-                            ])
+                            'values': [row16]},])
     sleep(1)
     print('Gussying up the "Scores" sheet...')
 
-    blue = {"red": 0.7, "green": 0.9, "blue": 1,}
-    yellow = {"red": 1, "green": 0.95, "blue": 0.8,}
-    grey = {"red": 0.94, "green": 0.94, "blue": 0.94,}
-    dkgrey = {"red": 0.59, "green": 0.59, "blue": 0.59,}
-
+    # List of dicts holds formatting data
     formats = [{"range": "A1:N1",
                 "format": {
                 "textFormat": {"bold": True, "fontSize": 36,},
@@ -326,47 +316,57 @@ def gs_scores(tick, companies, peer_group, ws_scores):
                 {"range": "B2",
                 "format": {
                 "textFormat": {"bold": True, "fontSize": 30,},
-                        },},        
-            ]
-
+                        },},]
+    
+    # Loops below will append formatting data to formats list
     for row in [18, 21, 24, 27, 30, 33, 36]:
         formats.append({"range": f"A{row}:N{row}",
                     "format": {
                     "textFormat": {"bold": True},
-                    "backgroundColor": yellow,
-                            },})
+                    "backgroundColor": yellow,},})
 
     for row in [row for row in range(4, 10) if row % 2]:
         formats.append({"range": f"A{row}:N{row}",
                     "format": {
-                    "backgroundColor": grey,
-                            },})
+                    "backgroundColor": grey,},})
 
     for row in [row for row in range(12, 17) if not row % 2]:
         formats.append({"range": f"A{row}:N{row}",
                     "format": {
-                    "backgroundColor": grey,
-                            },})
+                    "backgroundColor": grey,},})
 
     for border_range, position in zip(["A1:A37", "N1:N37", "A37:N37"], ["left", "right", "bottom"]):
         formats.append({"range": border_range,
                     "format": {
-                    "borders": {position: {"style": "SOLID_THICK"},}
-                            },})
+                    "borders": {position: {"style": "SOLID_THICK"},}},})   
 
-    ws_scores.batch_format(formats)
-    sleep(1)   
-
-#! BEGIN DO NOT APPEND
+    # Using loop to append additional dicts to formats list
     for row in [20, 23, 26, 29, 32, 35]:
-        formats = [{"range": f"A{row}:N{row}",
+        formats.append({"range": f"A{row}:N{row}",
                     "format": {
-                    "backgroundColor": dkgrey,
-                            },},]
-        ws_scores.batch_format(formats)
+                    "backgroundColor": dkgrey,},},)
+
+        # Setting row height while we're here
         set_row_height(ws_scores, str(row), 10)
         sleep(1)
 
+    # Loop to append border formats for the corners
+    for corner, side in zip(['A1', 'A10', 'A17', 'N1', 'N10', 'N17'], 
+                          ["left", "left", "left", "right", "right", "right"]):
+        formats.append({"range": corner,
+                        "format": {"borders": {side: {"style": "SOLID_THICK"},
+                                   "top": {"style": "SOLID_THICK"},}},})
+
+    for bottomcorner, side in zip(['A37', 'N37'], ["left", "right"]):
+        formats.append({"range": bottomcorner,
+                        "format": {"borders": {side: {"style": "SOLID_THICK"},
+                                   "bottom": {"style": "SOLID_THICK"},}},})
+
+    # Batch formatting using formats dict
+    ws_scores.batch_format(formats)
+    sleep(1)
+
+    # Misc formatting that can't be done in batch
     ws_scores.format('A2:A3', {'textFormat': {"fontSize": 14, 'bold': True}})
     ws_scores.format('B4:B7', {'textFormat': {"fontSize": 12, 'bold': True}})
     sleep(2)
@@ -380,22 +380,6 @@ def gs_scores(tick, companies, peer_group, ws_scores):
     format_cell_range(ws_scores, 'B2:B3', left_align)
     format_cell_range(ws_scores, 'B9', left_align)
     sleep(2)
-
-    for corner, side in zip(['A1', 'A10', 'A17', 'N1', 'N10', 'N17'], 
-                          ["left", "left", "left", "right", "right", "right"]):
-        ws_scores.format(corner, {"borders": 
-                                {"top": {"style": "SOLID_THICK"},
-                                side: {"style": "SOLID_THICK"},}
-                            })
-        sleep(1)
-
-    for bottomcorner, side in zip(['A37', 'N37'], ["left", "right"]):
-        ws_scores.format(bottomcorner, {"borders": 
-                                {"bottom": {"style": "SOLID_THICK"},
-                                side: {"style": "SOLID_THICK"},}
-                                })
-        sleep(1)
-#! END DO NOT APPEND
 
     print('"Scores" sheet complete!\n')
 
@@ -430,6 +414,7 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
                             {'range': 'E31:G31',
                             'values': [['ESG', tick, 'Peer Avg']]},
                              ])
+    sleep(1)
 
 #* Loops below populate lists of stats that will be batch imported into the sheet.
 #* All loops are similar in structure except for Dividend, Analyst, and ESG 
@@ -568,46 +553,70 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
                             ])
     sleep(1)
     print('Beautifying the "Metrics" sheet...')
-    
-    # Formatting cells
-    format_cell_range(ws_metrics, 'A1:A36', fmt_bold_italic)
-    format_cell_range(ws_metrics, 'E1:E36', fmt_bold_italic)
-    sleep(2)
-    format_cell_range(ws_metrics, 'A3:G3', fmt_bold_blue)
+
+    # BATCH FORMATTING BEGIN:
+    formats = [{"range": "A1:A36",
+                "format": {
+                "textFormat": {"bold": True, "italic": True,},
+              },},
+                {"range": "E1:E36",
+                "format": {
+                "textFormat": {"bold": True, "italic": True,},
+               },},
+                {"range": "A3:G3",        
+                "format": {
+                "textFormat": {"bold": True, "fontSize": 11,},
+                "backgroundColor": blue,
+               },},
+                {"range": "E23:G23",        
+                "format": {
+                "textFormat": {"bold": True, "fontSize": 11,},
+                "backgroundColor": blue,
+                },},
+                {"range": "E27:G27",        
+                "format": {
+                "textFormat": {"bold": True, "fontSize": 11,},
+                "backgroundColor": blue,
+                },},
+                {"range": "E31:G31",        
+                "format": {
+                "textFormat": {"bold": True, "fontSize": 11,},
+                "backgroundColor": blue,
+                },},
+                {"range": "A25:C25",        
+                "format": {
+                "textFormat": {"bold": True, "fontSize": 11,},
+                "backgroundColor": blue,
+                },},
+                {"range": "A31:C31",        
+                "format": {
+                "textFormat": {"bold": True, "fontSize": 11,},
+                "backgroundColor": blue,
+                },},
+                {"range": "D3:D36",        
+                "format": {"backgroundColor": blue,},},
+                {"range": "A1:B1",        
+                "format": {"textFormat": {"bold": True, "fontSize": 18,},},},]
+
+    # Using loops to append dicts to formats list
+    for row in [x for x in range(4, 37) if not x % 2]:
+        formats.append({"range": f"A{row}:C{row}",        
+                        "format": {"backgroundColor": grey,},})
+
+    for row in [x for x in range(4, 37) if not x % 2]:
+        formats.append({"range": f"E{row}:G{row}",        
+                        "format": {"backgroundColor": grey,},})      
+
+    ws_metrics.batch_format(formats)
+    # BATCH FORMATTING END
+
+    # Setting column widths
     set_column_width(ws_metrics, 'D', 20)
-    sleep(2)
+    sleep(1)
 
     for column in ['A', 'B', 'C', 'E', 'F', 'G']:
         set_column_width(ws_metrics, column, 93)
         sleep(1)
-
-    format_cell_range(ws_metrics, 'D3:D36', fmt_blue_background)
-    format_cell_range(ws_metrics, 'E23:G23', fmt_bold_blue)
-    sleep(2)
-    format_cell_range(ws_metrics, 'E27:G27', fmt_bold_blue)
-    format_cell_range(ws_metrics, 'E31:G31', fmt_bold_blue)
-    sleep(2)
-    format_cell_range(ws_metrics, 'A25:C25', fmt_bold_blue)
-    format_cell_range(ws_metrics, 'A31:C31', fmt_bold_blue)
-    sleep(2)
-
-    for row in [x for x in range(4, 37) if not x % 2]:
-        format_cell_range(ws_metrics, f'A{row}:C{row}', fmt_grey_background)
-        sleep(1)
-
-    for row in [x for x in range(4, 37) if not x % 2]:
-        format_cell_range(ws_metrics, f'E{row}:G{row}', fmt_grey_background)
-        sleep(1)
-
-    ws_metrics.format('A1:B1', {'textFormat': {"fontSize": 18, 'bold': True}})
-    ws_metrics.format('A3:G3', {'textFormat': {"fontSize": 11, 'bold': True}})
-    ws_metrics.format('E23:G23', {'textFormat': {"fontSize": 11, 'bold': True}})
-    sleep(2)
-    ws_metrics.format('E27:G27', {'textFormat': {"fontSize": 11, 'bold': True}})
-    ws_metrics.format('E31:G31', {'textFormat': {"fontSize": 11, 'bold': True}})
-    sleep(2)
-    ws_metrics.format('A25:C25', {'textFormat': {"fontSize": 11, 'bold': True}})
-    ws_metrics.format('A31:C31', {'textFormat': {"fontSize": 11, 'bold': True}})
 
     print('"Metrics" sheet has been completed!\n')
     sleep(1)
@@ -624,8 +633,8 @@ def gs_analyst(tick, companies, ws_analyst):
 
     a1 = [['Ratings over last 3 months']]
     d1 = [['Ratings over last 30 days']]
-    a3_b3 = [['Rating', 'Total']]
-    d3_g3 = [['Date', 'Rating', 'Date', 'Rating']]
+    a2_b2 = [['Rating', 'Total']]
+    d2_g2 = [['Date', 'Rating', 'Date', 'Rating']]
 
     # Loop adds "3mo ratings over time" data to lists. Lists will be part of batch update
     call_type = []
@@ -653,48 +662,63 @@ def gs_analyst(tick, companies, ws_analyst):
                             'values': a1},
                             {'range': 'D1',
                             'values': d1},
-                            {'range': 'A3:B3',
-                            'values': a3_b3},
-                            {'range': 'D3:G3',
-                            'values': d3_g3},
-                            {'range': 'A4:A8',
+                            {'range': 'A2:B2',
+                            'values': a2_b2},
+                            {'range': 'D2:G2',
+                            'values': d2_g2},
+                            {'range': 'A3:A7',
                             'values': call_type},
-                            {'range': 'B4:B8',
+                            {'range': 'B3:B7',
                             'values': rot_3mo},
-                            {'range': 'D4:D18',
+                            {'range': 'D3:D17',
                             'values': first_15_dates},
-                            {'range': 'E4:E18',
+                            {'range': 'E3:E17',
                             'values': first_15_calls},
-                            {'range': 'F4:F18',
+                            {'range': 'F3:F17',
                             'values': second_15_dates},
-                            {'range': 'G4:G18',
+                            {'range': 'G3:G17',
                             'values': second_15_calls},
                             ])
     sleep(1)
 
-    # Formatting the cells
     print('Fancifying the "Analyst" sheet...')
-    format_cell_range(ws_analyst, 'B4:B8', left_align)
-    format_cell_range(ws_analyst, 'A4:A8', right_align)
-    format_cell_range(ws_analyst, 'A1:G1', fmt_bold_blue)
-    sleep(3)
-    ws_analyst.format('A3:G3', {'textFormat': {"fontSize": 11, 'bold': True}})
-    format_cell_range(ws_analyst, 'D4:D18', fmt_italic)
-    format_cell_range(ws_analyst, 'F4:F18', fmt_italic)
-    sleep(3)
+    
+    # BEGIN batch formatting
+    formats = [{"range": "A1:G1",        
+                "format": {
+                "textFormat": {"bold": True, "fontSize": 14,},
+                "backgroundColor": blue,},
+             },
+               {"range": "A2:G2",        
+                "format": {
+                "textFormat": {"bold": True, "fontSize": 11,},
+                "backgroundColor": yellow,},
+             },
+               {"range": "C1:C17",        
+                "format": {"backgroundColor": dkgrey,},},
+               {"range": "D3:D17",        
+                "format": {"textFormat": {"italic": True},},},
+               {"range": "F3:F17",        
+                "format": {"textFormat": {"italic": True},},},
+              ]
 
-    for row in [row for row in range(4, 9) if row % 2]:
-        format_cell_range(ws_analyst, f'A{row}:B{row}', fmt_grey_background)
-        sleep(1)
+    for row in [row for row in range(3, 18) if not row % 2]:
+        formats.append({"range": f"A{row}:B{row}",        
+                        "format": {"backgroundColor": grey,},
+                       },)
 
-    for row in [row for row in range(4, 19) if row % 2]:
-        format_cell_range(ws_analyst, f'D{row}:G{row}', fmt_grey_background)
-        sleep(1)
+    for row in [row for row in range(3, 18) if not row % 2]:
+        formats.append({"range": f"D{row}:G{row}",        
+                        "format": {"backgroundColor": grey,},
+                       },)
 
-    format_cell_range(ws_analyst, 'A3:G3', fmt_yellow_background)
+    ws_analyst.batch_format(formats)
+    # END Batch formatting
+
+    # Manually formatting cells
     set_column_width(ws_analyst, 'A', 75)
     set_column_width(ws_analyst, 'B', 174)
-    sleep(3)
+    sleep(2)
     set_column_width(ws_analyst, 'C', 20)
     set_column_width(ws_analyst, 'D', 77)
     set_column_width(ws_analyst, 'E', 78)
@@ -702,10 +726,9 @@ def gs_analyst(tick, companies, ws_analyst):
     set_column_width(ws_analyst, 'F', 77)
     set_column_width(ws_analyst, 'G', 78)
     sleep(2)
-    format_cell_range(ws_analyst, 'C1:C18', fmt_dkgrey_background)
-    ws_analyst.format('A1', {'textFormat': {"fontSize": 14, 'bold': True}})
-    ws_analyst.format('D1', {'textFormat': {"fontSize": 14, 'bold': True}})
-    sleep(3)
+    format_cell_range(ws_analyst, 'A3:A7', right_align)
+    format_cell_range(ws_analyst, 'B3:B7', left_align)
+    sleep(2)
     print('"Analyst" sheet complete!\n')
 
 def gs_esg(tick, companies, ws_esg):
@@ -744,26 +767,36 @@ def gs_esg(tick, companies, ws_esg):
                             'values': esg_value},
                             ])
         sleep(1) 
-
         print('Giving the "ESG" sheet some love...')
+
+        # BEGIN batch formatting
+        formats = [{"range": "A1:B1",        
+                    "format": {
+                    "textFormat": {"bold": True, "fontSize": 17,},
+                    "backgroundColor": blue,},
+                },
+                {"range": "A2:B2",       
+                    "format": {
+                    "textFormat": {"bold": True, "fontSize": 12,},
+                    "backgroundColor": yellow,},
+                },]
+
         # Formatting the cells
         for row in [row for row in range(3, 30) if row % 2]:
-            format_cell_range(ws_esg, f'A{row}:B{row}', fmt_grey_background)
-            sleep(1)
+            formats.append({"range": f"A{row}:B{row}",        
+                            "format": {"backgroundColor": grey,},},)
 
-        ws_esg.format('A1', {'textFormat': {"fontSize": 17, 'bold': True}})
-        ws_esg.format('A2:B2', {'textFormat': {"fontSize": 12, 'bold': True}})
-        sleep(2)
-        format_cell_range(ws_esg, 'A1:B1', fmt_blue_background)
-        format_cell_range(ws_esg, 'A2:B2', fmt_yellow_background)
-        sleep(2)
+        ws_esg.batch_format(formats)
+        # END batch formatting
+
+        # Manually formatting
         set_column_width(ws_esg, 'A', 155)
         set_column_width(ws_esg, 'B', 155)
         sleep(2)
         format_cell_range(ws_esg, 'A3:A29', right_align)
         format_cell_range(ws_esg, 'B3:B29', center_align)
-        print('All done with the "ESG" sheet!\n')
         sleep(2)
+        print('All done with the "ESG" sheet!\n')
 
 def gs_news(tick, companies, peer_group, ws_news):
     """Pulls in data and formats the "News" sheet.
@@ -834,40 +867,41 @@ def gs_news(tick, companies, peer_group, ws_news):
                          ])
     sleep(1)
     print('Freshening up the "News" sheet...')
-    # Formatting the cells
-    set_column_width(ws_news, 'A', 900)
-    set_column_width(ws_news, 'B', 150)
-    ws_news.format('A1', {'textFormat': {"fontSize": 16, 'bold': True}})
-    ws_news.format('A2:B2', {'textFormat': {"fontSize": 12, 'bold': True}})
-    sleep(4)
-
-    ws_news.format('A23', {'textFormat': {"fontSize": 16, 'bold': True}})
-    ws_news.format('A24:B24', {'textFormat': {"fontSize": 12, 'bold': True}})
-    sleep(2)
-
-    ws_news.format('A35', {'textFormat': {"fontSize": 16, 'bold': True}})
-    ws_news.format('A36:B36', {'textFormat': {"fontSize": 12, 'bold': True}})
-    sleep(2)
     
+    # BEGIN Batch format
+    # Using loops to populate formats list
+    formats = []
     for row in [row for row in range(3, 23) if row % 2]:
-        format_cell_range(ws_news, f'A{row}:B{row}', fmt_grey_background)
-        sleep(1)
+        formats.append({"range": f"A{row}:B{row}", 
+                        "format": {"backgroundColor": grey,},},)
 
     for row in [row for row in range(25, 35) if row % 2]:
-        format_cell_range(ws_news, f'A{row}:B{row}', fmt_grey_background)
-        sleep(1)
+        formats.append({"range": f"A{row}:B{row}", 
+                        "format": {"backgroundColor": grey,},},)
 
     for row in [row for row in range(37, 47) if row % 2]:
-        format_cell_range(ws_news, f'A{row}:B{row}', fmt_grey_background)
-        sleep(1)
+        formats.append({"range": f"A{row}:B{row}", 
+                        "format": {"backgroundColor": grey,},},)
 
     for blue_set in ['A1:B1', 'A23:B23', 'A35:B35']:
-        format_cell_range(ws_news, blue_set, fmt_blue_background)
-        sleep(1)
+        formats.append({"range": blue_set,        
+                        "format": {
+                        "textFormat": {"bold": True, "fontSize": 16,},
+                        "backgroundColor": blue,},},)
 
     for yellow_set in ['A2:B2', 'A24:B24', 'A36:B36']:
-        format_cell_range(ws_news, yellow_set, fmt_yellow_background)
-        sleep(1)
+        formats.append({"range": yellow_set,        
+                        "format": {
+                        "textFormat": {"bold": True, "fontSize": 12,},
+                        "backgroundColor": yellow,},},)
+    
+    ws_news.batch_format(formats)
+    # END Batch format
+
+    # Manually formatting cells
+    set_column_width(ws_news, 'A', 900)
+    set_column_width(ws_news, 'B', 150)
+    sleep(2)
     print('"News" sheet is complete!\n')
 
 def gs_sec(tick, companies, ws_sec):
@@ -903,36 +937,45 @@ def gs_sec(tick, companies, ws_sec):
 
         ws_sec.batch_update([
                             {'range': 'A1',
-                            'values': [[f"{tick}: SEC Analysis with the help of machine learning"]]},
+                            'values': [[f"{tick}: SEC Analysis with help of machine learning"]]},
                             {'range': f'A3:A{number_of_columns + 2}',
                             'values': sec_all_one_column},
                              ])
 
         print('Making the "SEC" sheet look nice...')
-        ws_sec.format('A1', {'textFormat': {"fontSize": 24, 'bold': True}})
-        set_column_width(ws_sec, 'A', 1875)
-        set_row_height(ws_sec, '2', 11)
-        sleep(3)
 
+        # BEGIN Batch formatting
+        formats = [{"range": "A1",        
+                    "format": {
+                    "textFormat": {"bold": True, "fontSize": 24,},
+                    "backgroundColor": blue,},},
+                   {"range": "A2",        
+                    "format": {
+                    "backgroundColor": dkgrey,},}]
+        
+        # Appending formats with more dicts
         for row in range(3, number_of_columns + 2, 4):
-            ws_sec.format(f'A{row}', {'textFormat': {"fontSize": 12, 'bold': True, 'underline': True}})
-            sleep(1)
-
-        format_cell_range(ws_sec, 'A1', fmt_blue_background)
-        sleep(1)
-        format_cell_range(ws_sec, 'A2', fmt_dkgrey_background)
-        sleep(1)
-
-        for row in range(3, number_of_columns + 2, 4):
-            format_cell_range(ws_sec, f'A{row}', fmt_yellow_background)
-            sleep(1)
+            formats.append({"range": f"{row}",        
+                            "format": {
+                            "textFormat": {"bold": True, "underline": True, "fontSize": 12,},
+                            "backgroundColor": yellow,},},)
 
         for row in range(4, number_of_columns + 2, 4):
-            format_cell_range(ws_sec, f'A{row}', fmt_yellow_background)
-            sleep(1)
+            formats.append({"range": f"{row}",        
+                            "format": {"backgroundColor": yellow,},},)
 
         for row in range(5, number_of_columns + 2, 4):
-            format_cell_range(ws_sec, f'A{row}', fmt_grey_background)
+            formats.append({"range": f"{row}",        
+                            "format": {"backgroundColor": grey,},},)
+
+        ws_sec.batch_format(formats)
+        # END Batch formatting
+        sleep(1)
+
+        # Manually formatting cells
+        set_column_width(ws_sec, 'A', 1875)
+        set_row_height(ws_sec, '2', 11)
+        sleep(2)
 
         print(f'"SEC" Sheet complete!\n')
         print(f'Your shiny new spreadsheet "{spreadsheet_name}" has been assembled!')
