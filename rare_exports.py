@@ -1,6 +1,6 @@
 # rare_exports.py
-#* Version 1.0.5
-#* file last updated 11/20/22
+#* Version 1.1
+#* file last updated 11/21/22
 """Exports Smelloscope data to a fancy Google Sheet.
    Use  gs_export within Smelloscope lab to initiate
    all other rare_exports functions.
@@ -16,8 +16,13 @@ import gspread
 from gspread_formatting import *
 from time import sleep
 
-gc = gspread.service_account(filename='smelloscope-bf9b919f41a7.json')
+#*********************** PUT YOUR SERVICE ACCOUNT FILE NAME HERE:
+gc = gspread.service_account(filename='YOUR_SERVICE_ACCOUNT.json')
 today = str(datetime.date.today())
+
+# URLs for glossary and scoring documentation
+glossary_url = 'tinyurl.com/smelloscope-glossary'
+scoring_url = 'tinyurl.com/smelloscope-scoring'
 
 # color dicts for batch_format
 blue = {"red": 0.7, "green": 0.9, "blue": 1,}
@@ -30,7 +35,7 @@ left_align = CellFormat(horizontalAlignment='LEFT')
 right_align = CellFormat(horizontalAlignment='RIGHT')
 center_align = CellFormat(horizontalAlignment='CENTER')
 
-def gs_export(tick, companies, peer_group, custom='', e_to_j=False, e_to_m=False):
+def gs_export(tick, companies, peer_group, custom='', emails=[]):
     """Calls all gs functions to export data. 
        Creates, populate, and formats the Google Sheet.
 
@@ -38,11 +43,11 @@ def gs_export(tick, companies, peer_group, custom='', e_to_j=False, e_to_m=False
         tick (str): company ticker
         companies (dict): dict of company objects
         peer_group (PeerGroup): PeerGroup object
-        custom OPTIONAL (str): str used to customize Google Sheet file name
-        e_to_j OPTIONAL (bool): True emails to Jeff7sr@gmail.com
-        e_to_m OPTIONAL (bool): True emails to mer.broadway@gmail.com
+        custom (str) (optional): str used to customize Google Sheet file name
+        emails (list) (optional): A list of addresses to email to. 
+                                  If empty list, user will be prompted.
     """
-    gs_create(tick, custom, e_to_j, e_to_m)
+    gs_create(tick, custom, emails)
     gs_scores(tick, companies, peer_group, ws_scores)
     gs_metrics(tick, companies, peer_group, ws_metrics)
     gs_analyst(tick, companies, ws_analyst)
@@ -50,37 +55,40 @@ def gs_export(tick, companies, peer_group, custom='', e_to_j=False, e_to_m=False
     gs_news(tick, companies, peer_group, ws_news)
     gs_sec(tick, companies, ws_sec)
 
-def gs_create(tick, custom, e_to_j, e_to_m):
+def gs_create(tick, custom, emails):
     """Creates Google Spreadsheet, initializes Worksheets,
        and shares via email.
 
     Args:
         tick (str): ticker of company
         custom (str): submitted by user in Lab when calling gs_export method
-        e_to_j (bool): False unless set to True in Lab when calling gs_export. Emails to Jeff.
-        e_to_m (bool): False unless set to True in Lab when calling gs_export. Emails to Mary.
+        emails (list): A list of addresses to email to. 
+                       If empty list, user will be prompted.
     """
-    global spreadsheet_name # making global so can be accessed by other functions
+
+    #! Note that variables for WorkSheet objects must be set to global.
+    global ws_scores, ws_metrics, ws_analyst, ws_news, ws_esg, ws_sec, spreadsheet_name
 
     spreadsheet_name = f"{tick} {today}{custom}"
 
-    #! Note that variables for WorkSheet objects must be set to global.
-    global ws_scores, ws_metrics, ws_analyst, ws_news, ws_esg, ws_sec 
-    
-    print(f'Creating Google Sheet called: "{spreadsheet_name}"')
-    sleep(1)
-    print('Grab a cup of coffee, find a snack, or smoke a doob. This will take about 90 seconds.\n')
+    print('*** This will take about 90 seconds ***\n')
 
     sh = gc.create(f'{tick} {today}{custom}') # creating spreadsheet object
 
-    # sharing via email
-    sh.share('ssrjustin@gmail.com', perm_type='user', role='writer')
+    if emails != []:
+        print(f'Creating Google Sheet called: "{spreadsheet_name}"\n')
+        for address in emails:
+            sh.share(address, perm_type='user', role='writer')
+            print(f'Sharing with {address}\n')
 
-    if e_to_j is True:
-        sh.share('Jeff7sr@gmail.com', perm_type='user', role='writer')
+    if emails == []:
+        are_you_sure = input("Are you sure you don't want to share via email? (y/n): ")
 
-    if e_to_m is True:
-        sh.share('mer.broadway@gmail.com', perm_type='user', role='writer')
+        if are_you_sure == 'n':
+            email = input("Input email and press enter: ")
+            print(f'\nCreating Google Sheet called: "{spreadsheet_name}"\n')
+            sh.share(email, perm_type='user', role='writer')
+            print(f'Sharing with {email}\n')
 
     # Adding worksheets
     ws_scores = sh.add_worksheet(title="Scores", rows=37, cols=14)
@@ -316,6 +324,10 @@ def gs_scores(tick, companies, peer_group, ws_scores):
                 {"range": "B2",
                 "format": {
                 "textFormat": {"bold": True, "fontSize": 30,},
+                        },},
+                {"range": "I2:K2",        
+                "format": {
+                "textFormat": {"fontSize": 12,},
                         },},]
     
     # Loops below will append formatting data to formats list
@@ -381,6 +393,12 @@ def gs_scores(tick, companies, peer_group, ws_scores):
     format_cell_range(ws_scores, 'B9', left_align)
     sleep(2)
 
+    # Formatting messes with hyperlink so batch updating scoring_url here:
+    ws_scores.batch_update([{'range': 'I2',
+                            'values': [['Scoring Formulas:']]},
+                            {'range': 'K2',
+                            'values': [[scoring_url]]},])
+
     print('"Scores" sheet complete!\n')
 
 def gs_metrics(tick, companies, peer_group, ws_metrics):
@@ -399,6 +417,10 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
     ws_metrics.batch_update([
                             {'range': 'A1:B1',
                             'values': [['Price', price]]},
+                            {'range': 'A2',
+                            'values': [['Glossary:']]},
+                            {'range': 'B2',
+                            'values': [[glossary_url]]},
                             {'range': 'A3:C3',
                             'values': [['Value', tick, 'Peer Avg']]},
                             {'range': 'E3:G3',
@@ -555,7 +577,11 @@ def gs_metrics(tick, companies, peer_group, ws_metrics):
     print('Beautifying the "Metrics" sheet...')
 
     # BATCH FORMATTING BEGIN:
-    formats = [{"range": "A1:A36",
+    formats = [{"range": "A2",
+                "format": {
+                "textFormat": {"fontSize": 12,},
+              },},
+                {"range": "A4:A36",
                 "format": {
                 "textFormat": {"bold": True, "italic": True,},
               },},
