@@ -1,6 +1,6 @@
 # sniffer.py
-#* Version 0.9.9.9
-#* file last updated 11/13/22
+#* Version 1.1
+#* file last updated 11/22/22
 """A collection of functions used for analyzing the data in 
    Company objects.
 
@@ -8,10 +8,6 @@
    functions at once.
 
    big_phat_whiff is imported and used by scope_it_out.py
-
-   The main purpose of the functions below:
-   1) Analyze the metrics of a Company & PeerGroup object
-   2) Calculate score & populate score_card for a Company object
 """
 
 def big_phat_whiff(company, peer_group):
@@ -1074,13 +1070,13 @@ def set_scores_esg(company, peer_group):
     if esg_perf == 'n/a':
         company.score_card['esg'].loc['e05'][0] = 1
 
-    elif esg_perf == 'OUT_PERF' or esg_perf == 'LEAD_PERF':
+    elif esg_perf == 'LAG_PERF' or esg_perf == 'UNDER_PERF':
         company.score_card['esg'].loc['e05'][0] = 2
 
     elif esg_perf == 'AVG_PERF':
         company.score_card['esg'].loc['e05'][0] = 1
 
-    elif esg_perf == 'UNDER_PERF' or esg_perf == 'LAG_PERF':
+    elif esg_perf == 'OUT_PERF' or esg_perf == 'LEAD_PERF':
         company.score_card['esg'].loc['e05'][0] = 0
 
     else:

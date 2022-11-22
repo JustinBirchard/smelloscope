@@ -1,6 +1,6 @@
 # scope_it_out.py
-#* Version 1.0
-#* file last updated 11/18/22
+#* Version 1.1
+#* file last updated 11/22/22
 """scope_it_out.py returns a dict of Company objects and a 
    PeerGroup object. These are pulled into the Smelloscope lab
    by importing * from scope_it_out
@@ -580,7 +580,9 @@ peer_group = PeerGroup(companies=companies)
 peer_group.set_avg_values()
 
 # Fixes improper calculation set by set_all_data() for peer_group tca_div_tld
-peer_group.df_value.loc['tca_div_tld'][0] = round((tca_mrfy / tld_mrfy), 4)
+peer_tca = peer_group.df_value.loc['tca_mrfy'][0]
+peer_tld = peer_group.df_value.loc['tld_mrfy'][0]
+peer_group.df_value.loc['tca_div_tld'][0] = round((peer_tca / peer_tld), 4)
 
 # For each stock, calculates scores for each category
 for ticker in clean_stocks:

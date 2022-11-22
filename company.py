@@ -1,7 +1,7 @@
 # company.py
-#* Version 0.9.10
-#* file last updated 11/18/22
-"""Company class and PeerGroup subclass definitions and methods.
+#* Version 1.1
+#* file last updated 11/22/22
+"""Company class and PeerGroup subclass functions, definitions, and methods.
 """
 
 from stocklist import stocks, young_stocks
@@ -333,11 +333,14 @@ class PeerGroup(Company):
             if len(self.peer_score_totals.keys()) > 5:
                 self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 5)
                 
-            elif len(self.peer_score_totals.keys()) > 3:
-                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 3)
+            elif len(self.peer_score_totals.keys()) == 4:
+                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 4)
                 
+            elif len(self.peer_score_totals.keys()) >= 3:
+                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 3)
+
             elif len(self.peer_score_totals.keys()) >= 2:
-                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 1)
+                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 2)
 
     def set_winners(self):
         """Creates dict out of the top 3-5 winners from the peer group.
@@ -385,9 +388,8 @@ class PeerGroup(Company):
            Note! The calculation for the PeerGroup value metric tca_div_tld 
            is invalid here! It is fixed and calculated properly in scope_it_out.py
         """
-
+        #! see docstring note about tca_div_tld
         result_list = []
-
         for metric in self.companies[primary_stock].df_value.index:
             for company in self.companies.values():
                 value = company.df_value.loc[metric][0]
@@ -396,7 +398,7 @@ class PeerGroup(Company):
                     if value >= 0 and value <= 50: 
                         result_list.append(company.df_value.loc[metric])
 
-                elif metric == 'tca_mrfy' or metric == 'tld_mrfy' or metric == 'tca_div_tld':
+                elif metric in ['tca_mrfy', 'tld_mrfy']:
                     result_list.append(company.df_value.loc[metric])
 
             # discarding series objects that hold string values

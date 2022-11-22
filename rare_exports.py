@@ -1,6 +1,6 @@
 # rare_exports.py
 #* Version 1.1
-#* file last updated 11/21/22
+#* file last updated 11/22/22
 """Exports Smelloscope data to a fancy Google Sheet.
    Use  gs_export within Smelloscope lab to initiate
    all other rare_exports functions.
@@ -82,9 +82,9 @@ def gs_create(tick, custom, emails):
             print(f'Sharing with {address}\n')
 
     if emails == []:
-        are_you_sure = input("Are you sure you don't want to share via email? (y/n): ")
+        share = input("Do you want to share via email? (y/n): ")
 
-        if are_you_sure == 'n':
+        if share == 'y':
             email = input("Input email and press enter: ")
             print(f'\nCreating Google Sheet called: "{spreadsheet_name}"\n')
             sh.share(email, perm_type='user', role='writer')
@@ -1004,4 +1004,4 @@ def gs_sec(tick, companies, ws_sec):
         sleep(2)
 
         print(f'"SEC" Sheet complete!\n')
-        print(f'Your shiny new spreadsheet "{spreadsheet_name}" has been assembled!')
+        print(f'New spreadsheet "{spreadsheet_name}" has been assembled!')
