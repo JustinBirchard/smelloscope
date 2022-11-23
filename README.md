@@ -7,7 +7,7 @@
   <img alt="Shows a picture of Fry trying out the Smell-O-Scope." src="https://facingwinter.com/misc2022/smelloscope2small.jpg">
 </picture>
 
-The Smelloscope gives scientists and curiousity seekers the chance to get a long hard whiff of publicly traded companies.
+The Smelloscope gives scientists and curiousity seekers a chance to get a long hard whiff of publicly traded companies.
 
 By examining groups of similar stocks (like those in the same industry), the Smelloscope can help determine which stocks are fragarant and which are putrid.
 
