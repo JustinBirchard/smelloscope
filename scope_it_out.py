@@ -1,14 +1,13 @@
 # scope_it_out.py
 #* Version 1.1
 #* file last updated 11/22/22
-"""scope_it_out.py returns a dict of Company objects and a 
-   PeerGroup object. These are pulled into the Smelloscope lab
-   by importing * from scope_it_out
+"""Returns a dict of Company objects and a PeerGroup object. 
+   These are pulled into the Smelloscope lab by importing * 
+   from scope_it_out
 
-   This script takes the user supplied list from stocklist.py 
-   and pulls in a variety of data via OpenBB.
-
-   Each stock becomes a Company object and is populated with data. 
+   scope_it_out takes user supplied list from stocklist.py 
+   and pulls in stock data via OpenBB. Each stock becomes a 
+   Company object and is populated with data. 
 
    A PeerGroup object will also be created. PeerGroup is a subclass 
    of Company and its methods will be used to pull in every metric 
