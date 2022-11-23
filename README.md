@@ -21,10 +21,14 @@ By examining groups of similar stocks (like those in the same industry), the Sme
 - Export detailed reports to Google Sheets
 - Export data to Excel
 
-### How to use it:
-Users should start by opening and editing **stocklist.py**. Within the file there are 20+ lists of pre-set Peer Groups. Simply uncomment one of the presets, or create your own new list of stocks. Save the file. Then launch Jupyter Lab and open the file **TheSmelloscope.ipynb**
+### How to get started:
+1) Download and install the free [OpenBB API](https://openbb.co/products/terminal#get-started)
+2) Clone this repository, and move all of the files into the OpenBBTerminal folder
+3) Open and edit the file **stocklist.py**. Within the file there are 20+ lists of pre-set Peer Groups. Simply uncomment one of the presets, or create your      own new list of stocks. Save the file.
+4) Launch Jupyter Lab and open the file **TheSmelloscope.ipynb**
+5) Run the top cell in the notebook and that's it! 
 
-Run the top cell in the notebook and that's it! From there you can choose which cells in the notebook you want to run.
+**From there you can choose which cells in the notebook you want to run.**
 
 _______________________________________________________________________________________________________________________________________________________
 ## Requirements:
