@@ -1,6 +1,6 @@
 # scope_it_out.py
-#* Version 1.1
-#* file last updated 11/22/22
+#* Version 1.2
+#* file last updated 12/1/22
 """Returns a dict of Company objects and a PeerGroup object. 
    These are pulled into the Smelloscope lab by importing * 
    from scope_it_out
@@ -39,7 +39,7 @@ f = io.StringIO()
 
 #Redirecting api messages from obb to log file
 with redirect_stdout(f), redirect_stderr(f):
-   from openbb_terminal.api import openbb as obb      
+   from openbb_terminal.sdk import openbb as obb      
    logging.info(f.getvalue())
 print('Angling the scope towards an interesting cluster...\n\n')
 
@@ -224,7 +224,7 @@ for stock in clean_stocks:
     fmp_msg5 = ' in stocklist.py to avoid this error in the future.'
 
     try:
-        df_metrics = obb.stocks.fa.fmp_metrics(stock)
+        df_metrics = obb.stocks.fa.metrics(stock)
 
     except ValueError:
         print(fmp_msg1 + fmp_msg2 + fmp_msg3 + fmp_msg4 + fmp_msg5)
@@ -261,7 +261,7 @@ for stock in clean_stocks:
 #&# END cleaning/refining df_metrics ************************************************
 #&# BEGIN cleaning/refining df_ratios ***********************************************
 
-    df_ratios = obb.stocks.fa.fmp_ratios(stock)
+    df_ratios = obb.stocks.fa.ratios(stock)
 
     # Where possible, converting strings to floats in df_ratios    
     float_error_set = set() 
@@ -327,7 +327,7 @@ for stock in clean_stocks:
     yahoo_success = 'no'
     while yahoo_success == 'no':
         try:
-            tca_mrfy = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Total current assets'][0]
+            tca_mrfy = obb.stocks.fa.balance(stock).loc['Total current assets'][0]
             yahoo_success = 'yes'
 
         except AttributeError:
@@ -340,16 +340,16 @@ for stock in clean_stocks:
     while yahoo_success == 'no':
     # Cases for if the company has no debt
         try:
-            if math.isnan(obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]) is True:
+            if math.isnan(obb.stocks.fa.balance(stock).loc['Long-term debt'][0]) is True:
                 tld_mrfy = 0 
                 yahoo_success = 'yes'
             
-            elif obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0] is None:
+            elif obb.stocks.fa.balance(stock).loc['Long-term debt'][0] is None:
                 tld_mrfy = 0
                 yahoo_success = 'yes' 
             
             else:  
-                tld_mrfy = obb.stocks.fa.yf_financials(stock, "balance-sheet").loc['Long-term debt'][0]
+                tld_mrfy = obb.stocks.fa.balance(stock).loc['Long-term debt'][0]
                 yahoo_success = 'yes'
 
             if tld_mrfy == 0:
@@ -510,7 +510,7 @@ for stock in clean_stocks:
 
 ############## *** COMPANY, SECTOR, & INDUSTRY NEWS *** ##############
     
-    df_com_news = obb.common.news(f"{name} {ticker}", sort='published').head(20)
+    df_com_news = obb.news(f"{name} {ticker}", sort='published').head(20)
     df_sec_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Sector News'])
     df_ind_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Industry News'])
 

@@ -82,8 +82,8 @@
 # stocks = ['ETSY', 'SHOP', 'EBAY', 'AMZN', 'W', 'OSTK', 'BABA', 'ZS']
 
 #* Internet, Data, Information
-# stocks = ['GOOGL', 'FDS', 'SWCH', 'META', 'SHOP', 'BIDU', 
-#           'TTD', 'ZS', 'ETSY', 'AKAM', 'ZG', 'LTRPB']
+stocks = ['GOOGL', 'FDS', 'SWCH', 'META', 'SHOP', 'BIDU', 
+          'TTD', 'ZS', 'ETSY', 'AKAM', 'ZG', 'LTRPB']
 
 #* Oil and Fuel
 # stocks = ['COP', 'XOM', 'CVX', 'MPC', 'HES', 'PSX', 'VLO', 'EQNR', 'BP', 'PBF']

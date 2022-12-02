@@ -1,2 +1,6 @@
 
 YOUR_SERVICE_ACCOUNT.json
+.ipynb_checkpoints/TheSmelloscope-checkpoint.ipynb
+__pycache__/company.cpython-39.pyc
+*.pyc
+*.log

@@ -1,12 +1,12 @@
 # company.py
-#* Version 1.1
-#* file last updated 11/22/22
+#* Version 1.2
+#* file last updated 12/1/22
 """Company class and PeerGroup subclass functions, definitions, and methods.
 """
 
 from stocklist import stocks, young_stocks
 from copy import deepcopy
-from openbb_terminal.api import openbb as obb
+from openbb_terminal.sdk import openbb as obb
 import pandas as pd
 from dataclasses import dataclass, field
 from IPython.display import display
@@ -555,8 +555,8 @@ class PeerGroup(Company):
         """
 
         df_com_news = pd.DataFrame({'Data N/A': 'n/a'}, index=['Company News'])
-        df_sec_news = obb.common.news(self.companies[primary_stock].df_basic.loc['sector'][0] + ' Sector Stock Market', sort='published').head(50)
-        df_ind_news = obb.common.news(self.companies[primary_stock].df_basic.loc['industry'][0] + ' Industry Stock Market', sort='published').head(50)
+        df_sec_news = obb.news(self.companies[primary_stock].df_basic.loc['sector'][0] + ' Sector Stock Market', sort='published').head(50)
+        df_ind_news = obb.news(self.companies[primary_stock].df_basic.loc['industry'][0] + ' Industry Stock Market', sort='published').head(50)
 
         self.news_dfs = [df_com_news, df_sec_news, df_ind_news]
 
