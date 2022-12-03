@@ -7,11 +7,11 @@
   <img alt="Shows a picture of Fry trying out the Smell-O-Scope." src="https://facingwinter.com/misc2022/smelloscope2small.jpg">
 </picture>
 
-The Smelloscope gives scientists and curiousity seekers a chance to get a long hard whiff of publicly traded companies.
+The Smelloscope gives curiousity seekers a chance to get a long hard whiff of publicly traded companies.
 
 By examining groups of similar stocks (like those in the same industry), the Smelloscope can help determine which stocks are fragarant and which are putrid.
 
-### A simple Jupyter Notebook is where all the action happens. From there, users can:
+### A Jupyter Notebook is where the action happens. From there, users can:
 - Generate detailed scorecards for all companies in the Peer Group
 - Examine 50+ metrics for every company
 - View averages for every metric in the Peer Group
@@ -22,25 +22,33 @@ By examining groups of similar stocks (like those in the same industry), the Sme
 - Export data to Excel
 
 ### How to get started:
-1) Download and install the free [OpenBB API](https://openbb.co/products/terminal#get-started)
-2) Clone this repository, and move all of the files into the OpenBBTerminal folder
-3) Open and edit the file **stocklist.py**. Within the file there are 20+ lists of pre-set Peer Groups. Simply uncomment one of the presets, or create your      own new list of stocks. Save the file.
-4) Launch Jupyter Lab and open the file **TheSmelloscope.ipynb**
-5) Run the top cell in the notebook and that's it! 
-
-**From there you can choose which cells in the notebook you want to run.**
+1) Clone this repo, and create Python environment by following the "Installation Instructions" below
+2) Launch Jupyter Lab and open the file **TheSmelloscope.ipynb**
+3) Run the top cell in the notebook and then start exploring.
 
 _______________________________________________________________________________________________________________________________________________________
-## Requirements:
+## Installation Instructions:
 
-<i>[Python](https://www.python.org/downloads/) 3.8.5 or newer<br></i>
-<i>[OpenBB](https://docs.openbb.co/sdk/quickstart/installation) (a free, open source API)<br></i>
-<i>[Anaconda](https://www.anaconda.com/products/distribution) (a free, open source resource for Python)<br></i>
+After cloning this repo:
+
+1) For Windows: <i>[Install Anaconda](https://docs.anaconda.com/anaconda/install/windows/)<br></i> 
+   For Mac/Linux <i>[Install Miniconda x86_64 version](https://docs.conda.io/en/latest/miniconda.html)<br></i>
+
+2) Create an virtual environment & install Python. To do this, you can run this line in your terminal: 
+    >conda create -n YOUR_ENVIRONMENT_NAME python=3.9.6 -y
+
+3) Activate the vitrual environment by entering this line in your terminal:
+    >conda activate YOUR_ENVIRONMENT_NAME
+
+4) Install the OpenBB SDK from the terminal using this line:
+    >pip install openbb
 
 **The following are only required if exporting to Google Sheets:**<br>
-<i>Free [Google Developer Account](https://developers.google.com/)<br></i>
-<i>gspread</i><br>
-<i>gspread-formatting</i>
+5) <i>Grab a free [Google Developer Account](https://developers.google.com/)<br></i>
+6) Install gspread module from terminal using this line:
+    >pip install openbb
+7) Install gspread-formatting module from terminal using this line:
+    >pip install gspread-formatting
  
  _______________________________________________________________________________________________________________________________________________________
  # Documentation
