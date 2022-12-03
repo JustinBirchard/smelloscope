@@ -21,13 +21,18 @@ By examining groups of similar stocks (like those in the same industry), the Sme
 - Export detailed reports to Google Sheets
 - Export data to Excel
 
-### How to get started:
-1) Clone this repo, and create Python environment by following the "Installation Instructions" below
-2) Launch Jupyter Lab and open the file **TheSmelloscope.ipynb**
-3) Run the top cell in the notebook and then start exploring.
+#### MASSIVE Shout out to the brilliant, helpful, friendly folks at OpenBB for making their [amazing SDK available, free, and open source!](https://docs.openbb.co/sdk/quickstart/installation)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://facingwinter.com/misc2022/small_openbb_logo.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://facingwinter.com/misc2022/small_openbb_logo.png">
+  <img alt="Shows OpenBB logo." src="https://facingwinter.com/misc2022/small_openbb_logo.png">
+</picture>
+
+Visit [OpenBB.co](https://openbb.co/) for more info.
 
 _______________________________________________________________________________________________________________________________________________________
-## Installation Instructions:
+## Smelloscope Installation Instructions:
 
 After cloning this repo:
 
@@ -49,11 +54,16 @@ After cloning this repo:
     >pip install openbb
 7) Install gspread-formatting module from terminal using this line:
     >pip install gspread-formatting
- 
+
+
+### How to use the Smelloscope:
+1) From the virtual environment created using instructions above, launch Jupyter Lab and open the file **TheSmelloscope.ipynb**
+3) Run the top cell in the notebook and then start exploring!
+
  _______________________________________________________________________________________________________________________________________________________
  # Documentation
  
-<i>(Work in progress) Last update: 11/22/22</i><br>
+<i>(Work in progress) Last update: 12/3/22</i><br>
  
  ### Glossary of stock terms and variable names used for metrics:<br> 
  https://tinyurl.com/smelloscope-glossary
@@ -61,28 +71,30 @@ After cloning this repo:
  ### Scoring categories and formulas:<br> 
  https://tinyurl.com/smelloscope-scoring
  
- ### The repository contains six key files:
+ ### The root contains 6 key files and one directory:
+ - TheSmelloscope.ipynb
  - scope_it_out.py
+ - objective_lens.py
  - company.py
  - sniffer.py
  - rare_exports.py
- - stocklist.py
- - TheSmelloscope.ipynb
- 
- ### Brief explanation of each file:
- 
-**scope_it_out.py** is the engine of the program. It imports the **stocks** list from **stocklist.py** and iterates through each ticker in the list, gathering data, and instantiating Company and Peer Group objects.
+ - config folder which contains smello.toml and an init file
 
-**company.py** contains functions, methods, and definitions for Company and Peer Group objects. Each stock in the **stocks** list will become a Company object. The Company object holds all data and information relating to the company. A PeerGroup object is a subclass of Company and contains the average values of every metric. Company and PeerGroup methods are what allow for examination in **TheSmelloscope.ipynb**. These methods also allow for analyzation and scoring.
+ ### Brief explanation of each file:
+
+**TheSmelloscope.ipynb** is where all the action happens. The lab contains methods and functions for examining and exporting data.
+
+**scope_it_out.py** is the engine. It imports the user selected stocks from **smello.toml** via the **objective_lens.group_selection** function. The script iterates through each ticker in the list, gathering data, and instantiating **Company** and **PeerGroup** objects.
+
+**objective_lens.py** imports the config module and defines **group_selection**, a function that returns a list of user selected stocks.
+
+**company.py** contains functions, methods, and definitions for **Company** and **PeerGroup** objects. Each stock in the user selected group will become a Company object. The Company object holds all data relating to the company. A PeerGroup object is a subclass of Company and contains the average values of every metric. Company and PeerGroup methods are what allow for examination in **TheSmelloscope.ipynb**. These methods also allow for analyzation and scoring.
 
 **sniffer.py** sniffer contains functions that are used to analyze and output scores for each Company. The master function is called **big_phat_whiff**, and it is called near the end of the **scope_it_out.py** script.
 
 **rare_exports.py** contains functions that can be called in **TheSmelloscope.ipynb**. It is used to export data to a fancy-ass Google Sheet.
 
-**stocklist.py** contains pre-set groups of stock lists. User should uncomment one of the presets, or create a new list of stocks and save file before launching **TheSmelloscope.ipynb**.
-
-**TheSmelloscope.ipynb** is where all the action happens. The lab contains methods and functions for examining and exporting data.
- 
+**smello.toml** is the configuration file where advanced users can define custom stock groups and industry presets. Within the same folder is the init file which uses module **tomli** to make smello.toml accessible globally.
  
 ## More coming soon, please contact thesmelloscope@gmail.com with questions/comments.
 
