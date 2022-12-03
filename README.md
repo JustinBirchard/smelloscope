@@ -83,7 +83,7 @@ After cloning this repo:
  ### Scoring categories and formulas:<br> 
  https://tinyurl.com/smelloscope-scoring
  
- ### The root contains 6 key files and one directory:
+ ### The root directory contains 6 key files and one directory:
  - TheSmelloscope.ipynb
  - scope_it_out.py
  - objective_lens.py
@@ -94,11 +94,11 @@ After cloning this repo:
 
  ### Brief explanation of each file:
 
-**TheSmelloscope.ipynb** is where all the action happens. The lab contains methods and functions for examining and exporting data.
+**TheSmelloscope.ipynb** is where the action happens. The lab contains methods and functions for examining and exporting data.
 
 **scope_it_out.py** is the engine. It imports the user selected stocks from **smello.toml** via the **objective_lens.group_selection** function. The script iterates through each ticker in the list, gathering data, and instantiating **Company** and **PeerGroup** objects.
 
-**objective_lens.py** imports the config module and defines **group_selection**, a function that returns a list of user selected stocks.
+**objective_lens.py** imports the config module and defines **group_selection**, this function serves as a mini user interface and returns a list of user selected stocks.
 
 **company.py** contains functions, methods, and definitions for **Company** and **PeerGroup** objects. Each stock in the user selected group will become a Company object. The Company object holds all data relating to the company. A PeerGroup object is a subclass of Company and contains the average values of every metric. Company and PeerGroup methods are what allow for examination in **TheSmelloscope.ipynb**. These methods also allow for analyzation and scoring.
 
