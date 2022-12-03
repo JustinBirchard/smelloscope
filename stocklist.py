@@ -56,8 +56,8 @@
 #           'ADBE', 'SAP', 'VMW', 'ADSK', 'SNPS', 'CDNS', 'SHOP', 'SQ']
 
 #* Computer hardware & semiconductors
-# stocks = ['STM', 'MCHP', 'ON', 'TSEM', 'MPWR', 'INTC', 'AVGO', 'AMAT', 
-#           'ADI', 'MU', 'NXPI', 'ENPH', 'MRVL', 'TSM', 'AMD', 'IBM', 'NVDA', 'TXN']
+stocks = ['STM', 'MCHP', 'ON', 'TSEM', 'MPWR', 'INTC', 'AVGO', 'AMAT', 
+          'ADI', 'MU', 'NXPI', 'ENPH', 'MRVL', 'TSM', 'AMD', 'IBM', 'NVDA', 'TXN']
 
 #* Consumer Products - Misc Discretionary
 # stocks = ['SPB', 'PBH', 'CL', 'CHD', 'CLX', 'CENT', 'CENTA', 'FNKO', 'ALTO']
@@ -82,8 +82,8 @@
 # stocks = ['ETSY', 'SHOP', 'EBAY', 'AMZN', 'W', 'OSTK', 'BABA', 'ZS']
 
 #* Internet, Data, Information
-stocks = ['GOOGL', 'FDS', 'SWCH', 'META', 'SHOP', 'BIDU', 
-          'TTD', 'ZS', 'ETSY', 'AKAM', 'ZG', 'LTRPB']
+# stocks = ['GOOGL', 'FDS', 'SWCH', 'META', 'SHOP', 'BIDU', 
+#           'TTD', 'ZS', 'ETSY', 'AKAM', 'ZG', 'LTRPB']
 
 #* Oil and Fuel
 # stocks = ['COP', 'XOM', 'CVX', 'MPC', 'HES', 'PSX', 'VLO', 'EQNR', 'BP', 'PBF']

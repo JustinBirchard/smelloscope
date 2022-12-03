@@ -1,0 +1,30 @@
+# smello.toml
+
+[custom]
+custom1 = ['MSFT', 'AAPL', 'ADBE']
+
+[presets]
+biomedical = ['CRSP', 'GSK', 'BMY', 'AMGN', 'GILD', 'REGN', 'VRTX', 
+              'BIIB', 'ILMN', 'GMAB', 'ALNY', 'SGEN', 'DNLI', 'EXEL', 'BCRX']
+
+software_games = ['ATVI', 'EA', 'TTWO']
+
+clothing = ['SFIX', 'QRTEA', 'GOOS', 'PLCE', 'BKE', 'VIPS', 'URBN', 'AEO']
+
+[problem_stocks]
+young_stocks = ['DDOG', 'CRWD', 'RIVN', 'LCID', 'NIO', 'LI', 'ONEM', 
+                'CANO', 'MRVI', 'CERE', 'NARI', 'DNA', 'BEAM', 'VIR', 
+                'IMCR', 'PCVX', 'RLAY', 'UBER', 'DOCS', 'PGNY', 'MEDP', 
+                'OGN', 'SNOW', 'DASH', 'ASAI', 'REYN', 'RLX', 'VZIO', 
+                'HNST', 'ZM', 'SRAD', 'DLO', 'MRNA', 'BNTX', 'GDRX', 
+                'PGNY',  'ONEM', 'GDRX', 'SGFY', 'TXG', 'PRVA', 'AGTI', 
+                'CERT', 'MPLN', 'SDGR', 'PHR', 'CHWY', 'FIGS', 'CURV', 
+                'POSH', 'RVLV', 'AVTR', 'ESAB', 'REZI']
+
+financial_stocks = ['JPM', 'BAC', 'LLY', 'MRK', 'WFC', 
+                    'UNP', 'GS', 'SCWB', 'ELV', 'LMT',
+                    'MS', 'BLK', 'BKNG', 'PNC', 'CI',
+                    'CB', 'C', 'AXP', 'PGR', 'DUK',
+                    'HUM', 'NMYT', 'LADR', 'KREF', 'BRSP',
+                    'TRTX', 'STWD', 'TWO', 'CNO', 'PRI', 
+                    'AEL', 'NWLI', 'KCLI', 'RDN', 'HMN']

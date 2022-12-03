@@ -1,6 +1,6 @@
 # scope_it_out.py
-#* Version 1.2
-#* file last updated 12/1/22
+#* Version 1.3
+#* file last updated 12/2/22
 """Returns a dict of Company objects and a PeerGroup object. 
    These are pulled into the Smelloscope lab by importing * 
    from scope_it_out
@@ -39,30 +39,12 @@ f = io.StringIO()
 
 #Redirecting api messages from obb to log file
 with redirect_stdout(f), redirect_stderr(f):
-   from openbb_terminal.sdk import openbb as obb      
-   logging.info(f.getvalue())
-print('Angling the scope towards an interesting cluster...\n\n')
+    from openbb_terminal.sdk import openbb as obb      
+logging.info(f.getvalue())
 
+import objective_lens
 from sniffer import big_phat_whiff
 from company import Company, PeerGroup
-from stocklist import stocks, young_stocks
-
-# Using young_stocks from stocklist.py to remove stocks 
-# that are not available via FMP api
-clean_stocks = []
-for stock in stocks:
-
-    if stock not in young_stocks:
-        clean_stocks.append(stock)
-
-    elif stock in young_stocks and stock == stocks[0]:
-        error_msg1 = f'Bummer! {stock} is too young for sniffing. ' 
-        error_msg2 = 'Please remove it from stocklist.py and try again.'
-        raise ValueError(error_msg1 + error_msg2)
-
-    elif stock in young_stocks:
-        print(f'Poop: \n{stock} is too fresh for a proper sniffing.')
-        print("We'll keep smelling the rest of the stocks in your list.\n")
 
 #&# BEGIN: FUNCTION DEFINITIONS ***************************************
 def show_total_scores(companies):
@@ -209,6 +191,9 @@ def try_it(string, calltype, avg=False, p2f_bool=False, perf=False):
 #&# END: Function definitions *****************************************
 
 #! BEGIN MAIN LOOP ***************************************************
+
+clean_stocks = objective_lens.group_seclection()
+print('Angling the scope towards an interesting cluster...\n\n')
 
 # Company objects will be added to this dict later
 companies = {}
@@ -575,8 +560,11 @@ for stock in clean_stocks:
 # Creating PeerGroup object
 peer_group = PeerGroup(companies=companies)
 
+# Primary stock is needed for peer_group methods
+primary_stock = clean_stocks[0]
+
 # Pulling in the data and calculating averages for PeerGroup object
-peer_group.set_avg_values()
+peer_group.set_avg_values(primary_stock)
 
 # Fixes improper calculation set by set_all_data() for peer_group tca_div_tld
 peer_tca = peer_group.df_value.loc['tca_mrfy'][0]
@@ -588,6 +576,6 @@ for ticker in clean_stocks:
         big_phat_whiff(companies[ticker], peer_group)
 
 # Pulls in data for the PeerGroup scoring dictionaries
-peer_group.set_scoring_data()
+peer_group.set_scoring_data(clean_stocks)
 
 print('STOCKS ARE SMELT AND SCORES ARE DEALT!')

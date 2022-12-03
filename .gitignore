@@ -4,3 +4,5 @@ YOUR_SERVICE_ACCOUNT.json
 __pycache__/company.cpython-39.pyc
 *.pyc
 *.log
+stocklist.py
+stocklist.py

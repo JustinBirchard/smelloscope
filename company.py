@@ -4,7 +4,7 @@
 """Company class and PeerGroup subclass functions, definitions, and methods.
 """
 
-from stocklist import stocks, young_stocks
+# from stocklist import stocks, young_stocks
 from copy import deepcopy
 from openbb_terminal.sdk import openbb as obb
 import pandas as pd
@@ -12,16 +12,16 @@ from dataclasses import dataclass, field
 from IPython.display import display
 
 # Using young_stocks from stocklist.py to remove stocks that are not available via FMP api
-clean_stocks = []
-for stock in stocks:
-    if stock not in young_stocks:
-        clean_stocks.append(stock)
+# clean_stocks = []
+# for stock in stocks:
+#     if stock not in young_stocks:
+#         clean_stocks.append(stock)
 
 # Setting display options for viewing dataframes in Lab
 pd.set_option('display.float_format', lambda x: '%.4f' % x)
 
 # Retrieving the first stock in stocks and using as the primary stock
-primary_stock = clean_stocks[0]
+# primary_stock = clean_stocks[0]
 
 def find_X_best_scores(list_of_tuples, X):
     """Iterates thru given list of tuples X times. 
@@ -278,16 +278,16 @@ class PeerGroup(Company):
     top_scores: dict = field(default_factory=lambda: {}) # top company scores for each category
     winners: dict = field(default_factory=lambda: {}) # the top scorers of the PeerGroup
 
-    def set_scoring_data(self):
+    def set_scoring_data(self, clean_stocks):
         """Populates scores for the three PeerGroup score dictionaries.
            And also the winners dictionary.
         """
-        self.set_peer_score_totals()
+        self.set_peer_score_totals(clean_stocks)
         self.set_cat_totals()
         self.set_top_scores()
         self.set_winners()
 
-    def set_peer_score_totals(self):
+    def set_peer_score_totals(self, clean_stocks):
         """Populates the peer_score_totals dictionary which contains
            grand total and category totals for every company.
            CAN ONLY RUN AFTER:
@@ -353,19 +353,19 @@ class PeerGroup(Company):
         for winner in self.top_scores['grand_total']:
             self.winners[winner[0]] = self.peer_score_totals[winner[0]]
 
-    def set_avg_values(self):
-        self.set_df_basic()
-        self.set_df_value()
-        self.set_df_mgmt()
-        self.set_df_ins()
-        self.set_div_dfs()
-        self.set_df_pub_sent()
-        self.set_news_dfs()
+    def set_avg_values(self, primary_stock):
+        self.set_df_basic(primary_stock)
+        self.set_df_value(primary_stock)
+        self.set_df_mgmt(primary_stock)
+        self.set_df_ins(primary_stock)
+        self.set_div_dfs(primary_stock)
+        self.set_df_pub_sent(primary_stock)
+        self.set_news_dfs(primary_stock)
         self.set_analyst_data()
-        self.set_df_esg()
+        self.set_df_esg(primary_stock)
         self.set_sec_analysis()
 
-    def set_df_basic(self):
+    def set_df_basic(self, primary_stock):
         """Set self.df_basic values"""
 
         self.df_basic['name'] = self.companies[primary_stock].df_basic.loc['ticker'] + ' Peer Group Avg'
@@ -377,7 +377,7 @@ class PeerGroup(Company):
 
         self.df_basic = self.df_basic.T
 
-    def set_df_value(self):
+    def set_df_value(self, primary_stock):
         """Set self.df_value by calculating average value for each metric in the 
            Value category and assigning it to PeerGroup object.
 
@@ -418,7 +418,7 @@ class PeerGroup(Company):
 
         self.df_value = self.df_value.T
 
-    def set_df_mgmt(self):
+    def set_df_mgmt(self, primary_stock):
         """Set self.df_mgt by calculating average value for each metric 
            in the Management category and assigning it to PeerGroup object.
 
@@ -460,7 +460,7 @@ class PeerGroup(Company):
 
         self.df_mgmt = self.df_mgmt.T
 
-    def set_df_ins(self):
+    def set_df_ins(self, primary_stock):
         """Set self.df_ins by calculating average value for each metric 
            in the Management category and assigning it to PeerGroup object.
            'n/a' values are discarded
@@ -487,7 +487,7 @@ class PeerGroup(Company):
 
         self.df_ins = self.df_ins.T
 
-    def set_div_dfs(self):
+    def set_div_dfs(self, primary_stock):
         """Set self.div_dfs[0] and self.div_dfs[1] by calculating average value 
            for each applicable metric in the Dividend category and assigning it 
            to PeerGroup object.
@@ -522,7 +522,7 @@ class PeerGroup(Company):
 
         self.div_dfs[0] = self.div_dfs[0].T
 
-    def set_df_pub_sent(self):
+    def set_df_pub_sent(self, primary_stock):
         """Set self.df_pub_sent by calculating average value for each metric 
            in the Public Sentiment category and assigning it to PeerGroup object.
            'n/a' values are discarded
@@ -549,7 +549,7 @@ class PeerGroup(Company):
 
         self.df_pub_sent = self.df_pub_sent.T
 
-    def set_news_dfs(self):
+    def set_news_dfs(self, primary_stock):
         """Set self.news_dfs values. 
            self.news_dfs[0] will be set to 'n/a' as it is company specific.
         """
@@ -616,7 +616,7 @@ class PeerGroup(Company):
 
         self.analyst_data = [df_rating_30d, peer_df_rot_3mo, wb_score, fwd_pe]
 
-    def set_df_esg(self):
+    def set_df_esg(self, primary_stock):
         """Set self.df_esg by calculating average value for each metric 
            in the ESG category and assigning it to PeerGroup object.
            'n/a' values are discarded
