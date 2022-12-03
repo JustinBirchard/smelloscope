@@ -1,4 +1,5 @@
 # smelloscope
+<i>Version 1.3</i>
 ### A Smell-O-Scope for sniffing stocks.
 
 <picture>
@@ -32,33 +33,39 @@ By examining groups of similar stocks (like those in the same industry), the Sme
 Visit [OpenBB.co](https://openbb.co/) for more info.
 
 _______________________________________________________________________________________________________________________________________________________
-## Smelloscope Installation Instructions:
+# Smelloscope Installation Instructions:
 
 After cloning this repo:
 
-1) For Windows: <i>[Install Anaconda](https://docs.anaconda.com/anaconda/install/windows/)<br></i> 
-   For Mac/Linux <i>[Install Miniconda x86_64 version](https://docs.conda.io/en/latest/miniconda.html)<br></i>
+**1)** For Windows: <i>[Install Anaconda](https://docs.anaconda.com/anaconda/install/windows/)<br></i> 
+&nbsp; &nbsp; For Mac/Linux <i>[Install Miniconda x86_64 version](https://docs.conda.io/en/latest/miniconda.html)<br></i>
 
-2) Create an virtual environment & install Python. To do this, you can run this line in your terminal: 
-    >conda create -n YOUR_ENVIRONMENT_NAME python=3.9.6 -y
+**2)** Create a virtual environment & install Python. To do this, you can run this line in your terminal: 
 
-3) Activate the vitrual environment by entering this line in your terminal:
-    >conda activate YOUR_ENVIRONMENT_NAME
+    conda create -n YOUR_ENVIRONMENT_NAME python=3.9.6 -y
 
-4) Install the OpenBB SDK from the terminal using this line:
-    >pip install openbb
+**3)** Activate the vitrual environment in your terminal:
 
-**The following are only required if exporting to Google Sheets:**<br>
-5) <i>Grab a free [Google Developer Account](https://developers.google.com/)<br></i>
-6) Install gspread module from terminal using this line:
-    >pip install openbb
-7) Install gspread-formatting module from terminal using this line:
-    >pip install gspread-formatting
+    conda activate YOUR_ENVIRONMENT_NAME
+
+**4)** Install the OpenBB SDK:
+
+    pip install openbb
+
+**The following steps are only required if exporting to Google Sheets:**<br><br>
+**5)** <i>Grab a free [Google Developer Account](https://developers.google.com/)<br><br></i>
+**6)** Install gspread module:
+
+    pip install gspread
+
+**7)** Install gspread-formatting module from terminal using this line:
+
+    pip install gspread-formatting
 
 
 ### How to use the Smelloscope:
 1) From the virtual environment created using instructions above, launch Jupyter Lab and open the file **TheSmelloscope.ipynb**
-3) Run the top cell in the notebook and then start exploring!
+2) Run the top cell in the notebook and then start exploring!
 
  _______________________________________________________________________________________________________________________________________________________
  # Documentation
