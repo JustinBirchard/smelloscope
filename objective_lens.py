@@ -4,7 +4,7 @@
 
 import config
 
-def group_seclection():
+def group_selection():
     """Interface to allow user to choose group of stocks.
 
     Returns:

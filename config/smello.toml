@@ -1,16 +1,141 @@
 # smello.toml
+# Smelloscope Version 1.3
+# file last updated 12/2/22
 
+# Avoid manually entering custom groups by
+# creating custom peer groups below:
 [custom]
 custom1 = ['MSFT', 'AAPL', 'ADBE']
 
+# Pre-made groups of peers
+# User can add/subtract stocks from
+# lists below if desired, or create
+# new preset 
 [presets]
-biomedical = ['CRSP', 'GSK', 'BMY', 'AMGN', 'GILD', 'REGN', 'VRTX', 
-              'BIIB', 'ILMN', 'GMAB', 'ALNY', 'SGEN', 'DNLI', 'EXEL', 'BCRX']
+auto = ['PCAR', 'RACE', 'HMC', 
+        'STLA', 'TTM', 'F', 
+        'GM']
+
+biomedical = ['CRSP', 'GSK', 'BMY', 
+              'AMGN', 'GILD', 'REGN', 
+              'VRTX', 'BIIB', 'ILMN', 
+              'GMAB', 'ALNY', 'SGEN', 
+              'DNLI', 'EXEL', 'BCRX']
+
+clothing = ['SFIX', 'QRTEA', 'GOOS', 
+            'PLCE', 'BKE', 'VIPS', 
+            'URBN', 'AEO']
+
+computers_hardware = ['STM', 'MCHP', 'ON', 
+                      'TSEM', 'MPWR', 'INTC', 
+                      'AVGO', 'AMAT', 'ADI', 
+                      'MU', 'NXPI', 'ENPH', 
+                      'MRVL', 'TSM', 'AMD', 
+                      'IBM', 'NVDA', 'TXN']
+
+consumer_disc = ['SPB', 'PBH', 'CL', 
+                 'CHD', 'CLX', 'CENT', 
+                 'CENTA', 'FNKO', 'ALTO']
+
+drugs = ['ZTS', 'HZNP', 'ABT', 
+         'GSK', 'VRTX', 'REGN', 
+         'SNY', 'BMY', 'TAK', 
+         'NBIX', 'UTHR', 'JAZZ', 
+         'CTLT', 'IONS']
+
+ent_and_media = ['DIS', 'FUN', 'FWONK', 
+                 'FWONA', 'PAR', 'PSO', 
+                 'MTN', 'IGT', 'SEAS', 
+                 'MSGS', 'RCL', 'CCL', 
+                 'CMCSA', 'NFLX']
+
+fincial_services = ['MA', 'WEX', 'EFX', 
+                    'WU', 'V', 'ACN', 
+                    'SPGI', 'ADP', 'FISV', 
+                    'FIS', 'GPN', 'BR', 
+                    'FLT', 'PYPL', 'INTU']
+
+health_tech = ['TDOC', 'VEEV', 'EVH', 
+               'MDRX', 'RCM', 'PINC', 
+               'OMCL', 'NXGN', 'AMN', 
+               'ICLR', 'VTRS', 'CRL', 
+               'NVCR', 'HQY', 'ITCI', 
+               'HAE', 'GRFS', 'NTRA']
+
+internet_commerce = ['ETSY', 'SHOP', 'EBAY', 
+                     'AMZN', 'W', 'OSTK', 
+                     'BABA', 'ZS']
+
+internet_data_info = ['GOOGL', 'FDS', 'SWCH', 
+                      'META', 'SHOP', 'BIDU',
+                      'TTD', 'ZS', 'ETSY', 
+                      'AKAM', 'ZG', 'LTRPB']
+
+energy_oil = ['COP', 'XOM', 'CVX', 
+              'MPC', 'HES', 'PSX', 
+              'VLO', 'EQNR', 'BP', 
+              'PBF']
+
+reits_healthcare = ['VTR', 'OHI', 'MPW', 
+                    'HR', 'SUI', 'PEAK', 
+                    'DOC']
+
+reits_storage = ['PSA', 'EXR', 'CUBE', 
+                 'LSI']
+
+semiconductor_related = ['STM', 'ON', 'NXPI', 
+                         'TXN', 'MCHP', 'ST', 
+                         'TEL', 'MRVL', 'ENPH']
 
 software_games = ['ATVI', 'EA', 'TTWO']
 
-clothing = ['SFIX', 'QRTEA', 'GOOS', 'PLCE', 'BKE', 'VIPS', 'URBN', 'AEO']
+software_general = ['MSFT', 'EA', 'TTWO', 
+                    'ATVI', 'VEEV', 'ORCL', 
+                    'CRM',  'ADBE', 'SAP', 
+                    'VMW', 'ADSK', 'SNPS', 
+                    'CDNS', 'SHOP', 'SQ']
 
+toys_games = ['ATVI', 'EA', 'TTWO', 
+              'HAS', 'MAT', 'JAKK', 
+              'GME']
+
+sp500_fifty_heaviest = ['AAPL', 'MSFT', 'AMZN', 
+                        'TSLA', 'GOOGL', 'UNH', 
+                        'XOM', 'JNJ', 'NVDA', 
+                        'CVX', 'V', 'PG', 
+                        'HD', 'MA', 'PFE',
+                        'ABBV', 'PEP', 'KO', 
+                        'COST', 'META', 'MCD', 
+                        'WMT', 'TMO', 'AVGO', 
+                        'CSCO', 'DIS', 'ABT', 
+                        'COP', 'BMY', 'ACN', 
+                        'DHR', 'VZ', 'NEE', 
+                        'LIN', 'TXN', 'AMGN', 
+                        'RTX', 'HON', 'PM', 
+                        'CRM', 'CMCSA', 'ADBE', 
+                        'CVS', 'T', 'IBM',  
+                        'UPS', 'NKE', 'CAT', 
+                        'QCOM', 'LOW']
+
+sp500_next_fifty = ['NKE', 'INTC', 'ORCL', 
+                    'NFLX', 'MDT', 'DE', 
+                    'SPGI', 'INTU', 'SBUX', 
+                    'GILD', 'AMD', 'PLD', 
+                    'ADP', 'APD', 'AMT', 
+                    'BA', 'GE', 'TMUS', 
+                    'PYPL', 'ITW', 'BSX', 
+                    'MDLZ', 'MPC', 'ISRG', 
+                    'EOG', 'TJX', 'AMAT', 
+                    'MO', 'MMC', 'REGN',
+                    'VRTX', 'NOC', 'ADI', 
+                    'SLB', 'LRCX', 'TGT', 
+                    'NOW', 'SYK', 'WM', 
+                    'GM', 'MMM', 'SO', 
+                    'ZTS', 'CSX', 'ETN',
+                    'BDX', 'MU', 'FISV', 
+                    'PXD', 'CL']
+
+# Lists of stocks not currently compatable with the Smelloscope
 [problem_stocks]
 young_stocks = ['DDOG', 'CRWD', 'RIVN', 'LCID', 'NIO', 'LI', 'ONEM', 
                 'CANO', 'MRVI', 'CERE', 'NARI', 'DNA', 'BEAM', 'VIR', 

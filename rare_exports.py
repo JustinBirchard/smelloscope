@@ -1,5 +1,5 @@
 # rare_exports.py
-#* Version 1.1
+#* Smelloscope Version 1.3
 #* file last updated 11/22/22
 """Exports Smelloscope data to a fancy Google Sheet.
    Use  gs_export within Smelloscope lab to initiate

@@ -1,5 +1,5 @@
 # sniffer.py
-#* Version 1.1
+#* Smelloscope Version 1.3
 #* file last updated 11/22/22
 """A collection of functions used for analyzing the data in 
    Company objects.

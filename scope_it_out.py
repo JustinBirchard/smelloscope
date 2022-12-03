@@ -1,5 +1,5 @@
 # scope_it_out.py
-#* Version 1.3
+#* Smelloscope Version 1.3
 #* file last updated 12/2/22
 """Returns a dict of Company objects and a PeerGroup object. 
    These are pulled into the Smelloscope lab by importing * 
@@ -192,7 +192,7 @@ def try_it(string, calltype, avg=False, p2f_bool=False, perf=False):
 
 #! BEGIN MAIN LOOP ***************************************************
 
-clean_stocks = objective_lens.group_seclection()
+clean_stocks = objective_lens.group_selection()
 print('Angling the scope towards an interesting cluster...\n\n')
 
 # Company objects will be added to this dict later

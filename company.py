@@ -1,6 +1,6 @@
 # company.py
-#* Version 1.2
-#* file last updated 12/1/22
+#* Version 1.3
+#* file last updated 12/2/22
 """Company class and PeerGroup subclass functions, definitions, and methods.
 """
 
@@ -11,17 +11,8 @@ import pandas as pd
 from dataclasses import dataclass, field
 from IPython.display import display
 
-# Using young_stocks from stocklist.py to remove stocks that are not available via FMP api
-# clean_stocks = []
-# for stock in stocks:
-#     if stock not in young_stocks:
-#         clean_stocks.append(stock)
-
 # Setting display options for viewing dataframes in Lab
 pd.set_option('display.float_format', lambda x: '%.4f' % x)
-
-# Retrieving the first stock in stocks and using as the primary stock
-# primary_stock = clean_stocks[0]
 
 def find_X_best_scores(list_of_tuples, X):
     """Iterates thru given list of tuples X times. 
