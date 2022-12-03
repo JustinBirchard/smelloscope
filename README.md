@@ -22,7 +22,7 @@ By examining groups of similar stocks (like those in the same industry), the Sme
 - Export detailed reports to Google Sheets
 - Export data to Excel
 
-#### MASSIVE Shout out to the brilliant, helpful, friendly folks at OpenBB for making their [amazing SDK available, free, and open source!](https://docs.openbb.co/sdk/quickstart/installation)
+#### MASSIVE shout out to the brilliant, helpful, friendly folks at OpenBB for making their [amazing SDK available, free, and open source!](https://docs.openbb.co/sdk/quickstart/installation)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://facingwinter.com/misc2022/small_openbb_logo.png">
