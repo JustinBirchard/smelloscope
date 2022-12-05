@@ -1,11 +1,11 @@
 # scope_it_out.py
 #* Smelloscope Version 1.3
-#* file last updated 12/2/22
+#* file last updated 12/4/22
 """Returns a dict of Company objects and a PeerGroup object. 
    These are pulled into the Smelloscope lab by importing * 
    from scope_it_out
 
-   scope_it_out takes user supplied list from stocklist.py 
+   scope_it_out takes user supplied list from smello.toml 
    and pulls in stock data via OpenBB. Each stock becomes a 
    Company object and is populated with data. 
 
@@ -205,8 +205,8 @@ for stock in clean_stocks:
     fmp_msg1 = f'Dag nabbit! {stock} is not available via FMP api.'
     fmp_msg2 = ' Probably because it is not 5 years old. '
     fmp_msg3 = 'Please remove it from stocklist.py and try again. '
-    fmp_msg4 = f'You can add {stock} to young_stocks set'
-    fmp_msg5 = ' in stocklist.py to avoid this error in the future.'
+    fmp_msg4 = f'You can add {stock} to young_stocks list'
+    fmp_msg5 = ' in config/smello.toml to avoid this error in the future.'
 
     try:
         df_metrics = obb.stocks.fa.metrics(stock)

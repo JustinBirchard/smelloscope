@@ -1,6 +1,6 @@
 # company.py
 #* Version 1.3
-#* file last updated 12/2/22
+#* file last updated 12/4/22
 """Company class and PeerGroup subclass functions, definitions, and methods.
 """
 
@@ -86,7 +86,7 @@ scores_esg = pd.DataFrame({'esg': {'e01': None, 'e02': None,
 @dataclass
 class Company:
     """Company objects hold a variety of metrics and data.
-       Each stock in stocklist.py will become a Company object.
+       Each stock will become a Company object.
        Methods are meant to be called in TheSmelloscope lab.
     """
     df_basic: pd.DataFrame = field(default_factory=pd.DataFrame) # shape=(6,1), basic company details
@@ -269,82 +269,17 @@ class PeerGroup(Company):
     top_scores: dict = field(default_factory=lambda: {}) # top company scores for each category
     winners: dict = field(default_factory=lambda: {}) # the top scorers of the PeerGroup
 
-    def set_scoring_data(self, clean_stocks):
-        """Populates scores for the three PeerGroup score dictionaries.
-           And also the winners dictionary.
-        """
-        self.set_peer_score_totals(clean_stocks)
-        self.set_cat_totals()
-        self.set_top_scores()
-        self.set_winners()
-
-    def set_peer_score_totals(self, clean_stocks):
-        """Populates the peer_score_totals dictionary which contains
-           grand total and category totals for every company.
-           CAN ONLY RUN AFTER:
-           set_avg_values
-        """
-        for tick in clean_stocks:
-            grand_total = self.companies[tick].score_card['grand_total']
-            vTotal = self.companies[tick].score_card['value'].loc['vTotal'][0]
-            mTotal = self.companies[tick].score_card['mgmt'].loc['mTotal'][0]
-            iTotal = self.companies[tick].score_card['ins'].loc['iTotal'][0]
-            dTotal = self.companies[tick].score_card['div'].loc['dTotal'][0]
-            pTotal = self.companies[tick].score_card['pub_sent'].loc['pTotal'][0]
-            aTotal = self.companies[tick].score_card['analyst_data'].loc['aTotal'][0]
-            eTotal = self.companies[tick].score_card['esg'].loc['eTotal'][0]
-                     
-            self.peer_score_totals[tick] = {'grand_total': grand_total, 'vTotal': vTotal, 
-                                                 'mTotal': mTotal, 'iTotal': iTotal, 
-                                                 'dTotal': dTotal, 'pTotal': pTotal, 
-                                                 'aTotal': aTotal, 'eTotal': eTotal}
-                                                 
-    def set_cat_totals(self):
-        """Populates the category_totals dictionary which holds 
-           total scores for each company grouped by category.
-           CAN ONLY RUN AFTER:
-           set_peer_score_totals
-        """
-        for tick in self.companies.keys():
-            for cat in self.category_totals.keys():
-                self.category_totals[cat].append((tick, self.peer_score_totals[tick][cat]))
-
-    def set_top_scores(self):
-        """Finds the top X scores for every category and adds
-           them to the top_scores dictionary.
-           To accomplish this, the find_X_best_scores function
-           is used and arg X is determined programatically based 
-           on how many peers are in group.
-           CAN ONLY RUN AFTER:
-           set_peer_score_totals
-           set_cat_totals
-        """
-        cat_totals_copy = deepcopy(self.category_totals)
-        for cat in cat_totals_copy.keys():
-            if len(self.peer_score_totals.keys()) > 5:
-                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 5)
-                
-            elif len(self.peer_score_totals.keys()) == 4:
-                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 4)
-                
-            elif len(self.peer_score_totals.keys()) >= 3:
-                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 3)
-
-            elif len(self.peer_score_totals.keys()) >= 2:
-                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 2)
-
-    def set_winners(self):
-        """Creates dict out of the top 3-5 winners from the peer group.
-           Number of winners will depend on total tickers in clean_stocks list.
-           CAN ONLY RUN AFTER:
-           set_peer_score_totals()
-           set_cat_totals()
-           set_top_scores()
-        """
-        for winner in self.top_scores['grand_total']:
-            self.winners[winner[0]] = self.peer_score_totals[winner[0]]
-
     def set_avg_values(self, primary_stock):
+        """Calls all set_X functions and calculates 
+           the average values for every applicable 
+           metric. Pulls in Sector & Industry news.
+
+        Args:
+            primary_stock (str): The ticker of the primary_stock. It is used
+                                 to determine certain text based info like 
+                                 Sector, Industry, & name of peer group.
+                                 Also used to pull the keys for each category.
+        """
         self.set_df_basic(primary_stock)
         self.set_df_value(primary_stock)
         self.set_df_mgmt(primary_stock)
@@ -376,7 +311,7 @@ class PeerGroup(Company):
            1) They are < 0 or > 50
            2) They have 'n/a' value
 
-           Note! The calculation for the PeerGroup value metric tca_div_tld 
+           NOTE! The calculation for the PeerGroup value metric tca_div_tld 
            is invalid here! It is fixed and calculated properly in scope_it_out.py
         """
         #! see docstring note about tca_div_tld
@@ -637,3 +572,78 @@ class PeerGroup(Company):
 
     def set_sec_analysis(self):
         self.sec_analysis = 'n/a'
+
+    def set_scoring_data(self, clean_stocks):
+        """Populates scores for the three PeerGroup score dictionaries.
+           And also the winners dictionary.
+        """
+        self.set_peer_score_totals(clean_stocks)
+        self.set_cat_totals()
+        self.set_top_scores()
+        self.set_winners()
+
+    def set_peer_score_totals(self, clean_stocks):
+        """Populates the peer_score_totals dictionary which contains
+           grand total and category totals for every company.
+           CAN ONLY RUN AFTER:
+           set_avg_values
+        """
+        for tick in clean_stocks:
+            grand_total = self.companies[tick].score_card['grand_total']
+            vTotal = self.companies[tick].score_card['value'].loc['vTotal'][0]
+            mTotal = self.companies[tick].score_card['mgmt'].loc['mTotal'][0]
+            iTotal = self.companies[tick].score_card['ins'].loc['iTotal'][0]
+            dTotal = self.companies[tick].score_card['div'].loc['dTotal'][0]
+            pTotal = self.companies[tick].score_card['pub_sent'].loc['pTotal'][0]
+            aTotal = self.companies[tick].score_card['analyst_data'].loc['aTotal'][0]
+            eTotal = self.companies[tick].score_card['esg'].loc['eTotal'][0]
+                     
+            self.peer_score_totals[tick] = {'grand_total': grand_total, 'vTotal': vTotal, 
+                                                 'mTotal': mTotal, 'iTotal': iTotal, 
+                                                 'dTotal': dTotal, 'pTotal': pTotal, 
+                                                 'aTotal': aTotal, 'eTotal': eTotal}
+                                                 
+    def set_cat_totals(self):
+        """Populates the category_totals dictionary which holds 
+           total scores for each company grouped by category.
+           CAN ONLY RUN AFTER:
+           set_peer_score_totals
+        """
+        for tick in self.companies.keys():
+            for cat in self.category_totals.keys():
+                self.category_totals[cat].append((tick, self.peer_score_totals[tick][cat]))
+
+    def set_top_scores(self):
+        """Finds the top X scores for every category and adds
+           them to the top_scores dictionary.
+           To accomplish this, the find_X_best_scores function
+           is used and arg X is determined programatically based 
+           on how many peers are in group.
+           CAN ONLY RUN AFTER:
+           set_peer_score_totals
+           set_cat_totals
+        """
+        cat_totals_copy = deepcopy(self.category_totals)
+        for cat in cat_totals_copy.keys():
+            if len(self.peer_score_totals.keys()) >= 5:
+                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 5)
+                
+            elif len(self.peer_score_totals.keys()) == 4:
+                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 4)
+                
+            elif len(self.peer_score_totals.keys()) >= 3:
+                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 3)
+
+            elif len(self.peer_score_totals.keys()) >= 2:
+                self.top_scores[cat] = find_X_best_scores(cat_totals_copy[cat], 2)
+
+    def set_winners(self):
+        """Creates dict out of the top 3-5 winners from the peer group.
+           Number of winners will depend on total tickers in clean_stocks list.
+           CAN ONLY RUN AFTER:
+           set_peer_score_totals()
+           set_cat_totals()
+           set_top_scores()
+        """
+        for winner in self.top_scores['grand_total']:
+            self.winners[winner[0]] = self.peer_score_totals[winner[0]]
